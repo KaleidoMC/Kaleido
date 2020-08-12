@@ -13,6 +13,6 @@ license="ARR"
 [[dependencies.kaleido]]
     modId="kiwi"
     mandatory=true
-    versionRange="[2.8.2, 2.12)"
+    versionRange="[2.8.3, 2.12)"
     ordering="BEFORE"
     side="BOTH"
