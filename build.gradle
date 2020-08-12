@@ -15,7 +15,7 @@ apply plugin: 'maven-publish'
 
 version = "${version_major}.${version_minor}.${version_patch}"
 group = "snownee"
-archivesBaseName = "ModName-${minecraft_version}"
+archivesBaseName = "Kaleido-${minecraft_version}"
 
 if (System.getenv().BUILD_NUMBER != null) {
     // Maven version scheme uses dot to separate things
@@ -47,7 +47,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                modname {
+                kaleido {
                     source sourceSets.main
                 }
             }
@@ -63,7 +63,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                modname {
+                kaleido {
                     source sourceSets.main
                 }
             }

@@ -1,16 +1,18 @@
 modLoader="javafml"
 loaderVersion="[31,)"
 [[mods]]
-modId="modname"
+modId="kaleido"
 version="${file.jarVersion}"
-displayName="ModName"
-authors="Snownee"
-displayURL="https://minecraft.curseforge.com/projects/modname"
-description=""
+displayName="看过来！关于在酷暑难耐的炎炎夏日，一边品味下午茶，一边惬意地装饰自己的空间，这样的模组你喜欢吗？"
+authors="TorridTeaTeam"
+displayURL="https://minecraft.curseforge.com/projects/kaleido"
+description='''Models for showcase are from ItemBound by SixFootBlue
+Textures of woodworking bench are made by YurisCat'''
+license="ARR"
 
-[[dependencies.modname]]
+[[dependencies.kaleido]]
     modId="kiwi"
     mandatory=true
-    versionRange="[2.7, 2.11)"
+    versionRange="[2.8.2, 2.12)"
     ordering="BEFORE"
     side="BOTH"

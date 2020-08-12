@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "facing=north": { "model": "kaleido:block/bench" },
+        "facing=south": { "model": "kaleido:block/bench", "y": 180 },
+        "facing=west":  { "model": "kaleido:block/bench", "y": 270 },
+        "facing=east":  { "model": "kaleido:block/bench", "y": 90 }
+    }
+}
