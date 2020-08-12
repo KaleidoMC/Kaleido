@@ -33,6 +33,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
@@ -40,7 +43,13 @@ import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.Util;
 
+@EventBusSubscriber(bus = Bus.MOD)
 public class KaleidoDataManager extends JsonReloadListener {
+
+    @SubscribeEvent
+    public static void addToDataListener(FMLServerAboutToStartEvent event) {
+        event.getServer().getResourceManager().addReloadListener(KaleidoDataManager.INSTANCE);
+    }
 
     /* off */
     private static final Gson GSON = new GsonBuilder()
@@ -168,7 +177,7 @@ public class KaleidoDataManager extends JsonReloadListener {
     }
 
     public ModelInfo getRandomUnlocked(ServerPlayerEntity player, Random rand) {
-        List<ModelInfo> list = allInfos.values().stream().filter(ModelInfo::isLocked).filter($ -> !$.reward).collect(Collectors.toList());
+        List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
         return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
     }
 

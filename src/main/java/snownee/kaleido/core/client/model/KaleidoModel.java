@@ -40,6 +40,7 @@ import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.tile.MasterTile;
 
 @OnlyIn(Dist.CLIENT)
@@ -84,7 +85,7 @@ public class KaleidoModel implements IDynamicBakedModel {
         @Override
         public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn) {
             ModelInfo info = MasterBlock.getInfo(stack);
-            return info != null ? info.getBakedModel(Direction.NORTH) : model;
+            return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : model;
         }
 
     }
@@ -96,7 +97,7 @@ public class KaleidoModel implements IDynamicBakedModel {
     private static IBakedModel getModel(IModelData extraData, Direction direction) {
         IBakedModel model = null;
         if (extraData.getData(MasterTile.MODEL) != null) {
-            model = extraData.getData(MasterTile.MODEL).getBakedModel(direction);
+            model = KaleidoClient.getModel(extraData.getData(MasterTile.MODEL), direction);
         }
         return model != null ? model : missingno.get();
     }

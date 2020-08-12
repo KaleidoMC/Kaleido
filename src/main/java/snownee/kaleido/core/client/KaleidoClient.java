@@ -1,8 +1,11 @@
 package snownee.kaleido.core.client;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -17,13 +20,16 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import snownee.kaleido.core.ModelInfo;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 public class KaleidoClient {
 
+    public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
+
     @Nullable
-    public static IBakedModel getModel(ResourceLocation id, Direction direction) {
+    public static IBakedModel loadModel(ResourceLocation id, Direction direction) {
         ModelLoader modelLoader = ModelLoader.instance();
         if (modelLoader == null) {
             return null;
@@ -37,6 +43,19 @@ public class KaleidoClient {
             transform = ModelRotation.X0_Y90;
         }
         return modelLoader.getBakedModel(new ResourceLocation(id.getNamespace(), "kaleido/" + id.getPath()), transform, modelLoader.getSpriteMap()::getSprite);
+    }
+
+    @Nullable
+    public static IBakedModel getModel(ModelInfo info, Direction direction) {
+        int i = direction.getHorizontalIndex();
+        if (i == -1) {
+            return null;
+        }
+        IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[4]);
+        if (bakedModel[i] == null) {
+            bakedModel[i] = loadModel(info.id, direction);
+        }
+        return bakedModel[i];
     }
 
     @SubscribeEvent

@@ -36,7 +36,7 @@ public class LuckyBoxItem extends ModItem {
                     if (!playerIn.isCreative()) {
                         stack.shrink(1);
                     }
-                    playerIn.sendMessage(new StringTextComponent("Unlock: " + info.id));
+                    //playerIn.sendMessage(new StringTextComponent("Unlock: " + info.id));
                 }
             }
             return ActionResult.resultSuccess(stack);

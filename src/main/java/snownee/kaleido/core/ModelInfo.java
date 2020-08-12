@@ -1,17 +1,13 @@
 package snownee.kaleido.core;
 
-import javax.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.api.distmarker.Dist;
@@ -20,27 +16,11 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kaleido.core.block.MasterBlock;
-import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo {
 
-    @OnlyIn(Dist.CLIENT)
-    public static ModelInfo read(PacketBuffer buf) {
-        ModelInfo info = new ModelInfo();
-        info.id = buf.readResourceLocation();
-        info.setLocked(!buf.readBoolean());
-        info.useAO = buf.readBoolean();
-        info.reward = buf.readBoolean();
-        info.price = buf.readByte();
-
-        info.opposite = buf.readBoolean();
-        return info;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    private IBakedModel[] bakedModel = new IBakedModel[4];
     @Expose
     public Behavior behavior = NoneBehavior.INSTANCE;
     public ResourceLocation id;
@@ -58,19 +38,6 @@ public class ModelInfo {
 
     public ResourceLocation getAdvancementId() {
         return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
-    }
-
-    @Nullable
-    @OnlyIn(Dist.CLIENT)
-    public IBakedModel getBakedModel(Direction direction) {
-        int i = direction.getHorizontalIndex();
-        if (i == -1) {
-            return null;
-        }
-        if (bakedModel[i] == null) {
-            bakedModel[i] = KaleidoClient.getModel(id, direction);
-        }
-        return bakedModel[i];
     }
 
     public String getTranslationKey() {
@@ -132,6 +99,19 @@ public class ModelInfo {
         buf.writeByte(price);
 
         buf.writeBoolean(opposite);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static ModelInfo read(PacketBuffer buf) {
+        ModelInfo info = new ModelInfo();
+        info.id = buf.readResourceLocation();
+        info.setLocked(buf.readBoolean());
+        info.useAO = buf.readBoolean();
+        info.reward = buf.readBoolean();
+        info.price = buf.readByte();
+
+        info.opposite = buf.readBoolean();
+        return info;
     }
 
 }

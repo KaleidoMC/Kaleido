@@ -50,6 +50,7 @@ import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.tile.MasterTile;
 
 @OnlyIn(Dist.CLIENT)
@@ -79,6 +80,7 @@ public final class PlacementPreview {
             });
         }
     }
+
     private static final MethodHandle GET_STATE_FOR_PLACEMENT;
     private static ItemStack lastStack = ItemStack.EMPTY;
     private static IRenderTypeBuffer.Impl renderBuffer;
@@ -184,7 +186,7 @@ public final class PlacementPreview {
                         bakedModel = mc.getModelManager().getMissingModel();
                     } else {
                         Direction direction = placeResult.get(HorizontalBlock.HORIZONTAL_FACING);
-                        bakedModel = info.getBakedModel(direction);
+                        bakedModel = KaleidoClient.getModel(info, direction);
                     }
                 } else {
                     bakedModel = dispatcher.getBlockModelShapes().getModel(placeResult);

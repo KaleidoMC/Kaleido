@@ -21,6 +21,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Kaleido;
@@ -75,6 +76,7 @@ public class CoreModule extends AbstractModule {
             modEventBus.register(KaleidoClientConfig.class);
         }
         //MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
+        modEventBus.addListener(this::addToDataListener);
     }
 
     @Override
@@ -92,6 +94,10 @@ public class CoreModule extends AbstractModule {
         Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
         Behavior.Deserializer.registerFactory("item_storage", ItemStorageBehavior::create);
         Behavior.Deserializer.registerFactory("light", LightBehavior::create);
+    }
+
+    protected void addToDataListener(FMLServerAboutToStartEvent event) {
+        event.getServer().getResourceManager().addReloadListener(KaleidoDataManager.INSTANCE);
     }
 
     @SubscribeEvent
