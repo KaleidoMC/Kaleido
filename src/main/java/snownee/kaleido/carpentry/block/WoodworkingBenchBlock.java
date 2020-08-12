@@ -12,6 +12,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.carpentry.client.gui.CarpentryCraftingScreen;
 
 public class WoodworkingBenchBlock extends HorizontalBlock {
@@ -33,11 +35,16 @@ public class WoodworkingBenchBlock extends HorizontalBlock {
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (worldIn.isRemote) {
-            Minecraft.getInstance().displayGuiScreen(new CarpentryCraftingScreen(getNameTextComponent(), worldIn, pos));
+            openScreen(worldIn, pos, player);
         } else {
             //player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE); //TODO
         }
         return ActionResultType.SUCCESS;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private void openScreen(World worldIn, BlockPos pos, PlayerEntity player) {
+        Minecraft.getInstance().displayGuiScreen(new CarpentryCraftingScreen(getNameTextComponent(), worldIn, pos));
     }
 
 }
