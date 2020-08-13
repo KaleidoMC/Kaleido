@@ -10,7 +10,7 @@ import net.minecraftforge.fml.config.ModConfig;
 
 public final class KaleidoClientConfig {
 
-    public static boolean previewAllBlocks = true;
+    public static boolean previewAllBlocks = false;
 
     private static BooleanValue previewAllBlocksVal;
     public static float previewAlpha = 0.5F;
