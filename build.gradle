@@ -3,9 +3,12 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        maven { url = 'https://dist.creeper.host/Sponge/maven' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -85,6 +88,8 @@ repositories {
         name = "jei"
         url = "https://dvs1.progwml6.com/files/maven"
     }
+    // mixin
+    maven { url = 'https://dist.creeper.host/Sponge/maven' }
 }
 
 dependencies {
@@ -96,6 +101,8 @@ dependencies {
     compile fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
 	
     compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
+    
+    compile 'org.spongepowered:mixin:0.8'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -133,4 +140,10 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, "mixins.passablefoliage.refmap.json"
 }

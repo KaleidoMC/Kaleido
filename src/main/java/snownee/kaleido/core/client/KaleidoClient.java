@@ -60,6 +60,7 @@ public class KaleidoClient {
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
+        MODEL_MAP.clear();
         IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
         Collection<ResourceLocation> locations = resourceManager.getAllResourceLocations("models/kaleido", s -> s.endsWith(".json"));
         locations.stream().map(KaleidoClient::resolveLocation).forEach(ModelLoader::addSpecialModel);

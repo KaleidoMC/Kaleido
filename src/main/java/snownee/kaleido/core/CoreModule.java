@@ -5,17 +5,13 @@ import java.util.Collections;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.Tag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.config.ModConfig;
@@ -42,7 +38,6 @@ import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.core.tile.MasterTile;
 import snownee.kiwi.AbstractModule;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
 import snownee.kiwi.NoItem;
@@ -100,18 +95,18 @@ public class CoreModule extends AbstractModule {
         event.getServer().getResourceManager().addReloadListener(KaleidoDataManager.INSTANCE);
     }
 
-    @SubscribeEvent
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        MinecraftServer server = Kiwi.getServer();
-        if (!event.getEntity().world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            if (server.isServerOwner(player.getGameProfile())) {
-                KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
-            } else {
-                new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
-            }
-        }
-    }
+//    @SubscribeEvent
+//    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+//        MinecraftServer server = Kiwi.getServer();
+//        if (!event.getEntity().world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
+//            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+//            if (server.isServerOwner(player.getGameProfile())) {
+//                KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
+//            } else {
+//                new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
+//            }
+//        }
+//    }
 
     @Override
     protected void preInit() {

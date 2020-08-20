@@ -88,6 +88,9 @@ public class KaleidoModel implements IDynamicBakedModel {
         @Override
         public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn) {
             ModelInfo info = MasterBlock.getInfo(stack);
+            if (Minecraft.getInstance().loadingGui != null) {
+                return null;
+            }
             return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
         }
 

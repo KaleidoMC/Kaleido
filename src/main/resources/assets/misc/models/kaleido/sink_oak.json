@@ -1,4 +1,5 @@
 {
+    "ambientocclusion": false,
 	"__comment": "Designed by Sixfootblue with Cubik Studio - https://cubik.studio",
 	"textures": {
 		"particle": "kaleido:block/sink_oak",

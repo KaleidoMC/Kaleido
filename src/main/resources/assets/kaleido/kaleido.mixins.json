@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "snownee.kaleido.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.kaleido.refmap.json",
+  "mixins": [
+    "MixinPlayerList"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

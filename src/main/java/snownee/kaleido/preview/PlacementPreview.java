@@ -118,7 +118,7 @@ public final class PlacementPreview {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.gameSettings.hideGUI || mc.gameSettings.keyBindAttack.isKeyDown() || !(mc.objectMouseOver instanceof BlockRayTraceResult) || mc.objectMouseOver.getType() == RayTraceResult.Type.MISS) {
+        if (mc.loadingGui != null || mc.player == null || mc.gameSettings.hideGUI || mc.gameSettings.keyBindAttack.isKeyDown() || !(mc.objectMouseOver instanceof BlockRayTraceResult) || mc.objectMouseOver.getType() == RayTraceResult.Type.MISS) {
             return;
         }
 
@@ -137,7 +137,8 @@ public final class PlacementPreview {
                 info = MasterBlock.getInfo(held);
                 TileEntity tile = mc.world.getTileEntity(((BlockRayTraceResult) mc.objectMouseOver).getPos());
                 if (tile instanceof MasterTile) {
-                    if (((MasterTile) tile).getModelInfo() == info) {
+                    MasterTile masterTile = (MasterTile) tile;
+                    if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
                         return;
                     }
                 }
