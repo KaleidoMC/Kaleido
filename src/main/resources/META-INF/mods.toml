@@ -1,5 +1,7 @@
 modLoader="javafml"
 loaderVersion="[31,)"
+license="ARR"
+
 [[mods]]
 modId="kaleido"
 version="${file.jarVersion}"
@@ -8,7 +10,6 @@ authors="TorridTeaTeam"
 displayURL="https://minecraft.curseforge.com/projects/kaleido"
 description='''Models for showcase are from ItemBound by SixFootBlue
 Textures of woodworking bench are made by YurisCat'''
-license="ARR"
 
 [[dependencies.kaleido]]
     modId="kiwi"

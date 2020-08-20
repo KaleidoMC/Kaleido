@@ -7,6 +7,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -82,10 +84,11 @@ public class KaleidoModel implements IDynamicBakedModel {
 
     public static class OverrideList extends ItemOverrideList {
 
+        @Nullable
         @Override
         public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn) {
             ModelInfo info = MasterBlock.getInfo(stack);
-            return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : model;
+            return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
         }
 
     }
@@ -124,7 +127,10 @@ public class KaleidoModel implements IDynamicBakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, Direction side, Random rand, IModelData extraData) {
+        if (state == null) {
+            return missingno.get().getQuads(null, side, rand, extraData);
+        }
         Direction direction = state.has(HorizontalBlock.HORIZONTAL_FACING) ? state.get(HorizontalBlock.HORIZONTAL_FACING) : Direction.NORTH;
         return getModel(extraData, direction).getQuads(state, side, rand, extraData);
     }
