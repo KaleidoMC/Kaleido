@@ -115,7 +115,8 @@ jar {
         attributes([
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConnector": "snownee.kaleido.mixin.Connector"
         ])
     }
 }
@@ -145,5 +146,5 @@ publishing {
 apply plugin: 'org.spongepowered.mixin'
 
 mixin {
-    add sourceSets.main, "mixins.passablefoliage.refmap.json"
+    add sourceSets.main, "mixins.kaleido.refmap.json"
 }
