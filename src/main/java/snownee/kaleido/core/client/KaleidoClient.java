@@ -29,7 +29,7 @@ public class KaleidoClient {
     public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
 
     @Nullable
-    public static IBakedModel loadModel(ResourceLocation id, Direction direction) {
+    public static synchronized IBakedModel loadModel(ResourceLocation id, Direction direction) {
         ModelLoader modelLoader = ModelLoader.instance();
         if (modelLoader == null) {
             return null;

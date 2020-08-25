@@ -14,6 +14,7 @@ import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.Util;
 
@@ -21,7 +22,7 @@ public class MasterTile extends BaseTile {
 
     public static final ModelProperty<ModelInfo> MODEL = new ModelProperty<>();
 
-    public Behavior behavior;
+    public Behavior behavior = NoneBehavior.INSTANCE;
     private IModelData modelData = FMLEnvironment.dist.isClient() ? new ModelDataMap.Builder().build() : EmptyModelData.INSTANCE;
 
     private ModelInfo modelInfo;
@@ -59,11 +60,16 @@ public class MasterTile extends BaseTile {
     protected void readPacketData(CompoundNBT data) {
         ResourceLocation id = Util.RL(data.getString("Model"));
         if (id != null) {
-            setModelInfo(KaleidoDataManager.INSTANCE.get(id));
-            if (data.contains("SubTile")) {
-                behavior.read(data.getCompound("SubTile"));
+            ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
+            if (info != null) {
+                setModelInfo(info);
+                if (data.contains("SubTile")) {
+                    behavior.read(data.getCompound("SubTile"));
+                }
+                return;
             }
-        } else {
+        }
+        if (world != null) {
             world.destroyBlock(pos, false);
         }
     }
