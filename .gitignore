@@ -22,3 +22,6 @@ eclipse
 run
 #*.jar
 !gradle-wrapper.jar
+/Projects/
+
+/.factorypath

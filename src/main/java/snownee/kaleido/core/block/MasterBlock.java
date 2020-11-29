@@ -58,7 +58,7 @@ public class MasterBlock extends HorizontalBlock {
         return new MasterTile();
     }
 
-    @Override
+    @Override // Need to refresh every time tag updated?
     public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
         KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap(pack -> Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream())).map(ModelInfo::makeItem).forEach(items::add);
     }

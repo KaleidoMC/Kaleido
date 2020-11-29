@@ -5,10 +5,10 @@ license="ARR"
 [[mods]]
 modId="kaleido"
 version="${file.jarVersion}"
-displayName="看过来！关于在酷暑难耐的炎炎夏日，一边品味下午茶，一边惬意地装饰自己的空间，这样的模组你喜欢吗？"
-authors="TorridTeaTeam"
-displayURL="https://minecraft.curseforge.com/projects/kaleido"
-description='''Models for showcase are from ItemBound by SixFootBlue
+displayName="Kaleido"
+authors="Snownee"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/kaleido"
+description='''Models for showcase are from ItemBound by SixFootBlue, and will finally be removed in release ver.
 Textures of woodworking bench are made by YurisCat'''
 
 [[dependencies.kaleido]]
