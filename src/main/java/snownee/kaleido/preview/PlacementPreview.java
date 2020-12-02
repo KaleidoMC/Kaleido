@@ -35,7 +35,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -169,7 +169,7 @@ public final class PlacementPreview {
                 renderBuffer = initRenderBuffer(mc.getRenderTypeBuffers().getBufferSource());
             }
             MatrixStack transforms = event.getMatrixStack();
-            Vec3d projVec = mc.getRenderManager().info.getProjectedView();
+            Vector3d projVec = mc.getRenderManager().info.getProjectedView();
             transforms.translate(-projVec.x, -projVec.y, -projVec.z);
             transforms.push();
             transform.target(target).tick(mc.getTickLength());
@@ -193,13 +193,13 @@ public final class PlacementPreview {
                     bakedModel = dispatcher.getBlockModelShapes().getModel(placeResult);
                 }
                 long i = placeResult.getPositionRandom(target);
-                dispatcher.getBlockModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
+                dispatcher.getBlockModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup./*getRenderType*/func_239220_a_(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
             }
             /* Assume renderType is not null.
-                             *
-                             * Yes, we use a fake tile entity to workaround this. All exceptions are
-                             * discared. It is ugly, yes, but it partially solve the problem.
-                             */
+             *
+             * Yes, we use a fake tile entity to workaround this. All exceptions are
+             * discared. It is ugly, yes, but it partially solve the problem.
+             */
             if (placeResult.hasTileEntity()) {
                 TileEntity tile = placeResult.createTileEntity(world);
                 tile.setWorldAndPos(world, target);

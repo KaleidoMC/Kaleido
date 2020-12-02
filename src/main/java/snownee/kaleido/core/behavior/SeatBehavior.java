@@ -13,7 +13,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -27,18 +27,18 @@ public class SeatBehavior implements Behavior {
 
     public static SeatBehavior create(JsonObject obj) {
         if (obj.has("seat")) {
-            return new SeatBehavior(new Vec3d[] { vecFromJson(obj.getAsJsonObject("seat")) });
+            return new SeatBehavior(new Vector3d[] { vecFromJson(obj.getAsJsonObject("seat")) });
         }
-        return new SeatBehavior(new Vec3d[] { new Vec3d(0.5, 0.25, 0.5) });
+        return new SeatBehavior(new Vector3d[] { new Vector3d(0.5, 0.25, 0.5) });
     }
 
-    public static Vec3d vecFromJson(JsonObject o) {
-        return new Vec3d(JSONUtils.getFloat(o, "x", 0.5f), JSONUtils.getFloat(o, "y", 0.5f), JSONUtils.getFloat(o, "z", 0.5f));
+    public static Vector3d vecFromJson(JsonObject o) {
+        return new Vector3d(JSONUtils.getFloat(o, "x", 0.5f), JSONUtils.getFloat(o, "y", 0.5f), JSONUtils.getFloat(o, "z", 0.5f));
     }
 
-    private final Vec3d[] seats;
+    private final Vector3d[] seats;
 
-    public SeatBehavior(Vec3d[] seats) {
+    public SeatBehavior(Vector3d[] seats) {
         this.seats = seats;
     }
 
@@ -55,7 +55,7 @@ public class SeatBehavior implements Behavior {
         ItemStack stack2 = player.getHeldItemOffhand();
         if (!stack1.isEmpty() || !stack2.isEmpty())
             return ActionResultType.FAIL;
-        Vec3d vec = seats[0];
+        Vector3d vec = seats[0];
         vec = vec.add(pos.getX(), pos.getY(), pos.getZ());
 
         double maxDist = 2;

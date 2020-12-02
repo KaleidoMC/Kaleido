@@ -9,7 +9,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import snownee.kaleido.core.tile.MasterTile;
 
@@ -17,10 +16,6 @@ public class LightBehavior implements Behavior {
 
     public static LightBehavior create(JsonObject obj) {
         return new LightBehavior(JSONUtils.getInt(obj, "light", 15));
-    }
-
-    public static Vec3d vecFromJson(JsonObject o) {
-        return new Vec3d(JSONUtils.getFloat(o, "x", 0.5f), JSONUtils.getFloat(o, "y", 0.5f), JSONUtils.getFloat(o, "z", 0.5f));
     }
 
     private final int light;

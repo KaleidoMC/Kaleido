@@ -2,7 +2,7 @@
   "required": true,
   "package": "snownee.kaleido.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "mixins.kaleido.refmap.json",
+  "refmap": "kaleido.refmap.json",
   "mixins": [
     "MixinPlayerList"
   ],

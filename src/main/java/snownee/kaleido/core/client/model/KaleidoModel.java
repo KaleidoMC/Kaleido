@@ -23,15 +23,15 @@ import net.minecraft.client.renderer.model.IModelTransform;
 import net.minecraft.client.renderer.model.IUnbakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.ModelBakery;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.IModelConfiguration;
@@ -51,7 +51,7 @@ public class KaleidoModel implements IDynamicBakedModel {
     public static class Geometry implements IModelGeometry<Geometry> {
 
         @Override
-        public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
+        public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
             if (INSTANCE == null) {
                 INSTANCE = new KaleidoModel();
             }
@@ -59,7 +59,7 @@ public class KaleidoModel implements IDynamicBakedModel {
         }
 
         @Override
-        public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+        public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
             return Collections.EMPTY_LIST;
         }
 
@@ -86,7 +86,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 
         @Nullable
         @Override
-        public IBakedModel getModelWithOverrides(IBakedModel model, ItemStack stack, World worldIn, LivingEntity entityIn) {
+        public IBakedModel getOverrideModel(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
             ModelInfo info = MasterBlock.getInfo(stack);
             if (Minecraft.getInstance().loadingGui != null) {
                 return null;
@@ -106,11 +106,6 @@ public class KaleidoModel implements IDynamicBakedModel {
             model = KaleidoClient.getModel(extraData.getData(MasterTile.MODEL), direction);
         }
         return model != null ? model : missingno.get();
-    }
-
-    @Override
-    public boolean func_230044_c_() {
-        return false;
     }
 
     @Override
@@ -134,7 +129,7 @@ public class KaleidoModel implements IDynamicBakedModel {
         if (state == null) {
             return missingno.get().getQuads(null, side, rand, extraData);
         }
-        Direction direction = state.has(HorizontalBlock.HORIZONTAL_FACING) ? state.get(HorizontalBlock.HORIZONTAL_FACING) : Direction.NORTH;
+        Direction direction = state.hasProperty(HorizontalBlock.HORIZONTAL_FACING) ? state.get(HorizontalBlock.HORIZONTAL_FACING) : Direction.NORTH;
         return getModel(extraData, direction).getQuads(state, side, rand, extraData);
     }
 
@@ -151,7 +146,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 
     @Override
     public boolean isAmbientOcclusion(BlockState state) {
-        return state.has(MasterBlock.AO) && state.get(MasterBlock.AO) == Boolean.TRUE;
+        return state.hasProperty(MasterBlock.AO) && state.get(MasterBlock.AO) == Boolean.TRUE;
     }
 
     @Override
@@ -161,6 +156,11 @@ public class KaleidoModel implements IDynamicBakedModel {
 
     @Override
     public boolean isGui3d() {
+        return false;
+    }
+
+    @Override
+    public boolean isSideLit() {
         return false;
     }
 }

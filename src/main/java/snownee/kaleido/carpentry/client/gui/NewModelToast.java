@@ -3,6 +3,7 @@ package snownee.kaleido.carpentry.client.gui;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.toasts.IToast;
@@ -39,7 +40,7 @@ public class NewModelToast implements IToast {
     }
 
     @Override
-    public Visibility draw(ToastGui toastGui, long delta) {
+    public Visibility /*draw*/ func_230444_a_(MatrixStack matrix, ToastGui toastGui, long delta) {
         if (this.hasNewOutputs) {
             this.firstDrawTime = delta;
             this.hasNewOutputs = false;
@@ -49,10 +50,10 @@ public class NewModelToast implements IToast {
             return IToast.Visibility.HIDE;
         } else {
             toastGui.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
-            RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-            toastGui.blit(0, 0, 0, 32, 160, 32);
-            toastGui.getMinecraft().fontRenderer.drawString(I18n.format("kaleido.toast.title"), 30.0F, 7.0F, -11534256);
-            toastGui.getMinecraft().fontRenderer.drawString(I18n.format("kaleido.toast.description"), 30.0F, 18.0F, -16777216);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            toastGui.blit(matrix, 0, 0, 0, 32, 160, 32);
+            toastGui.getMinecraft().fontRenderer.drawString(matrix, I18n.format("kaleido.toast.title"), 30.0F, 7.0F, -11534256);
+            toastGui.getMinecraft().fontRenderer.drawString(matrix, I18n.format("kaleido.toast.description"), 30.0F, 18.0F, -16777216);
             ItemStack stack = this.stacks.get((int) ((delta * this.stacks.size() / 5000L) % this.stacks.size())); //Forge: fix math so that it doesn't divide by 0 when there are more than 5000 recipes
             toastGui.getMinecraft().getItemRenderer().renderItemAndEffectIntoGUI((LivingEntity) null, stack, 8, 8);
             return delta - this.firstDrawTime >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;

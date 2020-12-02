@@ -30,6 +30,8 @@ public class StackButton extends Button {
     public static void renderItemIntoGUI(ItemRenderer renderer, ItemStack stack, int x, int y, int light) {
         renderItemModelIntoGUI(renderer, stack, x, y, renderer.getItemModelWithOverrides(stack, (World) null, (LivingEntity) null), light);
     }
+
+    @SuppressWarnings("deprecation")
     public static void renderItemModelIntoGUI(ItemRenderer renderer, ItemStack stack, int x, int y, IBakedModel bakedmodel, int light) {
         RenderSystem.pushMatrix();
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
@@ -47,7 +49,7 @@ public class StackButton extends Button {
         RenderSystem.scalef(16.0F, 16.0F, 16.0F);
         MatrixStack matrixstack = new MatrixStack();
         IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        boolean flag = !bakedmodel.func_230044_c_();
+        boolean flag = !bakedmodel.isSideLit();
         if (flag) {
             RenderHelper.setupGuiFlatDiffuseLighting();
         }
@@ -63,6 +65,7 @@ public class StackButton extends Button {
         RenderSystem.disableRescaleNormal();
         RenderSystem.popMatrix();
     }
+
     public int frameColor = 0xFFFFFF;
     private float hoverProgress;
     public final ModelInfo info;
@@ -72,8 +75,8 @@ public class StackButton extends Button {
 
     public final ItemStack stack;
 
-    public StackButton(int x, int y, ModelInfo info, ItemStack stack, IPressable onPress) {
-        super(x, y, 27, 27, stack.getDisplayName().getString(), onPress);
+    public StackButton(int x, int y, ModelInfo info, ItemStack stack, IPressable onPress, Button.ITooltip onTooltip) {
+        super(x, y, 27, 27, stack.getDisplayName(), onPress, onTooltip);
         this.stack = stack;
         this.info = info;
         originalX = x;
@@ -85,19 +88,20 @@ public class StackButton extends Button {
     }
 
     @Override
-    public void renderButton(int mouseX, int mouseY, float pTicks) {
+    @SuppressWarnings("deprecation")
+    public void renderButton(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
         //        alpha = Math.min(alpha + pTicks * 0.2F, 1);
         //        int y = (int) (this.y + 15 - 15 * MathHelper.sin(alpha));
-        AbstractGui.fill(x, y, x + width, y + height, 0xAA222222);
+        AbstractGui.fill(matrix, x, y, x + width, y + height, 0xAA222222);
         if (!info.isLocked()) {
             hoverProgress += isHovered ? pTicks * .2f : -pTicks * .2f;
         }
         hoverProgress = MathHelper.clamp(hoverProgress, .4f, 1);
         int linecolor = frameColor | (int) (hoverProgress * 0xFF) << 24;
-        AbstractGui.fill(x, y, x + 1, y + height, linecolor);
-        AbstractGui.fill(x + width - 1, y, x + width, y + height, linecolor);
-        AbstractGui.fill(x + 1, y, x + width - 1, y + 1, linecolor);
-        AbstractGui.fill(x + 1, y + height - 1, x + width - 1, y + height, linecolor);
+        AbstractGui.fill(matrix, x, y, x + 1, y + height, linecolor);
+        AbstractGui.fill(matrix, x + width - 1, y, x + width, y + height, linecolor);
+        AbstractGui.fill(matrix, x + 1, y, x + width - 1, y + 1, linecolor);
+        AbstractGui.fill(matrix, x + 1, y + height - 1, x + width - 1, y + height, linecolor);
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         RenderSystem.pushMatrix();
         RenderSystem.translatef(x + 4, y + 4, 0);
@@ -108,7 +112,7 @@ public class StackButton extends Button {
             RenderSystem.pushMatrix();
             RenderSystem.translatef(0, 0, 500);
             FontRenderer font = Minecraft.getInstance().fontRenderer;
-            font.drawStringWithShadow("?", x + 11, y + 11, 0xFF888888);
+            font.drawStringWithShadow(matrix, "?", x + 11, y + 11, 0xFF888888);
             RenderSystem.popMatrix();
         }
     }

@@ -44,7 +44,7 @@ public class WoodworkingBenchBlock extends HorizontalBlock {
 
     @OnlyIn(Dist.CLIENT)
     private void openScreen(World worldIn, BlockPos pos, PlayerEntity player) {
-        Minecraft.getInstance().displayGuiScreen(new CarpentryCraftingScreen(getNameTextComponent(), worldIn, pos));
+        Minecraft.getInstance().displayGuiScreen(new CarpentryCraftingScreen(getTranslatedName(), worldIn, pos));
     }
 
 }

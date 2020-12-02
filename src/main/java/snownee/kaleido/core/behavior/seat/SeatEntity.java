@@ -7,7 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import snownee.kaleido.core.CoreModule;
@@ -20,7 +20,7 @@ public class SeatEntity extends Entity {
         super(CoreModule.SEAT, world);
     }
 
-    public SeatEntity(World world, Vec3d pos) {
+    public SeatEntity(World world, Vector3d pos) {
         this(world);
         setPosition(pos.x, pos.y + 0.001, pos.z);
         block = world.getBlockState(getPosition()).getBlock();

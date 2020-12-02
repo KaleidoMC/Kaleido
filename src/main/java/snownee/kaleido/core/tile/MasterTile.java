@@ -1,5 +1,6 @@
 package snownee.kaleido.core.tile;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -51,9 +52,9 @@ public class MasterTile extends BaseTile {
     }
 
     @Override
-    public void read(CompoundNBT compound) {
+    public void read(BlockState state, CompoundNBT compound) {
         readPacketData(compound);
-        super.read(compound);
+        super.read(state, compound);
     }
 
     @Override

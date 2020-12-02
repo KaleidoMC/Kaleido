@@ -13,43 +13,34 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonElement;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.Advancement.Builder;
 import net.minecraft.advancements.AdvancementList;
+import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.Util;
 
-@EventBusSubscriber(bus = Bus.MOD)
 public class KaleidoDataManager extends JsonReloadListener {
-
-    @SubscribeEvent
-    public static void addToDataListener(FMLServerAboutToStartEvent event) {
-        event.getServer().getResourceManager().addReloadListener(KaleidoDataManager.INSTANCE);
-    }
 
     /* off */
     private static final Gson GSON = new GsonBuilder()
@@ -68,11 +59,11 @@ public class KaleidoDataManager extends JsonReloadListener {
     public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
     public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 
-    public KaleidoDataManager() {
+    private KaleidoDataManager() {
         super(GSON, "kaleido");
         MinecraftForge.EVENT_BUS.addListener(this::onAdvancement);
-        MinecraftForge.EVENT_BUS.addListener(this::serverInit);
         MinecraftForge.EVENT_BUS.addListener(this::tick);
+        MinecraftForge.EVENT_BUS.addListener(this::serverInit);
     }
 
     public void add(ModelInfo info) {
@@ -82,29 +73,35 @@ public class KaleidoDataManager extends JsonReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonObject> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
+    protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
         boolean firstTime = allInfos.isEmpty();
         allInfos.clear();
         allPacks.clear();
-        for (Entry<ResourceLocation, JsonObject> entry : objectIn.entrySet()) {
+        for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
             try {
                 ModelInfo info = GSON.fromJson(entry.getValue(), ModelInfo.class);
                 if (info != null) {
                     info.id = entry.getKey();
                     add(info);
                 }
-            } catch (JsonSyntaxException | NullPointerException e) {
+            } catch (Exception e) {
                 Kaleido.logger.catching(e);
             }
         }
-        MinecraftServer server = Kiwi.getServer();
-        makeAdvancements(server.getAdvancementManager().advancementList);
-        if (!firstTime && server.getServerOwner() != null) {
-            ServerPlayerEntity owner = server.getPlayerList().getPlayerByUsername(server.getServerOwner());
-            if (server.isServerOwner(owner.getGameProfile())) {
-                syncAllLockInfo(owner);
+        if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
+            for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).reloadListeners) {
+                if (listener instanceof AdvancementManager) {
+                    makeAdvancements(((AdvancementManager) listener).advancementList);
+                    break;
+                }
             }
         }
+        //        if (!firstTime && server.getServerOwner() != null) {
+        //            ServerPlayerEntity owner = server.getPlayerList().getPlayerByUsername(server.getServerOwner());
+        //            if (server.isServerOwner(owner.getGameProfile())) {
+        //                syncAllLockInfo(owner);
+        //            }
+        //        }
     }
 
     public ModelInfo get(ResourceLocation id) {
@@ -148,10 +145,10 @@ public class KaleidoDataManager extends JsonReloadListener {
         infos.forEach(this::add);
     }
 
-    private void serverInit(FMLServerAboutToStartEvent event) {
+    private void serverInit(AddReloadListenerEvent event) {
         allInfos.clear();
         allPacks.clear();
-        event.getServer().getResourceManager().addReloadListener(this);
+        event.addListener(this);
     }
 
     public void syncAllLockInfo(ServerPlayerEntity player) {

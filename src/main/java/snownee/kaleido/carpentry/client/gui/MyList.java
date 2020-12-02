@@ -3,10 +3,12 @@ package snownee.kaleido.carpentry.client.gui;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -15,6 +17,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FocusableGui;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
+import net.minecraft.client.gui.widget.list.AbstractList;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -34,8 +37,9 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
             return Objects.equals(this.list.getEntryAtPosition(p_isMouseOver_1_, p_isMouseOver_3_), this);
         }
 
-        public abstract void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta);
+        public abstract void render(MatrixStack matrix, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta);
     }
+
     class SimpleArrayList extends java.util.AbstractList<E> {
         private final List<E> field_216871_b = Lists.newArrayList();
 
@@ -69,6 +73,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
             return this.field_216871_b.size();
         }
     }
+
     protected static final int DRAG_OUTSIDE = -2;
     protected boolean centerListVertically = true;
     private final List<E> children = new SimpleArrayList();
@@ -112,12 +117,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected void centerScrollOn(E entry) {
-        this.setScrollAmount(this.children().indexOf(entry) * entry.getHeight() + entry.getHeight() / 2 - (this.y1 - this.y0) / 2);
-    }
-
-    @Override
-    public final List<E> children() {
-        return this.children;
+        this.setScrollAmount(this.getEventListeners().indexOf(entry) * entry.getHeight() + entry.getHeight() / 2 - (this.y1 - this.y0) / 2);
     }
 
     protected final void clearEntries() {
@@ -144,8 +144,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         return this.y1;
     }
 
-    protected E getEntry(int entry) {
-        return (this.children().get(entry));
+    protected E getEntry(int index) {
+        return this.getEventListeners().get(index);
     }
 
     @Nullable
@@ -169,8 +169,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 
     @Override
     @Nullable
-    public E getFocused() {
-        return (E) (super.getFocused());
+    public E getListener() {
+        return (E) (super.getListener());
     }
 
     public int getHeight() {
@@ -178,7 +178,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected int getItemCount() {
-        return this.children().size();
+        return this.getEventListeners().size();
     }
 
     public int getLeft() {
@@ -244,18 +244,18 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected boolean isSelectedItem(int i) {
-        return Objects.equals(this.getSelected(), this.children().get(i));
+        return Objects.equals(this.getSelected(), this.getEventListeners().get(i));
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
-        } else if (p_keyPressed_1_ == 264) {
-            this.moveSelection(1);
+        } else if (keyCode == 264) {
+            this.moveSelection(AbstractList.Ordering.DOWN);
             return true;
-        } else if (p_keyPressed_1_ == 265) {
-            this.moveSelection(-1);
+        } else if (keyCode == 265) {
+            this.moveSelection(AbstractList.Ordering.UP);
             return true;
         } else {
             return false;
@@ -263,19 +263,19 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     @Override
-    public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-        this.updateScrollingState(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
-        if (!this.isMouseOver(p_mouseClicked_1_, p_mouseClicked_3_)) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        this.updateScrollingState(mouseX, mouseY, button);
+        if (!this.isMouseOver(mouseX, mouseY)) {
             return false;
         } else {
-            E e = this.getEntryAtPosition(p_mouseClicked_1_, p_mouseClicked_3_);
+            E e = this.getEntryAtPosition(mouseX, mouseY);
             if (e != null) {
                 pressTicks = 1;
-                this.setFocused(e);
+                this.setListener(e);
                 this.setDragging(true);
                 return true;
-            } else if (p_mouseClicked_5_ == 0) {
-                this.clickedHeader((int) (p_mouseClicked_1_ - (this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int) (p_mouseClicked_3_ - this.y0) + (int) this.getScrollAmount() - 4);
+            } else if (button == 0) {
+                this.clickedHeader((int) (mouseX - (this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int) (mouseY - this.y0) + (int) this.getScrollAmount() - 4);
                 return true;
             }
 
@@ -284,15 +284,19 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     @Override
-    public boolean mouseDragged(double p_mouseDragged_1_, double p_mouseDragged_3_, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
-        if (super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_)) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
             return true;
-        } else if (p_mouseDragged_5_ == 0 && this.scrolling) {
-            double d0 = Math.max(1, this.getMaxScroll());
-            int i = this.y1 - this.y0;
-            int j = MathHelper.clamp((int) ((float) (i * i) / (float) this.getMaxPosition()), 32, i - 8);
-            double d1 = d0 / 25;
-            this.setScrollAmount(this.getScrollAmount() + p_mouseDragged_8_ * d1 * -0.2);
+        } else if (button == 0 && this.scrolling) {
+            if (mouseY < this.y0) {
+                this.setScrollAmount(0.0D);
+            } else if (mouseY > this.y1) {
+                this.setScrollAmount(this.getMaxScroll());
+            } else {
+                double d0 = Math.max(1, this.getMaxScroll());
+                double d1 = Math.max(1.0D, d0 / 25);
+                this.setScrollAmount(this.getScrollAmount() + dragY * d1 * -0.2);
+            }
             return true;
         } else {
             return false;
@@ -300,15 +304,15 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int pTicks) {
-        if (this.getFocused() != null) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (this.getListener() != null) {
             if (pressTicks > 0) {
                 if (pressTicks < 4) {
-                    getFocused().mouseClicked(mouseX, mouseY, pTicks);
+                    getListener().mouseClicked(mouseX, mouseY, button);
                 }
                 pressTicks = 0;
             }
-            this.getFocused().mouseReleased(mouseX, mouseY, pTicks);
+            this.getListener().mouseReleased(mouseX, mouseY, button);
         }
         setDragging(false);
         return false;
@@ -320,15 +324,33 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         return true;
     }
 
-    protected void moveSelection(int p_moveSelection_1_) {
-        if (!this.children().isEmpty()) {
-            int i = this.children().indexOf(this.getSelected());
-            int j = MathHelper.clamp(i + p_moveSelection_1_, 0, this.getItemCount() - 1);
-            E e = this.children().get(j);
-            this.setSelected(e);
-            this.ensureVisible(e);
-        }
+    protected void moveSelection(AbstractList.Ordering p_241219_1_) {
+        this.func_241572_a_(p_241219_1_, (p_241573_0_) -> {
+            return true;
+        });
+    }
 
+    protected void func_241572_a_(AbstractList.Ordering p_241572_1_, Predicate<E> p_241572_2_) {
+        int i = p_241572_1_ == AbstractList.Ordering.UP ? -1 : 1;
+        if (!this.getEventListeners().isEmpty()) {
+            int j = this.getEventListeners().indexOf(this.getSelected());
+
+            while (true) {
+                int k = MathHelper.clamp(j + i, 0, this.getItemCount() - 1);
+                if (j == k) {
+                    break;
+                }
+
+                E e = this.getEventListeners().get(k);
+                if (p_241572_2_.test(e)) {
+                    this.setSelected(e);
+                    this.ensureVisible(e);
+                    break;
+                }
+
+                j = k;
+            }
+        }
     }
 
     protected E remove(int p_remove_1_) {
@@ -346,7 +368,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float pTicks) {
+    public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
         if (pressTicks > 0) {
             if (isMouseOver(mouseX, mouseY)) {
                 pressTicks += pTicks;
@@ -355,7 +377,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
                 setDragging(false);
             }
         }
-        this.renderBackground();
+        this.renderBackground(matrix);
         int i = this.getScrollbarPosition();
         int j = i + 6;
         Tessellator tessellator = Tessellator.getInstance();
@@ -371,10 +393,10 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         int k = this.getRowLeft();
         int l = this.y0 + getSpacer() - (int) this.getScrollAmount();
         if (this.renderHeader) {
-            this.renderHeader(k, l, tessellator);
+            this.renderHeader(matrix, k, l, tessellator);
         }
 
-        this.renderList(k, l, mouseX, mouseY, pTicks);
+        this.renderList(matrix, k, l, mouseX, mouseY, pTicks);
         RenderSystem.disableDepthTest();
         this.renderHoleBackground(0, this.y0, 255, 255);
         this.renderHoleBackground(this.y1, this.height, 255, 255);
@@ -424,18 +446,18 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
             tessellator.draw();
         }
 
-        this.renderDecorations(mouseX, mouseY);
+        this.renderDecorations(matrix, mouseX, mouseY);
         RenderSystem.enableTexture();
         RenderSystem.shadeModel(7424);
         RenderSystem.enableAlphaTest();
         RenderSystem.disableBlend();
     }
 
-    protected void renderBackground() {}
+    protected void renderBackground(MatrixStack matrix) {}
 
-    protected void renderDecorations(int p_renderDecorations_1_, int p_renderDecorations_2_) {}
+    protected void renderDecorations(MatrixStack matrix, int p_renderDecorations_1_, int p_renderDecorations_2_) {}
 
-    protected void renderHeader(int p_renderHeader_1_, int p_renderHeader_2_, Tessellator p_renderHeader_3_) {}
+    protected void renderHeader(MatrixStack matrix, int p_renderHeader_1_, int p_renderHeader_2_, Tessellator p_renderHeader_3_) {}
 
     protected void renderHoleBackground(int p_renderHoleBackground_1_, int p_renderHoleBackground_2_, int p_renderHoleBackground_3_, int p_renderHoleBackground_4_) {
         Tessellator tessellator = Tessellator.getInstance();
@@ -450,7 +472,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         tessellator.draw();
     }
 
-    protected void renderList(int x, int y, int mouseX, int mouseY, float pTicks) {
+    protected void renderList(MatrixStack matrix, int x, int y, int mouseX, int mouseY, float pTicks) {
         int i = this.getItemCount();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -488,7 +510,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
                 //System.out.println(mouseY + " " + i1);
 
                 int j2 = this.getRowLeft();
-                entry.render(j, top, j2, rowWidth, realHeight, mouseX, mouseY, !isDragging() && this.isMouseOver(mouseX, mouseY) && mouseY >= top && mouseY < bottom, pTicks);
+                entry.render(matrix, j, top, j2, rowWidth, realHeight, mouseX, mouseY, !isDragging() && this.isMouseOver(mouseX, mouseY) && mouseY >= top && mouseY < bottom, pTicks);
             }
             top = bottom;
         }
@@ -543,4 +565,10 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         this.x0 = 0;
         this.x1 = p_updateSize_1_;
     }
+
+    @Override
+    public List<E> getEventListeners() {
+        return children;
+    }
+
 }

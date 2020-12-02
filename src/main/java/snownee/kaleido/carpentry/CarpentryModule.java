@@ -16,13 +16,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
+import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.village.PointOfInterestType;
-import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.village.VillagerTradesEvent;
@@ -33,13 +33,13 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.Skip;
+import snownee.kiwi.Name;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 
 @KiwiModule.Subscriber
-@KiwiModule(name = "carpentry")
+@KiwiModule("carpentry")
 @KiwiModule.Group("decorations")
 public class CarpentryModule extends AbstractModule {
 
@@ -57,10 +57,10 @@ public class CarpentryModule extends AbstractModule {
 
     public static final Item CLOTH = new ModItem(itemProp());
 
-    public static final WoodworkingBenchBlock WOODWORKING_BENCH = init(new WoodworkingBenchBlock(blockProp(Material.WOOD)));
+    public static final WoodworkingBenchBlock WOODWORKING_BENCH = new WoodworkingBenchBlock(blockProp(Material.WOOD));
 
-    @Skip
-    public static final PointOfInterestType COLLECTOR_POI = PointOfInterestType.func_226359_a_("kaleido.collector", PointOfInterestType.getAllStates(WOODWORKING_BENCH), 1, 1);
+    @Name("collector")
+    public static final PointOfInterestType COLLECTOR_POI = PointOfInterestType.registerBlockStates(new PointOfInterestType("kaleido.collector", PointOfInterestType.getAllStates(WOODWORKING_BENCH), 1, 1));
 
     public static final VillagerProfession COLLECTOR = new VillagerProfession("kaleido.collector", COLLECTOR_POI, ImmutableSet.of(), ImmutableSet.of(), null);
 
@@ -116,15 +116,17 @@ public class CarpentryModule extends AbstractModule {
                     }
                 }
             }
-            list.add(NBTUtil.writeUniqueId(villager.previousCustomer.getUniqueID()));
+            list.add(NBTUtil./*writeUniqueId*/func_240626_a_(villager.previousCustomer.getUniqueID()));
             data.setLong("Kaleido.Day", day);
 
             // Unlock
             AxisAlignedBB bb = new AxisAlignedBB(villager.getPositionVec().subtract(5, 5, 5), villager.getPositionVec().add(5, 5, 5));
             List<ServerPlayerEntity> players = villager.getWorld().getEntitiesWithinAABB(ServerPlayerEntity.class, bb, $ -> !$.isSpectator());
             ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) villager.previousCustomer, villager.previousCustomer.getRNG());
-            for (ServerPlayerEntity player : players) {
-                info.grant(player);
+            if (info != null) {
+                for (ServerPlayerEntity player : players) {
+                    info.grant(player);
+                }
             }
         }
 
