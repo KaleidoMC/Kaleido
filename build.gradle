@@ -85,7 +85,10 @@ task deobfJar(type: Jar) {
 
 repositories {
     maven {
-        url = "https://www.cursemaven.com"
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
     // mixin
     maven { url = 'https://dist.creeper.host/Sponge/maven' }
@@ -97,10 +100,10 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compile fg.deobf("curse.maven:jei:3109181")
+    compile fg.deobf("curse.maven:jei-238222:3109181")
     //compile fg.deobf("mezz.jei:jei-1.16.3:${jei_version}")
 	
-	compile fg.deobf("curse.maven:kiwi:3103509")
+	compile fg.deobf("curse.maven:kiwi-303657:3103509")
     //compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
     
     compile 'org.spongepowered:mixin:0.8'

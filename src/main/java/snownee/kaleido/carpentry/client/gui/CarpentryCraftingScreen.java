@@ -16,6 +16,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.Button.IPressable;
+import net.minecraft.client.gui.widget.button.Button.ITooltip;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -62,10 +64,14 @@ public class CarpentryCraftingScreen extends Screen {
             LinkedList<ModelInfo> allInfos = Lists.newLinkedList(pack.normalInfos);
             allInfos.addAll(pack.rewardInfos);
             int i = 0;
+            IPressable pressable = btn -> {
+                parent.setSelectedButton((StackButton) btn);
+            };
+            ITooltip tooltip = (btn, matrix, mouseX, mouseY) -> {
+                parent.renderTooltip(matrix, btn.getMessage(), mouseX, mouseY);
+            };
             for (ModelInfo info : allInfos) {
-                StackButton button = new StackButton(5 + i % 8 * 28, 17 + i / 8 * 28, info, info.makeItem(), btn -> {
-                    parent.setSelectedButton((StackButton) btn);
-                }, (btn, matrix, mouseX, mouseY) -> {}); // TODO
+                StackButton button = new StackButton(5 + i % 8 * 28, 17 + i / 8 * 28, info, info.makeItem(), pressable, tooltip);
                 children.add(button);
                 ++i;
             }
