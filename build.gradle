@@ -86,9 +86,6 @@ task deobfJar(type: Jar) {
 repositories {
     maven {
         url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
     }
     // mixin
     maven { url = 'https://dist.creeper.host/Sponge/maven' }
