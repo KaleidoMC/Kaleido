@@ -1,6 +1,6 @@
 package snownee.kaleido.core;
 
-import com.google.gson.annotations.Expose;
+import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -8,6 +8,7 @@ import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,30 +22,25 @@ import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo {
 
-	@Expose
 	public Behavior behavior = NoneBehavior.INSTANCE;
 	public ResourceLocation id;
 	private boolean locked = true;
-	@Expose
 	public int price = 1;
-	@Expose
 	public boolean reward;
-	private String translationKey;
+	private String descriptionId;
+	public boolean expired;
 
-	@Expose
-	public boolean useAO = true;
-	@Expose
 	public boolean opposite; // temp
 
 	public ResourceLocation getAdvancementId() {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
 	}
 
-	public String getTranslationKey() {
-		if (translationKey == null) {
-			translationKey = Util.makeDescriptionId("kaleido.decor", id);
+	public String getDescriptionId() {
+		if (descriptionId == null) {
+			descriptionId = Util.makeDescriptionId("kaleido.decor", id);
 		}
-		return translationKey;
+		return descriptionId;
 	}
 
 	public boolean grant(ServerPlayerEntity player) {
@@ -65,6 +61,7 @@ public class ModelInfo {
 		return player.getAdvancements().getOrStartProgress(advancement).isDone(); //FIXME do not start progress
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public boolean isLocked() {
 		return locked;
 	}
@@ -91,10 +88,9 @@ public class ModelInfo {
 		this.locked = locked;
 	}
 
-	public void write(PacketBuffer buf, ServerPlayerEntity player) {
+	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player) {
 		buf.writeResourceLocation(id);
 		buf.writeBoolean(isLockedServer(player));
-		buf.writeBoolean(useAO);
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
 
@@ -102,15 +98,28 @@ public class ModelInfo {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static ModelInfo read(PacketBuffer buf) {
+	public static ModelInfo fromNetwork(PacketBuffer buf) {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
 		info.setLocked(buf.readBoolean());
-		info.useAO = buf.readBoolean();
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
 
 		info.opposite = buf.readBoolean();
+		return info;
+	}
+
+	public static ModelInfo fromJson(JsonObject json) {
+		ModelInfo info = new ModelInfo();
+		if (info != null) {
+			if (json.has("behavior")) {
+				info.behavior = KaleidoDataManager.GSON.fromJson(json.get("behavior"), Behavior.class);
+			}
+			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
+			info.price = JSONUtils.getAsInt(json, "price", 1);
+
+			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);
+		}
 		return info;
 	}
 

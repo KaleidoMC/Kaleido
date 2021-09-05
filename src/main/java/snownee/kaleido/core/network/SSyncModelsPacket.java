@@ -21,7 +21,7 @@ public class SSyncModelsPacket extends Packet {
 			int size = buf.readVarInt();
 			ImmutableList.Builder<ModelInfo> builder = ImmutableList.builder();
 			for (int i = 0; i < size; i++) {
-				builder.add(ModelInfo.read(buf));
+				builder.add(ModelInfo.fromNetwork(buf));
 			}
 			return new SSyncModelsPacket(builder.build());
 		}
@@ -30,7 +30,7 @@ public class SSyncModelsPacket extends Packet {
 		public void encode(SSyncModelsPacket pkt, PacketBuffer buf) {
 			buf.writeVarInt(pkt.infos.size());
 			for (ModelInfo info : pkt.infos) {
-				info.write(buf, pkt.player);
+				info.toNetwork(buf, pkt.player);
 			}
 		}
 

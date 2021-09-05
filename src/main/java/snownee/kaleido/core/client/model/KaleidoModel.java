@@ -42,8 +42,8 @@ import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.tile.MasterTile;
 
 @OnlyIn(Dist.CLIENT)
 public class KaleidoModel implements IDynamicBakedModel {
@@ -102,10 +102,10 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
 
-	private static IBakedModel getModel(IModelData extraData, Direction direction) {
+	public static IBakedModel getModel(IModelData extraData, Direction direction) {
 		IBakedModel model = null;
-		if (extraData.getData(MasterTile.MODEL) != null) {
-			model = KaleidoClient.getModel(extraData.getData(MasterTile.MODEL), direction);
+		if (extraData.getData(MasterBlockEntity.MODEL) != null) {
+			model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), direction);
 		}
 		return model != null ? model : missingno.get();
 	}
@@ -144,11 +144,6 @@ public class KaleidoModel implements IDynamicBakedModel {
 	@Override
 	public boolean useAmbientOcclusion() {
 		return true;
-	}
-
-	@Override
-	public boolean isAmbientOcclusion(BlockState state) {
-		return state.hasProperty(MasterBlock.AO) && state.getValue(MasterBlock.AO) == Boolean.TRUE;
 	}
 
 	@Override

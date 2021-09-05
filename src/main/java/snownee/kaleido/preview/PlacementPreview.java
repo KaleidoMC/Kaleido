@@ -50,8 +50,8 @@ import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.tile.MasterTile;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(Dist.CLIENT)
@@ -133,11 +133,14 @@ public final class PlacementPreview {
 		if (held.getItem() instanceof BlockItem) {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
 			ModelInfo info = MasterBlock.getInfo(held);
+			if (info == null) {
+				return;
+			}
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
 				info = MasterBlock.getInfo(held);
 				TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
-				if (tile instanceof MasterTile) {
-					MasterTile masterTile = (MasterTile) tile;
+				if (tile instanceof MasterBlockEntity) {
+					MasterBlockEntity masterTile = (MasterBlockEntity) tile;
 					if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
 						return;
 					}

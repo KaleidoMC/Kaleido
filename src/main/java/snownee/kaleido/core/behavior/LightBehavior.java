@@ -10,7 +10,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
 public class LightBehavior implements Behavior {
 
@@ -25,7 +25,7 @@ public class LightBehavior implements Behavior {
 	}
 
 	@Override
-	public Behavior copy(MasterTile tile) {
+	public Behavior copy(MasterBlockEntity tile) {
 		return this;
 	}
 

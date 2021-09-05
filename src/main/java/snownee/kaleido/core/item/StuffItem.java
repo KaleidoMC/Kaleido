@@ -16,7 +16,7 @@ public class StuffItem extends ModBlockItem {
 	public String getDescriptionId(ItemStack stack) {
 		ModelInfo info = MasterBlock.getInfo(stack);
 		if (info != null) {
-			return info.getTranslationKey();
+			return info.getDescriptionId();
 		}
 		return super.getDescriptionId(stack);
 	}

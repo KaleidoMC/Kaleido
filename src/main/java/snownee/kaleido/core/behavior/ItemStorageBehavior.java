@@ -20,7 +20,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.inventory.InvHandlerWrapper;
 
 public class ItemStorageBehavior implements Behavior {
@@ -38,11 +38,11 @@ public class ItemStorageBehavior implements Behavior {
 	}
 
 	@Override
-	public Behavior copy(MasterTile tile) {
+	public Behavior copy(MasterBlockEntity tile) {
 		ItemStorageBehavior copy = new ItemStorageBehavior(rows);
 		copy.handler = LazyOptional.of(() -> new ItemStackHandler(rows * 9));
 		if (tile.getModelInfo() != null) {
-			copy.title = new TranslationTextComponent(tile.getModelInfo().getTranslationKey());
+			copy.title = new TranslationTextComponent(tile.getModelInfo().getDescriptionId());
 		}
 		return copy;
 	}

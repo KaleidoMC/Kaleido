@@ -23,7 +23,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
 public interface Behavior {
 
@@ -57,7 +57,7 @@ public interface Behavior {
 
 	}
 
-	Behavior copy(MasterTile tile);
+	Behavior copy(MasterBlockEntity tile);
 
 	default <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
 		return LazyOptional.empty();

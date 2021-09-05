@@ -8,7 +8,7 @@ public class ModelPack {
 
 	public final List<ModelInfo> normalInfos = Lists.newArrayList();
 	public final List<ModelInfo> rewardInfos = Lists.newArrayList();
-	public String translationKey;
+	public String descriptionId;
 
 	public void add(ModelInfo info) {
 		if (info.reward) {
@@ -16,8 +16,8 @@ public class ModelPack {
 		} else {
 			normalInfos.add(info);
 		}
-		if (translationKey == null) {
-			translationKey = "kaleido.pack." + info.id.getNamespace();
+		if (descriptionId == null) {
+			descriptionId = "kaleido.pack." + info.id.getNamespace();
 		}
 	}
 

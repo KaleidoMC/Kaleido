@@ -93,21 +93,24 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 	protected int width;
 	protected int x0;
 	protected int x1;
-
 	protected int y0;
-
 	protected int y1;
-
 	protected int yDrag = -2;
 
-	public MyList(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn) {
+	public MyList(Minecraft mcIn, int widthIn, int heightIn, int topIn) {
 		this.minecraft = mcIn;
 		this.width = widthIn;
 		this.height = heightIn;
 		this.y0 = topIn;
-		this.y1 = bottomIn;
+		this.y1 = topIn + height - 40;
 		this.x0 = 0;
 		this.x1 = widthIn;
+	}
+
+	public void setTop(float topIn) {
+		int top = (int) topIn;
+		this.y0 = top;
+		this.y1 = top + height - 40;
 	}
 
 	protected int addEntry(E entry) {
@@ -290,15 +293,9 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
 			return true;
 		} else if (button == 0 && this.scrolling) {
-			if (mouseY < this.y0) {
-				this.setScrollAmount(0.0D);
-			} else if (mouseY > this.y1) {
-				this.setScrollAmount(this.getMaxScroll());
-			} else {
-				double d0 = Math.max(1, this.getMaxScroll());
-				double d1 = Math.max(1.0D, d0 / 25);
-				this.setScrollAmount(this.getScrollAmount() + dragY * d1 * -0.2);
-			}
+			double d0 = Math.max(1, this.getMaxScroll());
+			double d1 = Math.max(1.0D, d0 / 25);
+			this.setScrollAmount(this.getScrollAmount() + dragY * d1 * -0.2);
 			return true;
 		} else {
 			return false;
@@ -370,26 +367,18 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 	@Override
 	public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
 		if (pressTicks > 0) {
-			if (isMouseOver(mouseX, mouseY)) {
-				pressTicks += pTicks;
-			} else {
-				pressTicks = 0;
-				setDragging(false);
-			}
+			pressTicks += pTicks;
 		}
 		this.renderBackground(matrix);
 		int i = this.getScrollbarPosition();
 		int j = i + 6;
+		double scale = minecraft.getWindow().getGuiScale();
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
-		this.minecraft.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-		bufferbuilder.vertex(this.x0, this.y1, 0.0D).uv(this.x0 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-		bufferbuilder.vertex(this.x1, this.y1, 0.0D).uv(this.x1 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-		bufferbuilder.vertex(this.x1, this.y0, 0.0D).uv(this.x1 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-		bufferbuilder.vertex(this.x0, this.y0, 0.0D).uv(this.x0 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-		tessellator.end();
+		matrix.pushPose();
+		//matrix.translate(0, 10, 0);
+		AbstractGui.fill(matrix, x0 - 2, 0, x1 + 2, y1 + 3, 0xAA000000);
+		RenderSystem.enableScissor((int) (x0 * scale), (int) ((height - y1) * scale), (int) (width * scale), (int) ((y1 - y0) * scale));
 		int k = this.getRowLeft();
 		int l = this.y0 + getSpacer() - (int) this.getScrollAmount();
 		if (this.renderHeader) {
@@ -398,25 +387,13 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 
 		this.renderList(matrix, k, l, mouseX, mouseY, pTicks);
 		RenderSystem.disableDepthTest();
-		this.renderHoleBackground(0, this.y0, 255, 255);
-		this.renderHoleBackground(this.y1, this.height, 255, 255);
+		//this.renderHoleBackground(0, this.y0, 255, 255);
+		//this.renderHoleBackground(this.y1, this.height, 255, 255);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
 		RenderSystem.disableAlphaTest();
 		RenderSystem.shadeModel(7425);
 		RenderSystem.disableTexture();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-		bufferbuilder.vertex(this.x0, this.y0 + 4, 0.0D).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-		bufferbuilder.vertex(this.x1, this.y0 + 4, 0.0D).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-		bufferbuilder.vertex(this.x1, this.y0, 0.0D).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-		bufferbuilder.vertex(this.x0, this.y0, 0.0D).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-		tessellator.end();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-		bufferbuilder.vertex(this.x0, this.y1, 0.0D).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-		bufferbuilder.vertex(this.x1, this.y1, 0.0D).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-		bufferbuilder.vertex(this.x1, this.y1 - 4, 0.0D).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-		bufferbuilder.vertex(this.x0, this.y1 - 4, 0.0D).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-		tessellator.end();
 		int j1 = this.getMaxScroll();
 		if (renderScrollbar && j1 > 0) {
 			int k1 = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
@@ -451,6 +428,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		RenderSystem.shadeModel(7424);
 		RenderSystem.enableAlphaTest();
 		RenderSystem.disableBlend();
+		RenderSystem.disableScissor();
+		matrix.popPose();
 	}
 
 	protected void renderBackground(MatrixStack matrix) {
@@ -558,15 +537,6 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 
 	protected void updateScrollingState(double p_updateScrollingState_1_, double p_updateScrollingState_3_, int p_updateScrollingState_5_) {
 		this.scrolling = true;
-	}
-
-	public void updateSize(int p_updateSize_1_, int p_updateSize_2_, int p_updateSize_3_, int p_updateSize_4_) {
-		this.width = p_updateSize_1_;
-		this.height = p_updateSize_2_;
-		this.y0 = p_updateSize_3_;
-		this.y1 = p_updateSize_4_;
-		this.x0 = 0;
-		this.x1 = p_updateSize_1_;
 	}
 
 	@Override

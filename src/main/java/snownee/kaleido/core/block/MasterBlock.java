@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -27,7 +26,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.RenderLayer;
 import snownee.kiwi.RenderLayer.Layer;
 import snownee.kiwi.util.NBTHelper;
@@ -35,8 +34,6 @@ import snownee.kiwi.util.Util;
 
 @RenderLayer(Layer.TRANSLUCENT)
 public class MasterBlock extends HorizontalBlock {
-
-	public static final BooleanProperty AO = BooleanProperty.create("ao");
 
 	public static final String NBT_ID = "Kaleido.Id";
 
@@ -46,7 +43,7 @@ public class MasterBlock extends HorizontalBlock {
 		if (modelId == null || modelId.getPath().isEmpty()) {
 			return null;
 		}
-		return KaleidoDataManager.INSTANCE.get(modelId);
+		return KaleidoDataManager.get(modelId);
 	}
 
 	public MasterBlock(Properties builder) {
@@ -55,7 +52,7 @@ public class MasterBlock extends HorizontalBlock {
 
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-		return new MasterTile();
+		return new MasterBlockEntity();
 	}
 
 	@Override // Need to refresh every time tag updated?
@@ -65,15 +62,15 @@ public class MasterBlock extends HorizontalBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-		builder.add(FACING, AO);
+		builder.add(FACING);
 	}
 
 	@Override
 	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
 		ItemStack stack = new ItemStack(this);
 		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof MasterTile) {
-			ModelInfo info = ((MasterTile) tile).getModelInfo();
+		if (tile instanceof MasterBlockEntity) {
+			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
 			if (info != null) {
 				NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
 			}
@@ -91,7 +88,7 @@ public class MasterBlock extends HorizontalBlock {
 		if (info.opposite) {
 			direction = direction.getOpposite();
 		}
-		return defaultBlockState().setValue(FACING, direction).setValue(AO, info.useAO);
+		return defaultBlockState().setValue(FACING, direction);
 	}
 
 	@Override
@@ -102,8 +99,8 @@ public class MasterBlock extends HorizontalBlock {
 	@Override
 	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		TileEntity tile = worldIn.getBlockEntity(pos);
-		if (tile instanceof MasterTile) {
-			return ((MasterTile) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+		if (tile instanceof MasterBlockEntity) {
+			return ((MasterBlockEntity) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
 		}
 		return ActionResultType.PASS;
 	}
@@ -116,8 +113,8 @@ public class MasterBlock extends HorizontalBlock {
 			return;
 		}
 		TileEntity tile = worldIn.getBlockEntity(pos);
-		if (tile instanceof MasterTile) {
-			((MasterTile) tile).setModelInfo(info);
+		if (tile instanceof MasterBlockEntity) {
+			((MasterBlockEntity) tile).setModelInfo(info);
 			if (info.behavior.getLightValue() > 0) {
 				worldIn.getLightEngine().checkBlock(pos);
 			}
@@ -134,10 +131,16 @@ public class MasterBlock extends HorizontalBlock {
 	@Override
 	public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
 		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof MasterTile && ((MasterTile) tile).behavior != null) {
-			return ((MasterTile) tile).behavior.getLightValue();
+		if (tile instanceof MasterBlockEntity && ((MasterBlockEntity) tile).behavior != null) {
+			return ((MasterBlockEntity) tile).behavior.getLightValue();
 		}
 		return super.getLightValue(state, world, pos);
+	}
+
+	@Override
+	public OffsetType getOffsetType() {
+		// TODO Auto-generated method stub
+		return super.getOffsetType();
 	}
 
 }

@@ -19,7 +19,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.fml.LogicalSide;
 import snownee.kaleido.core.behavior.seat.SeatEntity;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
@@ -43,7 +43,7 @@ public class SeatBehavior implements Behavior {
 	}
 
 	@Override
-	public Behavior copy(MasterTile tile) {
+	public Behavior copy(MasterBlockEntity tile) {
 		return this;
 	}
 

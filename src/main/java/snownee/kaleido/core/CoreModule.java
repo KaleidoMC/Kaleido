@@ -24,13 +24,13 @@ import snownee.kaleido.core.behavior.SeatBehavior;
 import snownee.kaleido.core.behavior.seat.EmptyEntityRenderer;
 import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.item.LuckyBoxItem;
 import snownee.kaleido.core.item.StuffItem;
 import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
-import snownee.kaleido.core.tile.MasterTile;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -44,11 +44,11 @@ import snownee.kiwi.network.NetworkChannel;
 public class CoreModule extends AbstractModule {
 
 	@NoItem
-	public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion());
+	public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion().dynamicShape());
 
 	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-	public static final TileEntityType<MasterTile> MASTER = new TileEntityType<>(MasterTile::new, Collections.singleton(STUFF), null);
+	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, Collections.singleton(STUFF), null);
 
 	public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 

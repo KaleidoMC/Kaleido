@@ -5,6 +5,10 @@
   "refmap": "kaleido.refmap.json",
   "mixins": [
   ],
+  "client": [
+    "MixinModelBakery",
+    "MixinBlockModelRenderer"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

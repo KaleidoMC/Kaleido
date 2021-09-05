@@ -7,13 +7,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
-import snownee.kaleido.core.tile.MasterTile;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
 public enum NoneBehavior implements Behavior {
 	INSTANCE;
 
 	@Override
-	public Behavior copy(MasterTile tile) {
+	public Behavior copy(MasterBlockEntity tile) {
 		return this;
 	}
 

@@ -8,7 +8,7 @@ version="${file.jarVersion}"
 displayName="Kaleido"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kaleido"
-description='''Models for showcase are from Yuushya Townscape by Coco.
+description='''Models for showcase are from Yuushya Townscape by Cocofish.
 Textures of woodworking bench are made by YurisCat'''
 
 [[dependencies.kaleido]]

@@ -14,6 +14,7 @@ import com.google.common.collect.Multimaps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.Advancement.Builder;
@@ -46,7 +47,7 @@ import snownee.kiwi.util.Util;
 public class KaleidoDataManager extends JsonReloadListener {
 
 	/* off */
-    private static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .enableComplexMapKeySerialization()
@@ -79,11 +80,13 @@ public class KaleidoDataManager extends JsonReloadListener {
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
 		//boolean firstTime = allInfos.isEmpty();
+		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
 		allPacks.clear();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			try {
-				ModelInfo info = GSON.fromJson(entry.getValue(), ModelInfo.class);
+				JsonObject json = GSON.fromJson(entry.getValue(), JsonObject.class);
+				ModelInfo info = ModelInfo.fromJson(json);
 				if (info != null) {
 					info.id = entry.getKey();
 					add(info);
@@ -108,8 +111,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//        }
 	}
 
-	public ModelInfo get(ResourceLocation id) {
-		return allInfos.get(id);
+	public static ModelInfo get(ResourceLocation id) {
+		return INSTANCE.allInfos.get(id);
 	}
 
 	public void makeAdvancement(Map<ResourceLocation, Builder> map, Advancement parent, ModelInfo info) {

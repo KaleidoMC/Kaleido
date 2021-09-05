@@ -2,6 +2,7 @@ package snownee.kaleido.core.client;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -15,15 +16,10 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kaleido.core.ModelInfo;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 public class KaleidoClient {
 
 	public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
@@ -58,17 +54,17 @@ public class KaleidoClient {
 		return bakedModel[i];
 	}
 
-	@SubscribeEvent
-	public static void registerModels(ModelRegistryEvent event) {
+	public static void registerModels(Consumer<ResourceLocation> consumer) {
 		MODEL_MAP.clear();
 		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
-		locations.stream().map(KaleidoClient::resolveLocation).forEach(ModelLoader::addSpecialModel);
+		locations.stream().map(KaleidoClient::resolveLocation).forEach(consumer::accept);
 	}
 
 	private static ResourceLocation resolveLocation(ResourceLocation location) {
 		String path = location.getPath();
-		return new ResourceLocation(location.getNamespace(), path.substring(6, path.length() - 5));
+		// models/*.json
+		return new ResourceLocation(location.getNamespace(), path.substring(7, path.length() - 5));
 	}
 
 }

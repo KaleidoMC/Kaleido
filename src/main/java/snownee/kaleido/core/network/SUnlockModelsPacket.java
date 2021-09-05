@@ -53,7 +53,7 @@ public class SUnlockModelsPacket extends Packet {
 			ctx.get().enqueueWork(() -> {
 				List<ItemStack> icons = Lists.newArrayList();
 				for (ResourceLocation id : pkt.ids) {
-					ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
+					ModelInfo info = KaleidoDataManager.get(id);
 					if (info != null) {
 						info.setLocked(false);
 						if (pkt.toast) {

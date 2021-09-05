@@ -59,7 +59,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 		public Entry(CarpentryCraftingScreen parent, ModelPack pack) {
 			this.parent = parent;
-			name = I18n.get(pack.translationKey);
+			name = I18n.get(pack.descriptionId);
 
 			LinkedList<ModelInfo> allInfos = Lists.newLinkedList(pack.normalInfos);
 			allInfos.addAll(pack.rewardInfos);
@@ -150,8 +150,8 @@ public class CarpentryCraftingScreen extends Screen {
 
 	private static class List extends MyList<Entry> {
 
-		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn) {
-			super(mcIn, widthIn, heightIn, topIn, bottomIn);
+		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn) {
+			super(mcIn, widthIn, heightIn, topIn);
 			renderScrollbar = false;
 			scrollFactor = 25;
 		}
@@ -172,6 +172,7 @@ public class CarpentryCraftingScreen extends Screen {
 	private Button shrinkBtn;
 	private TextFieldWidget textField;
 	private int timer;
+	private float ticks;
 
 	private java.util.List<ITextProperties> tip;
 
@@ -214,7 +215,7 @@ public class CarpentryCraftingScreen extends Screen {
 			return;
 		}
 		tip = font.getSplitter().splitLines(I18n.get("tip.kaleido.unlock"), 120, Style.EMPTY);
-		children.add(list = new List(minecraft, 238, height, 20, height - 20));
+		children.add(list = new List(minecraft, 238, height, 20));
 		list.setLeftPos(30);
 		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
 			list.addEntry(new Entry(this, pack));
@@ -308,7 +309,14 @@ public class CarpentryCraftingScreen extends Screen {
 		alpha = MathHelper.clamp(alpha, 0, 1);
 
 		this.renderBackground(matrix);
+		ticks += pTicks;
+		float top = MathHelper.clamp(ticks / 8, 0, 1);
+		if (top > 0 && top < 1) {
+			top = (float) (Math.pow(2, -10 * top)) * MathHelper.sin((top * 6 - 0.75f) * 2.1f) + 1;
+		}
+		list.setTop(top * height - height + 20);
 		list.render(matrix, mouseX, mouseY, pTicks);
+		font.draw(matrix, getTitle(), list.x0 + 4, list.y0 - 14, 0xFFFFFF);
 		if (alpha < 0.5f) {
 			return;
 		}

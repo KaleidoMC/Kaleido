@@ -17,7 +17,7 @@ public class CRedeemPacket extends ClientPacket {
 
 		@Override
 		public CRedeemPacket decode(PacketBuffer buf) {
-			return new CRedeemPacket(KaleidoDataManager.INSTANCE.get(buf.readResourceLocation()), buf.readVarInt());
+			return new CRedeemPacket(KaleidoDataManager.get(buf.readResourceLocation()), buf.readVarInt());
 		}
 
 		@Override
