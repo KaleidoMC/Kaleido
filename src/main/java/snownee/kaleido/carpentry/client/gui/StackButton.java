@@ -89,7 +89,7 @@ public class StackButton extends Button {
 
 	@Override
 	@SuppressWarnings("deprecation")
-	public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
+	public void renderButton(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
 		//        alpha = Math.min(alpha + pTicks * 0.2F, 1);
 		//        int y = (int) (this.y + 15 - 15 * MathHelper.sin(alpha));
 		AbstractGui.fill(matrix, x, y, x + width, y + height, 0xAA222222);

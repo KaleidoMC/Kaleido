@@ -8,7 +8,7 @@ version="${file.jarVersion}"
 displayName="Kaleido"
 authors="Snownee"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/kaleido"
-description='''Models for showcase are from ItemBound by SixFootBlue, and will finally be removed in release ver.
+description='''Models for showcase are from Yuushya Townscape by Coco.
 Textures of woodworking bench are made by YurisCat'''
 
 [[dependencies.kaleido]]
@@ -16,4 +16,11 @@ Textures of woodworking bench are made by YurisCat'''
     mandatory=true
     versionRange="[3.4, 3.9)"
     ordering="BEFORE"
+    side="BOTH"
+
+[[dependencies.kaleido]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36.2.4, )"
+    ordering="NONE"
     side="BOTH"

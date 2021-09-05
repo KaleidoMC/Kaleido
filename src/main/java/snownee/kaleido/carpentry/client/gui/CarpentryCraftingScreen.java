@@ -328,7 +328,7 @@ public class CarpentryCraftingScreen extends Screen {
 			RenderSystem.popMatrix();
 			x += 40;
 			y += 40 - 62;
-			drawCenteredString(matrix, font, selectedButton.stack.getDisplayName().getString(), x, y, 0xFFFFFFFF);
+			drawCenteredString(matrix, font, selectedButton.stack.getHoverName(), x, y, 0xFFFFFFFF);
 			if (!selectedButton.info.isLocked()) {
 				itemRenderer.renderAndDecorateItem(coinStack, x + 45, y + 95);
 				int amount = getRedeemAmount();

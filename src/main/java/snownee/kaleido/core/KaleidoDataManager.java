@@ -27,16 +27,19 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.SimpleReloadableResourceManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kiwi.util.Util;
 
@@ -64,6 +67,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		MinecraftForge.EVENT_BUS.addListener(this::onAdvancement);
 		MinecraftForge.EVENT_BUS.addListener(this::tick);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
+		MinecraftForge.EVENT_BUS.addListener(this::onSyncDatapack);
 	}
 
 	public void add(ModelInfo info) {
@@ -163,7 +167,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		}
 	}
 
-	public void tick(TickEvent.ServerTickEvent event) {
+	private void tick(TickEvent.ServerTickEvent event) {
 		if (event.phase == Phase.START || deferredIds.isEmpty()) {
 			return;
 		}
@@ -171,6 +175,28 @@ public class KaleidoDataManager extends JsonReloadListener {
 			new SUnlockModelsPacket(entry.getValue(), true).send((ServerPlayerEntity) entry.getKey());
 		}
 		deferredIds.clear();
+	}
+
+	private void onSyncDatapack(OnDatapackSyncEvent event) {
+		MinecraftServer server = event.getPlayerList().getServer();
+		ServerPlayerEntity player = event.getPlayer();
+		if (player != null) {
+			sync(player, server);
+		} else {
+			for (ServerPlayerEntity p : event.getPlayerList().getPlayers()) {
+				sync(p, server);
+			}
+		}
+	}
+
+	private static void sync(ServerPlayerEntity player, MinecraftServer server) {
+		if (!player.level.isClientSide && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
+			if (server.isSingleplayerOwner(player.getGameProfile())) {
+				KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
+			} else {
+				new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
+			}
+		}
 	}
 
 	public ModelInfo getRandomUnlocked(ServerPlayerEntity player, Random rand) {

@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "kaleido.refmap.json",
   "mixins": [
-    "MixinPlayerList"
   ],
   "injectors": {
     "defaultRequire": 1
