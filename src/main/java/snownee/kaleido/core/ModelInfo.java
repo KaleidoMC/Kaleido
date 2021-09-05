@@ -21,97 +21,97 @@ import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo {
 
-    @Expose
-    public Behavior behavior = NoneBehavior.INSTANCE;
-    public ResourceLocation id;
-    private boolean locked = true;
-    @Expose
-    public int price = 1;
-    @Expose
-    public boolean reward;
-    private String translationKey;
+	@Expose
+	public Behavior behavior = NoneBehavior.INSTANCE;
+	public ResourceLocation id;
+	private boolean locked = true;
+	@Expose
+	public int price = 1;
+	@Expose
+	public boolean reward;
+	private String translationKey;
 
-    @Expose
-    public boolean useAO = true;
-    @Expose
-    public boolean opposite; // temp
+	@Expose
+	public boolean useAO = true;
+	@Expose
+	public boolean opposite; // temp
 
-    public ResourceLocation getAdvancementId() {
-        return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
-    }
+	public ResourceLocation getAdvancementId() {
+		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
+	}
 
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("kaleido.decor", id);
-        }
-        return translationKey;
-    }
+	public String getTranslationKey() {
+		if (translationKey == null) {
+			translationKey = Util.makeDescriptionId("kaleido.decor", id);
+		}
+		return translationKey;
+	}
 
-    public boolean grant(ServerPlayerEntity player) {
-        Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
-        if (advancement != null) {
-            PlayerAdvancements playerAdvancements = player.getAdvancements();
-            AdvancementProgress progress = playerAdvancements.getOrStartProgress(advancement);
-            for (String s : progress.getRemainingCriteria()) {
-                playerAdvancements.award(advancement, s);
-            }
-            return true;
-        }
-        return false;
-    }
+	public boolean grant(ServerPlayerEntity player) {
+		Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
+		if (advancement != null) {
+			PlayerAdvancements playerAdvancements = player.getAdvancements();
+			AdvancementProgress progress = playerAdvancements.getOrStartProgress(advancement);
+			for (String s : progress.getRemainingCriteria()) {
+				playerAdvancements.award(advancement, s);
+			}
+			return true;
+		}
+		return false;
+	}
 
-    public boolean isAdvancementDone(ServerPlayerEntity player) {
-        Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
-        return player.getAdvancements().getOrStartProgress(advancement).isDone(); //FIXME do not start progress
-    }
+	public boolean isAdvancementDone(ServerPlayerEntity player) {
+		Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
+		return player.getAdvancements().getOrStartProgress(advancement).isDone(); //FIXME do not start progress
+	}
 
-    public boolean isLocked() {
-        return locked;
-    }
+	public boolean isLocked() {
+		return locked;
+	}
 
-    public boolean isLockedServer(ServerPlayerEntity player) {
-        if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
-            return locked;
-        } else {
-            return !isAdvancementDone(player);
-        }
-    }
+	public boolean isLockedServer(ServerPlayerEntity player) {
+		if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
+			return locked;
+		} else {
+			return !isAdvancementDone(player);
+		}
+	}
 
-    public ItemStack makeItem() {
-        return makeItem(1);
-    }
+	public ItemStack makeItem() {
+		return makeItem(1);
+	}
 
-    public ItemStack makeItem(int size) {
-        NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF, size));
-        data.setString(MasterBlock.NBT_ID, id.toString());
-        return data.getItem();
-    }
+	public ItemStack makeItem(int size) {
+		NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF, size));
+		data.setString(MasterBlock.NBT_ID, id.toString());
+		return data.getItem();
+	}
 
-    public void setLocked(boolean locked) {
-        this.locked = locked;
-    }
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+	}
 
-    public void write(PacketBuffer buf, ServerPlayerEntity player) {
-        buf.writeResourceLocation(id);
-        buf.writeBoolean(isLockedServer(player));
-        buf.writeBoolean(useAO);
-        buf.writeBoolean(reward);
-        buf.writeByte(price);
+	public void write(PacketBuffer buf, ServerPlayerEntity player) {
+		buf.writeResourceLocation(id);
+		buf.writeBoolean(isLockedServer(player));
+		buf.writeBoolean(useAO);
+		buf.writeBoolean(reward);
+		buf.writeByte(price);
 
-        buf.writeBoolean(opposite);
-    }
+		buf.writeBoolean(opposite);
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    public static ModelInfo read(PacketBuffer buf) {
-        ModelInfo info = new ModelInfo();
-        info.id = buf.readResourceLocation();
-        info.setLocked(buf.readBoolean());
-        info.useAO = buf.readBoolean();
-        info.reward = buf.readBoolean();
-        info.price = buf.readByte();
+	@OnlyIn(Dist.CLIENT)
+	public static ModelInfo read(PacketBuffer buf) {
+		ModelInfo info = new ModelInfo();
+		info.id = buf.readResourceLocation();
+		info.setLocked(buf.readBoolean());
+		info.useAO = buf.readBoolean();
+		info.reward = buf.readBoolean();
+		info.price = buf.readByte();
 
-        info.opposite = buf.readBoolean();
-        return info;
-    }
+		info.opposite = buf.readBoolean();
+		return info;
+	}
 
 }

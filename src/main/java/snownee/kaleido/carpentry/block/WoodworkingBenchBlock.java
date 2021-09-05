@@ -18,33 +18,33 @@ import snownee.kaleido.carpentry.client.gui.CarpentryCraftingScreen;
 
 public class WoodworkingBenchBlock extends HorizontalBlock {
 
-    public WoodworkingBenchBlock(Properties builder) {
-        super(builder);
-    }
+	public WoodworkingBenchBlock(Properties builder) {
+		super(builder);
+	}
 
-    @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
-    }
+	@Override
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(FACING);
+	}
 
-    @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
-    }
+	@Override
+	public BlockState getStateForPlacement(BlockItemUseContext context) {
+		return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
+	}
 
-    @Override
-    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (worldIn.isClientSide) {
-            openScreen(worldIn, pos, player);
-        } else {
-            //player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE); //TODO
-        }
-        return ActionResultType.SUCCESS;
-    }
+	@Override
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		if (worldIn.isClientSide) {
+			openScreen(worldIn, pos, player);
+		} else {
+			//player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE); //TODO
+		}
+		return ActionResultType.SUCCESS;
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    private void openScreen(World worldIn, BlockPos pos, PlayerEntity player) {
-        Minecraft.getInstance().setScreen(new CarpentryCraftingScreen(getName(), worldIn, pos));
-    }
+	@OnlyIn(Dist.CLIENT)
+	private void openScreen(World worldIn, BlockPos pos, PlayerEntity player) {
+		Minecraft.getInstance().setScreen(new CarpentryCraftingScreen(getName(), worldIn, pos));
+	}
 
 }

@@ -19,55 +19,55 @@ import snownee.kiwi.network.Packet;
 
 public class SUnlockModelsPacket extends Packet {
 
-    private final Collection<ResourceLocation> ids;
-    private final boolean toast;
+	private final Collection<ResourceLocation> ids;
+	private final boolean toast;
 
-    public SUnlockModelsPacket(Collection<ResourceLocation> ids, boolean toast) {
-        this.ids = ids;
-        this.toast = toast;
-    }
+	public SUnlockModelsPacket(Collection<ResourceLocation> ids, boolean toast) {
+		this.ids = ids;
+		this.toast = toast;
+	}
 
-    public static class Handler extends PacketHandler<SUnlockModelsPacket> {
+	public static class Handler extends PacketHandler<SUnlockModelsPacket> {
 
-        @Override
-        public SUnlockModelsPacket decode(PacketBuffer buf) {
-            int size = buf.readVarInt();
-            ImmutableList.Builder<ResourceLocation> builder = ImmutableList.builder();
-            for (int i = 0; i < size; i++) {
-                builder.add(buf.readResourceLocation());
-            }
-            return new SUnlockModelsPacket(builder.build(), buf.readBoolean());
-        }
+		@Override
+		public SUnlockModelsPacket decode(PacketBuffer buf) {
+			int size = buf.readVarInt();
+			ImmutableList.Builder<ResourceLocation> builder = ImmutableList.builder();
+			for (int i = 0; i < size; i++) {
+				builder.add(buf.readResourceLocation());
+			}
+			return new SUnlockModelsPacket(builder.build(), buf.readBoolean());
+		}
 
-        @Override
-        public void encode(SUnlockModelsPacket pkt, PacketBuffer buf) {
-            buf.writeVarInt(pkt.ids.size());
-            for (ResourceLocation id : pkt.ids) {
-                buf.writeResourceLocation(id);
-            }
-            buf.writeBoolean(pkt.toast);
-        }
+		@Override
+		public void encode(SUnlockModelsPacket pkt, PacketBuffer buf) {
+			buf.writeVarInt(pkt.ids.size());
+			for (ResourceLocation id : pkt.ids) {
+				buf.writeResourceLocation(id);
+			}
+			buf.writeBoolean(pkt.toast);
+		}
 
-        @Override
-        public void handle(SUnlockModelsPacket pkt, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                List<ItemStack> icons = Lists.newArrayList();
-                for (ResourceLocation id : pkt.ids) {
-                    ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
-                    if (info != null) {
-                        info.setLocked(false);
-                        if (pkt.toast) {
-                            icons.add(info.makeItem());
-                        }
-                    }
-                }
-                if (!icons.isEmpty()) {
-                    NewModelToast.addOrUpdate(Minecraft.getInstance().getToasts(), icons);
-                }
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		public void handle(SUnlockModelsPacket pkt, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				List<ItemStack> icons = Lists.newArrayList();
+				for (ResourceLocation id : pkt.ids) {
+					ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
+					if (info != null) {
+						info.setLocked(false);
+						if (pkt.toast) {
+							icons.add(info.makeItem());
+						}
+					}
+				}
+				if (!icons.isEmpty()) {
+					NewModelToast.addOrUpdate(Minecraft.getInstance().getToasts(), icons);
+				}
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 
 }

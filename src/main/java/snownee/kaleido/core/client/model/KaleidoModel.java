@@ -48,121 +48,121 @@ import snownee.kaleido.core.tile.MasterTile;
 @OnlyIn(Dist.CLIENT)
 public class KaleidoModel implements IDynamicBakedModel {
 
-    public static class Geometry implements IModelGeometry<Geometry> {
+	public static class Geometry implements IModelGeometry<Geometry> {
 
-        @Override
-        public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
-            if (INSTANCE == null) {
-                INSTANCE = new KaleidoModel();
-            }
-            return INSTANCE;
-        }
+		@Override
+		public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
+			if (INSTANCE == null) {
+				INSTANCE = new KaleidoModel();
+			}
+			return INSTANCE;
+		}
 
-        @Override
-        public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-            return Collections.EMPTY_LIST;
-        }
+		@Override
+		public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+			return Collections.EMPTY_LIST;
+		}
 
-    }
+	}
 
-    public static class Loader implements IModelLoader<Geometry> {
+	public static class Loader implements IModelLoader<Geometry> {
 
-        @SuppressWarnings("hiding")
-        public static final Loader INSTANCE = new Loader();
+		@SuppressWarnings("hiding")
+		public static final Loader INSTANCE = new Loader();
 
-        private Loader() {
-        }
+		private Loader() {
+		}
 
-        @Override
-        public void onResourceManagerReload(IResourceManager resourceManager) {
-        }
+		@Override
+		public void onResourceManagerReload(IResourceManager resourceManager) {
+		}
 
-        @Override
-        public Geometry read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
-            return new Geometry();
-        }
+		@Override
+		public Geometry read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
+			return new Geometry();
+		}
 
-    }
+	}
 
-    public static class OverrideList extends ItemOverrideList {
+	public static class OverrideList extends ItemOverrideList {
 
-        @Nullable
-        @Override
-        public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
-            ModelInfo info = MasterBlock.getInfo(stack);
-            if (Minecraft.getInstance().overlay != null) {
-                return null;
-            }
-            return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
-        }
+		@Nullable
+		@Override
+		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
+			ModelInfo info = MasterBlock.getInfo(stack);
+			if (Minecraft.getInstance().overlay != null) {
+				return null;
+			}
+			return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
+		}
 
-    }
+	}
 
-    private static KaleidoModel INSTANCE;
+	private static KaleidoModel INSTANCE;
 
-    private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
+	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
 
-    private static IBakedModel getModel(IModelData extraData, Direction direction) {
-        IBakedModel model = null;
-        if (extraData.getData(MasterTile.MODEL) != null) {
-            model = KaleidoClient.getModel(extraData.getData(MasterTile.MODEL), direction);
-        }
-        return model != null ? model : missingno.get();
-    }
+	private static IBakedModel getModel(IModelData extraData, Direction direction) {
+		IBakedModel model = null;
+		if (extraData.getData(MasterTile.MODEL) != null) {
+			model = KaleidoClient.getModel(extraData.getData(MasterTile.MODEL), direction);
+		}
+		return model != null ? model : missingno.get();
+	}
 
-    @Override
-    public ItemOverrideList getOverrides() {
-        return new OverrideList();
-    }
+	@Override
+	public ItemOverrideList getOverrides() {
+		return new OverrideList();
+	}
 
-    @Override
-    @SuppressWarnings("deprecation")
-    public TextureAtlasSprite getParticleIcon() {
-        return missingno.get().getParticleIcon();
-    }
+	@Override
+	@SuppressWarnings("deprecation")
+	public TextureAtlasSprite getParticleIcon() {
+		return missingno.get().getParticleIcon();
+	}
 
-    @Override
-    public TextureAtlasSprite getParticleTexture(IModelData data) {
-        return getModel(data, Direction.NORTH).getParticleTexture(data);
-    }
+	@Override
+	public TextureAtlasSprite getParticleTexture(IModelData data) {
+		return getModel(data, Direction.NORTH).getParticleTexture(data);
+	}
 
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, Direction side, Random rand, IModelData extraData) {
-        if (state == null) {
-            return missingno.get().getQuads(null, side, rand, extraData);
-        }
-        Direction direction = state.hasProperty(HorizontalBlock.FACING) ? state.getValue(HorizontalBlock.FACING) : Direction.NORTH;
-        return getModel(extraData, direction).getQuads(state, side, rand, extraData);
-    }
+	@Override
+	public List<BakedQuad> getQuads(@Nullable BlockState state, Direction side, Random rand, IModelData extraData) {
+		if (state == null) {
+			return missingno.get().getQuads(null, side, rand, extraData);
+		}
+		Direction direction = state.hasProperty(HorizontalBlock.FACING) ? state.getValue(HorizontalBlock.FACING) : Direction.NORTH;
+		return getModel(extraData, direction).getQuads(state, side, rand, extraData);
+	}
 
-    @Override
-    public IBakedModel handlePerspective(TransformType cameraTransformType, MatrixStack mat) {
-        // TODO Auto-generated method stub
-        return IDynamicBakedModel.super.handlePerspective(cameraTransformType, mat);
-    }
+	@Override
+	public IBakedModel handlePerspective(TransformType cameraTransformType, MatrixStack mat) {
+		// TODO Auto-generated method stub
+		return IDynamicBakedModel.super.handlePerspective(cameraTransformType, mat);
+	}
 
-    @Override
-    public boolean useAmbientOcclusion() {
-        return true;
-    }
+	@Override
+	public boolean useAmbientOcclusion() {
+		return true;
+	}
 
-    @Override
-    public boolean isAmbientOcclusion(BlockState state) {
-        return state.hasProperty(MasterBlock.AO) && state.getValue(MasterBlock.AO) == Boolean.TRUE;
-    }
+	@Override
+	public boolean isAmbientOcclusion(BlockState state) {
+		return state.hasProperty(MasterBlock.AO) && state.getValue(MasterBlock.AO) == Boolean.TRUE;
+	}
 
-    @Override
-    public boolean isCustomRenderer() {
-        return false;
-    }
+	@Override
+	public boolean isCustomRenderer() {
+		return false;
+	}
 
-    @Override
-    public boolean isGui3d() {
-        return false;
-    }
+	@Override
+	public boolean isGui3d() {
+		return false;
+	}
 
-    @Override
-    public boolean usesBlockLight() {
-        return false;
-    }
+	@Override
+	public boolean usesBlockLight() {
+		return false;
+	}
 }

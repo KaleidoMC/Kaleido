@@ -42,7 +42,7 @@ import snownee.kiwi.util.Util;
 
 public class KaleidoDataManager extends JsonReloadListener {
 
-    /* off */
+	/* off */
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
@@ -53,129 +53,129 @@ public class KaleidoDataManager extends JsonReloadListener {
             .create();
 
     /* on */
-    public static final KaleidoDataManager INSTANCE = new KaleidoDataManager();
-    public final Map<ResourceLocation, ModelInfo> allInfos = Maps.newLinkedHashMap();
+	public static final KaleidoDataManager INSTANCE = new KaleidoDataManager();
+	public final Map<ResourceLocation, ModelInfo> allInfos = Maps.newLinkedHashMap();
 
-    public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
-    public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
+	public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
+	public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 
-    private KaleidoDataManager() {
-        super(GSON, "kaleido");
-        MinecraftForge.EVENT_BUS.addListener(this::onAdvancement);
-        MinecraftForge.EVENT_BUS.addListener(this::tick);
-        MinecraftForge.EVENT_BUS.addListener(this::serverInit);
-    }
+	private KaleidoDataManager() {
+		super(GSON, "kaleido");
+		MinecraftForge.EVENT_BUS.addListener(this::onAdvancement);
+		MinecraftForge.EVENT_BUS.addListener(this::tick);
+		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
+	}
 
-    public void add(ModelInfo info) {
-        allInfos.put(info.id, info);
-        ModelPack pack = allPacks.computeIfAbsent(info.id.getNamespace(), $ -> new ModelPack());
-        pack.add(info);
-    }
+	public void add(ModelInfo info) {
+		allInfos.put(info.id, info);
+		ModelPack pack = allPacks.computeIfAbsent(info.id.getNamespace(), $ -> new ModelPack());
+		pack.add(info);
+	}
 
-    @Override
-    protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
-        //boolean firstTime = allInfos.isEmpty();
-        allInfos.clear();
-        allPacks.clear();
-        for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
-            try {
-                ModelInfo info = GSON.fromJson(entry.getValue(), ModelInfo.class);
-                if (info != null) {
-                    info.id = entry.getKey();
-                    add(info);
-                }
-            } catch (Exception e) {
-                Kaleido.logger.catching(e);
-            }
-        }
-        if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
-            for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
-                if (listener instanceof AdvancementManager) {
-                    makeAdvancements(((AdvancementManager) listener).advancements);
-                    break;
-                }
-            }
-        }
-        //        if (!firstTime && server.getServerOwner() != null) {
-        //            ServerPlayerEntity owner = server.getPlayerList().getPlayerByUsername(server.getServerOwner());
-        //            if (server.isServerOwner(owner.getGameProfile())) {
-        //                syncAllLockInfo(owner);
-        //            }
-        //        }
-    }
+	@Override
+	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
+		//boolean firstTime = allInfos.isEmpty();
+		allInfos.clear();
+		allPacks.clear();
+		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
+			try {
+				ModelInfo info = GSON.fromJson(entry.getValue(), ModelInfo.class);
+				if (info != null) {
+					info.id = entry.getKey();
+					add(info);
+				}
+			} catch (Exception e) {
+				Kaleido.logger.catching(e);
+			}
+		}
+		if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
+			for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
+				if (listener instanceof AdvancementManager) {
+					makeAdvancements(((AdvancementManager) listener).advancements);
+					break;
+				}
+			}
+		}
+		//        if (!firstTime && server.getServerOwner() != null) {
+		//            ServerPlayerEntity owner = server.getPlayerList().getPlayerByUsername(server.getServerOwner());
+		//            if (server.isServerOwner(owner.getGameProfile())) {
+		//                syncAllLockInfo(owner);
+		//            }
+		//        }
+	}
 
-    public ModelInfo get(ResourceLocation id) {
-        return allInfos.get(id);
-    }
+	public ModelInfo get(ResourceLocation id) {
+		return allInfos.get(id);
+	}
 
-    public void makeAdvancement(Map<ResourceLocation, Builder> map, Advancement parent, ModelInfo info) {
-        Advancement.Builder builder = Advancement.Builder.advancement();
-        builder.parent(parent);
-        builder.addCriterion("_", new ImpossibleTrigger.Instance());
-        map.put(info.getAdvancementId(), builder);
-    }
+	public void makeAdvancement(Map<ResourceLocation, Builder> map, Advancement parent, ModelInfo info) {
+		Advancement.Builder builder = Advancement.Builder.advancement();
+		builder.parent(parent);
+		builder.addCriterion("_", new ImpossibleTrigger.Instance());
+		map.put(info.getAdvancementId(), builder);
+	}
 
-    public void makeAdvancements(AdvancementList advancements) {
-        Map<ResourceLocation, Builder> map = Maps.newLinkedHashMap();
-        Advancement parent = advancements.get(new ResourceLocation(Kaleido.MODID, "root"));
-        allInfos.values().forEach(info -> makeAdvancement(map, parent, info));
-        advancements.add(map);
-    }
+	public void makeAdvancements(AdvancementList advancements) {
+		Map<ResourceLocation, Builder> map = Maps.newLinkedHashMap();
+		Advancement parent = advancements.get(new ResourceLocation(Kaleido.MODID, "root"));
+		allInfos.values().forEach(info -> makeAdvancement(map, parent, info));
+		advancements.add(map);
+	}
 
-    public void onAdvancement(AdvancementEvent event) {
-        ResourceLocation id = event.getAdvancement().getId();
-        if (id.getNamespace().equals(Kaleido.MODID) && !id.getPath().equals("root")) {
-            ResourceLocation realId = Util.RL(id.getPath().replace('/', ':'));
-            if (realId == null) {
-                return;
-            }
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            deferredIds.put(player, realId);
-            ModelPack pack = allPacks.get(realId.getNamespace());
-            if (pack != null && pack.normalInfos.stream().allMatch($ -> $.id.equals(realId) || !$.isLockedServer(player))) {
-                pack.rewardInfos.forEach($ -> $.grant(player));
-            }
-        }
-    }
+	public void onAdvancement(AdvancementEvent event) {
+		ResourceLocation id = event.getAdvancement().getId();
+		if (id.getNamespace().equals(Kaleido.MODID) && !id.getPath().equals("root")) {
+			ResourceLocation realId = Util.RL(id.getPath().replace('/', ':'));
+			if (realId == null) {
+				return;
+			}
+			ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+			deferredIds.put(player, realId);
+			ModelPack pack = allPacks.get(realId.getNamespace());
+			if (pack != null && pack.normalInfos.stream().allMatch($ -> $.id.equals(realId) || !$.isLockedServer(player))) {
+				pack.rewardInfos.forEach($ -> $.grant(player));
+			}
+		}
+	}
 
-    @OnlyIn(Dist.CLIENT)
-    public void read(Collection<ModelInfo> infos) {
-        allInfos.clear();
-        allPacks.clear();
-        infos.forEach(this::add);
-    }
+	@OnlyIn(Dist.CLIENT)
+	public void read(Collection<ModelInfo> infos) {
+		allInfos.clear();
+		allPacks.clear();
+		infos.forEach(this::add);
+	}
 
-    private void serverInit(AddReloadListenerEvent event) {
-        allInfos.clear();
-        allPacks.clear();
-        event.addListener(this);
-    }
+	private void serverInit(AddReloadListenerEvent event) {
+		allInfos.clear();
+		allPacks.clear();
+		event.addListener(this);
+	}
 
-    public void syncAllLockInfo(ServerPlayerEntity player) {
-        /* off */
+	public void syncAllLockInfo(ServerPlayerEntity player) {
+		/* off */
         List<ResourceLocation> list = allInfos.values().stream()
                 .filter($ -> $.isAdvancementDone(player))
                 .map($ -> $.id)
                 .collect(Collectors.toList());
         /* on */
-        if (!list.isEmpty()) {
-            new SUnlockModelsPacket(list, false).send(player);
-        }
-    }
+		if (!list.isEmpty()) {
+			new SUnlockModelsPacket(list, false).send(player);
+		}
+	}
 
-    public void tick(TickEvent.ServerTickEvent event) {
-        if (event.phase == Phase.START || deferredIds.isEmpty()) {
-            return;
-        }
-        for (Entry<PlayerEntity, Collection<ResourceLocation>> entry : deferredIds.asMap().entrySet()) {
-            new SUnlockModelsPacket(entry.getValue(), true).send((ServerPlayerEntity) entry.getKey());
-        }
-        deferredIds.clear();
-    }
+	public void tick(TickEvent.ServerTickEvent event) {
+		if (event.phase == Phase.START || deferredIds.isEmpty()) {
+			return;
+		}
+		for (Entry<PlayerEntity, Collection<ResourceLocation>> entry : deferredIds.asMap().entrySet()) {
+			new SUnlockModelsPacket(entry.getValue(), true).send((ServerPlayerEntity) entry.getKey());
+		}
+		deferredIds.clear();
+	}
 
-    public ModelInfo getRandomUnlocked(ServerPlayerEntity player, Random rand) {
-        List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
-        return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
-    }
+	public ModelInfo getRandomUnlocked(ServerPlayerEntity player, Random rand) {
+		List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
+		return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
+	}
 
 }

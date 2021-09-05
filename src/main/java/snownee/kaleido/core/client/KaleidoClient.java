@@ -26,49 +26,49 @@ import snownee.kaleido.core.ModelInfo;
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 public class KaleidoClient {
 
-    public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
+	public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
 
-    @Nullable
-    public static synchronized IBakedModel loadModel(ResourceLocation id, Direction direction) {
-        ModelLoader modelLoader = ModelLoader.instance();
-        if (modelLoader == null) {
-            return null;
-        }
-        ModelRotation transform = ModelRotation.X0_Y0;
-        if (direction == Direction.SOUTH) {
-            transform = ModelRotation.X0_Y180;
-        } else if (direction == Direction.WEST) {
-            transform = ModelRotation.X0_Y270;
-        } else if (direction == Direction.EAST) {
-            transform = ModelRotation.X0_Y90;
-        }
-        return modelLoader.getBakedModel(new ResourceLocation(id.getNamespace(), "kaleido/" + id.getPath()), transform, modelLoader.getSpriteMap()::getSprite);
-    }
+	@Nullable
+	public static synchronized IBakedModel loadModel(ResourceLocation id, Direction direction) {
+		ModelLoader modelLoader = ModelLoader.instance();
+		if (modelLoader == null) {
+			return null;
+		}
+		ModelRotation transform = ModelRotation.X0_Y0;
+		if (direction == Direction.SOUTH) {
+			transform = ModelRotation.X0_Y180;
+		} else if (direction == Direction.WEST) {
+			transform = ModelRotation.X0_Y270;
+		} else if (direction == Direction.EAST) {
+			transform = ModelRotation.X0_Y90;
+		}
+		return modelLoader.getBakedModel(new ResourceLocation(id.getNamespace(), "kaleido/" + id.getPath()), transform, modelLoader.getSpriteMap()::getSprite);
+	}
 
-    @Nullable
-    public static IBakedModel getModel(ModelInfo info, Direction direction) {
-        int i = direction.get2DDataValue();
-        if (i == -1) {
-            return null;
-        }
-        IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[4]);
-        if (bakedModel[i] == null) {
-            bakedModel[i] = loadModel(info.id, direction);
-        }
-        return bakedModel[i];
-    }
+	@Nullable
+	public static IBakedModel getModel(ModelInfo info, Direction direction) {
+		int i = direction.get2DDataValue();
+		if (i == -1) {
+			return null;
+		}
+		IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[4]);
+		if (bakedModel[i] == null) {
+			bakedModel[i] = loadModel(info.id, direction);
+		}
+		return bakedModel[i];
+	}
 
-    @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-        MODEL_MAP.clear();
-        IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-        Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
-        locations.stream().map(KaleidoClient::resolveLocation).forEach(ModelLoader::addSpecialModel);
-    }
+	@SubscribeEvent
+	public static void registerModels(ModelRegistryEvent event) {
+		MODEL_MAP.clear();
+		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+		Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
+		locations.stream().map(KaleidoClient::resolveLocation).forEach(ModelLoader::addSpecialModel);
+	}
 
-    private static ResourceLocation resolveLocation(ResourceLocation location) {
-        String path = location.getPath();
-        return new ResourceLocation(location.getNamespace(), path.substring(6, path.length() - 5));
-    }
+	private static ResourceLocation resolveLocation(ResourceLocation location) {
+		String path = location.getPath();
+		return new ResourceLocation(location.getNamespace(), path.substring(6, path.length() - 5));
+	}
 
 }

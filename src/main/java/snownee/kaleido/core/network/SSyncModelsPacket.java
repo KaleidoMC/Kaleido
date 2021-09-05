@@ -14,51 +14,51 @@ import snownee.kiwi.network.Packet;
 
 public class SSyncModelsPacket extends Packet {
 
-    public static class Handler extends PacketHandler<SSyncModelsPacket> {
+	public static class Handler extends PacketHandler<SSyncModelsPacket> {
 
-        @Override
-        public SSyncModelsPacket decode(PacketBuffer buf) {
-            int size = buf.readVarInt();
-            ImmutableList.Builder<ModelInfo> builder = ImmutableList.builder();
-            for (int i = 0; i < size; i++) {
-                builder.add(ModelInfo.read(buf));
-            }
-            return new SSyncModelsPacket(builder.build());
-        }
+		@Override
+		public SSyncModelsPacket decode(PacketBuffer buf) {
+			int size = buf.readVarInt();
+			ImmutableList.Builder<ModelInfo> builder = ImmutableList.builder();
+			for (int i = 0; i < size; i++) {
+				builder.add(ModelInfo.read(buf));
+			}
+			return new SSyncModelsPacket(builder.build());
+		}
 
-        @Override
-        public void encode(SSyncModelsPacket pkt, PacketBuffer buf) {
-            buf.writeVarInt(pkt.infos.size());
-            for (ModelInfo info : pkt.infos) {
-                info.write(buf, pkt.player);
-            }
-        }
+		@Override
+		public void encode(SSyncModelsPacket pkt, PacketBuffer buf) {
+			buf.writeVarInt(pkt.infos.size());
+			for (ModelInfo info : pkt.infos) {
+				info.write(buf, pkt.player);
+			}
+		}
 
-        @Override
-        public void handle(SSyncModelsPacket pkt, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                KaleidoDataManager.INSTANCE.read(pkt.infos);
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		public void handle(SSyncModelsPacket pkt, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				KaleidoDataManager.INSTANCE.read(pkt.infos);
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 
-    private final Collection<ModelInfo> infos;
+	private final Collection<ModelInfo> infos;
 
-    private ServerPlayerEntity player;
+	private ServerPlayerEntity player;
 
-    public SSyncModelsPacket(Collection<ModelInfo> infos) {
-        this.infos = infos;
-    }
+	public SSyncModelsPacket(Collection<ModelInfo> infos) {
+		this.infos = infos;
+	}
 
-    @Override
-    public void send() {
-        send(player);
-    }
+	@Override
+	public void send() {
+		send(player);
+	}
 
-    public SSyncModelsPacket setPlayer(ServerPlayerEntity player) {
-        this.player = player;
-        return this;
-    }
+	public SSyncModelsPacket setPlayer(ServerPlayerEntity player) {
+		this.player = player;
+		return this;
+	}
 }

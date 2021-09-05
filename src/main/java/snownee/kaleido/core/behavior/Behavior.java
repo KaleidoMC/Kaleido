@@ -27,53 +27,53 @@ import snownee.kaleido.core.tile.MasterTile;
 
 public interface Behavior {
 
-    public enum Deserializer implements JsonDeserializer<Behavior> {
-        INSTANCE;
+	public enum Deserializer implements JsonDeserializer<Behavior> {
+		INSTANCE;
 
-        private static final Map<String, Function<JsonObject, Behavior>> factories = Maps.newHashMap();
+		private static final Map<String, Function<JsonObject, Behavior>> factories = Maps.newHashMap();
 
-        public static synchronized void registerFactory(String name, Function<JsonObject, Behavior> factory) {
-            factories.put(name, factory);
-        }
+		public static synchronized void registerFactory(String name, Function<JsonObject, Behavior> factory) {
+			factories.put(name, factory);
+		}
 
-        @Override
-        public Behavior deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            if (json != null) {
-                if (json.isJsonObject()) {
-                    JsonObject object = json.getAsJsonObject();
-                    Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getAsString(object, "type"));
-                    if (factory != null) {
-                        return factory.apply(object);
-                    }
-                } else {
-                    Function<JsonObject, Behavior> factory = factories.get(json.getAsString());
-                    if (factory != null) {
-                        return factory.apply(new JsonObject());
-                    }
-                }
-            }
-            return NoneBehavior.INSTANCE;
-        }
+		@Override
+		public Behavior deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+			if (json != null) {
+				if (json.isJsonObject()) {
+					JsonObject object = json.getAsJsonObject();
+					Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getAsString(object, "type"));
+					if (factory != null) {
+						return factory.apply(object);
+					}
+				} else {
+					Function<JsonObject, Behavior> factory = factories.get(json.getAsString());
+					if (factory != null) {
+						return factory.apply(new JsonObject());
+					}
+				}
+			}
+			return NoneBehavior.INSTANCE;
+		}
 
-    }
+	}
 
-    Behavior copy(MasterTile tile);
+	Behavior copy(MasterTile tile);
 
-    default <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        return LazyOptional.empty();
-    }
+	default <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+		return LazyOptional.empty();
+	}
 
-    ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
+	ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
 
-    default void read(CompoundNBT data) {
-    }
+	default void read(CompoundNBT data) {
+	}
 
-    default CompoundNBT write(CompoundNBT data) {
-        return data;
-    }
+	default CompoundNBT write(CompoundNBT data) {
+		return data;
+	}
 
-    default int getLightValue() {
-        return 0;
-    }
+	default int getLightValue() {
+		return 0;
+	}
 
 }

@@ -8,17 +8,17 @@ import snownee.kiwi.item.ModBlockItem;
 
 public class StuffItem extends ModBlockItem {
 
-    public StuffItem(Block block, Properties builder) {
-        super(block, builder);
-    }
+	public StuffItem(Block block, Properties builder) {
+		super(block, builder);
+	}
 
-    @Override
-    public String getDescriptionId(ItemStack stack) {
-        ModelInfo info = MasterBlock.getInfo(stack);
-        if (info != null) {
-            return info.getTranslationKey();
-        }
-        return super.getDescriptionId(stack);
-    }
+	@Override
+	public String getDescriptionId(ItemStack stack) {
+		ModelInfo info = MasterBlock.getInfo(stack);
+		if (info != null) {
+			return info.getTranslationKey();
+		}
+		return super.getDescriptionId(stack);
+	}
 
 }

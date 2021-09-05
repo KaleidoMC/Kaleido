@@ -43,60 +43,60 @@ import snownee.kiwi.network.NetworkChannel;
 @KiwiModule.Subscriber(Bus.MOD)
 public class CoreModule extends AbstractModule {
 
-    @NoItem
-    public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion());
+	@NoItem
+	public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion());
 
-    public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
+	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-    public static final TileEntityType<MasterTile> MASTER = new TileEntityType<>(MasterTile::new, Collections.singleton(STUFF), null);
+	public static final TileEntityType<MasterTile> MASTER = new TileEntityType<>(MasterTile::new, Collections.singleton(STUFF), null);
 
-    public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
+	public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 
-    @Name("stuff")
-    public static final StuffItem STUFF_ITEM = new StuffItem(STUFF, itemProp());
+	@Name("stuff")
+	public static final StuffItem STUFF_ITEM = new StuffItem(STUFF, itemProp());
 
-    public static final INamedTag<Item> CLOTH_TAG = itemTag(Kaleido.MODID, "cloth");
+	public static final INamedTag<Item> CLOTH_TAG = itemTag(Kaleido.MODID, "cloth");
 
-    public CoreModule() {
-        KaleidoDataManager.INSTANCE.hashCode();
-    }
+	public CoreModule() {
+		KaleidoDataManager.INSTANCE.hashCode();
+	}
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected void clientInit(FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(SEAT, EmptyEntityRenderer::new);
-    }
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	protected void clientInit(FMLClientSetupEvent event) {
+		RenderingRegistry.registerEntityRenderingHandler(SEAT, EmptyEntityRenderer::new);
+	}
 
-    @Override
-    protected void init(FMLCommonSetupEvent event) {
-        Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
-        Behavior.Deserializer.registerFactory("item_storage", ItemStorageBehavior::create);
-        Behavior.Deserializer.registerFactory("light", LightBehavior::create);
-    }
+	@Override
+	protected void init(FMLCommonSetupEvent event) {
+		Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
+		Behavior.Deserializer.registerFactory("item_storage", ItemStorageBehavior::create);
+		Behavior.Deserializer.registerFactory("light", LightBehavior::create);
+	}
 
-    //    @SubscribeEvent
-    //    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-    //        MinecraftServer server = Kiwi.getServer();
-    //        if (!event.getEntity().world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
-    //            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-    //            if (server.isServerOwner(player.getGameProfile())) {
-    //                KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
-    //            } else {
-    //                new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
-    //            }
-    //        }
-    //    }
+	//    @SubscribeEvent
+	//    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+	//        MinecraftServer server = Kiwi.getServer();
+	//        if (!event.getEntity().world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
+	//            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+	//            if (server.isServerOwner(player.getGameProfile())) {
+	//                KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
+	//            } else {
+	//                new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
+	//            }
+	//        }
+	//    }
 
-    @Override
-    protected void preInit() {
-        NetworkChannel.register(SSyncModelsPacket.class, new SSyncModelsPacket.Handler());
-        NetworkChannel.register(SUnlockModelsPacket.class, new SUnlockModelsPacket.Handler());
-        NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
-    }
+	@Override
+	protected void preInit() {
+		NetworkChannel.register(SSyncModelsPacket.class, new SSyncModelsPacket.Handler());
+		NetworkChannel.register(SUnlockModelsPacket.class, new SUnlockModelsPacket.Handler());
+		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
+	}
 
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void registerModelLoader(ModelRegistryEvent event) {
-        ModelLoaderRegistry.registerLoader(RL("dynamic"), KaleidoModel.Loader.INSTANCE);
-    }
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public void registerModelLoader(ModelRegistryEvent event) {
+		ModelLoaderRegistry.registerLoader(RL("dynamic"), KaleidoModel.Loader.INSTANCE);
+	}
 }

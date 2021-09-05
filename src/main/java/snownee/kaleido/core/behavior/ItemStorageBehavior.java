@@ -25,61 +25,61 @@ import snownee.kiwi.inventory.InvHandlerWrapper;
 
 public class ItemStorageBehavior implements Behavior {
 
-    public static ItemStorageBehavior create(JsonObject obj) {
-        return new ItemStorageBehavior(JSONUtils.getAsInt(obj, "rows", 3));
-    }
+	public static ItemStorageBehavior create(JsonObject obj) {
+		return new ItemStorageBehavior(JSONUtils.getAsInt(obj, "rows", 3));
+	}
 
-    private LazyOptional<ItemStackHandler> handler = LazyOptional.empty();
-    private int rows;
-    private ITextComponent title;
+	private LazyOptional<ItemStackHandler> handler = LazyOptional.empty();
+	private int rows;
+	private ITextComponent title;
 
-    public ItemStorageBehavior(int rows) {
-        this.rows = rows;
-    }
+	public ItemStorageBehavior(int rows) {
+		this.rows = rows;
+	}
 
-    @Override
-    public Behavior copy(MasterTile tile) {
-        ItemStorageBehavior copy = new ItemStorageBehavior(rows);
-        copy.handler = LazyOptional.of(() -> new ItemStackHandler(rows * 9));
-        if (tile.getModelInfo() != null) {
-            copy.title = new TranslationTextComponent(tile.getModelInfo().getTranslationKey());
-        }
-        return copy;
-    }
+	@Override
+	public Behavior copy(MasterTile tile) {
+		ItemStorageBehavior copy = new ItemStorageBehavior(rows);
+		copy.handler = LazyOptional.of(() -> new ItemStackHandler(rows * 9));
+		if (tile.getModelInfo() != null) {
+			copy.title = new TranslationTextComponent(tile.getModelInfo().getTranslationKey());
+		}
+		return copy;
+	}
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return handler.cast();
-        }
-        return LazyOptional.empty();
-    }
+	@Override
+	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+			return handler.cast();
+		}
+		return LazyOptional.empty();
+	}
 
-    @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (title != null && !worldIn.isClientSide) {
-            player.openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
-                if (rows == 6) {
-                    return ChestContainer.sixRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
-                } else {
-                    return ChestContainer.threeRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
-                }
-            }, title));
-        }
-        return ActionResultType.SUCCESS;
-    }
+	@Override
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		if (title != null && !worldIn.isClientSide) {
+			player.openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
+				if (rows == 6) {
+					return ChestContainer.sixRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
+				} else {
+					return ChestContainer.threeRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
+				}
+			}, title));
+		}
+		return ActionResultType.SUCCESS;
+	}
 
-    @Override
-    public void read(CompoundNBT data) {
-        handler.ifPresent($ -> $.deserializeNBT(data));
-    }
+	@Override
+	public void read(CompoundNBT data) {
+		handler.ifPresent($ -> $.deserializeNBT(data));
+	}
 
-    @Override
-    public CompoundNBT write(CompoundNBT data) {
-        if (handler.isPresent()) {
-            return handler.orElseGet(ItemStackHandler::new).serializeNBT();
-        }
-        return data;
-    }
+	@Override
+	public CompoundNBT write(CompoundNBT data) {
+		if (handler.isPresent()) {
+			return handler.orElseGet(ItemStackHandler::new).serializeNBT();
+		}
+		return data;
+	}
 
 }

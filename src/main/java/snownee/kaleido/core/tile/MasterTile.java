@@ -21,96 +21,96 @@ import snownee.kiwi.util.Util;
 
 public class MasterTile extends BaseTile {
 
-    public static final ModelProperty<ModelInfo> MODEL = new ModelProperty<>();
+	public static final ModelProperty<ModelInfo> MODEL = new ModelProperty<>();
 
-    public Behavior behavior = NoneBehavior.INSTANCE;
-    private IModelData modelData = FMLEnvironment.dist.isClient() ? new ModelDataMap.Builder().build() : EmptyModelData.INSTANCE;
+	public Behavior behavior = NoneBehavior.INSTANCE;
+	private IModelData modelData = FMLEnvironment.dist.isClient() ? new ModelDataMap.Builder().build() : EmptyModelData.INSTANCE;
 
-    private ModelInfo modelInfo;
+	private ModelInfo modelInfo;
 
-    public MasterTile() {
-        super(CoreModule.MASTER);
-        persistData = true;
-    }
+	public MasterTile() {
+		super(CoreModule.MASTER);
+		persistData = true;
+	}
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        LazyOptional<T> optional = behavior.getCapability(cap, side);
-        if (optional.isPresent()) {
-            return optional;
-        }
-        return super.getCapability(cap, side);
-    }
+	@Override
+	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+		LazyOptional<T> optional = behavior.getCapability(cap, side);
+		if (optional.isPresent()) {
+			return optional;
+		}
+		return super.getCapability(cap, side);
+	}
 
-    @Override
-    public IModelData getModelData() {
-        return modelData;
-    }
+	@Override
+	public IModelData getModelData() {
+		return modelData;
+	}
 
-    public ModelInfo getModelInfo() {
-        return modelInfo;
-    }
+	public ModelInfo getModelInfo() {
+		return modelInfo;
+	}
 
-    @Override
-    public void load(BlockState state, CompoundNBT compound) {
-        readPacketData(compound);
-        super.load(state, compound);
-    }
+	@Override
+	public void load(BlockState state, CompoundNBT compound) {
+		readPacketData(compound);
+		super.load(state, compound);
+	}
 
-    @Override
-    protected void readPacketData(CompoundNBT data) {
-        ResourceLocation id = Util.RL(data.getString("Model"));
-        if (id != null) {
-            ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
-            if (info != null) {
-                setModelInfo(info);
-                if (data.contains("SubTile")) {
-                    behavior.read(data.getCompound("SubTile"));
-                }
-                return;
-            }
-        }
-        if (level != null) {
-            level.destroyBlock(worldPosition, false);
-        }
-    }
+	@Override
+	protected void readPacketData(CompoundNBT data) {
+		ResourceLocation id = Util.RL(data.getString("Model"));
+		if (id != null) {
+			ModelInfo info = KaleidoDataManager.INSTANCE.get(id);
+			if (info != null) {
+				setModelInfo(info);
+				if (data.contains("SubTile")) {
+					behavior.read(data.getCompound("SubTile"));
+				}
+				return;
+			}
+		}
+		if (level != null) {
+			level.destroyBlock(worldPosition, false);
+		}
+	}
 
-    @Override
-    public void onLoad() {
-        // TODO Auto-generated method stub
-        super.onLoad();
-        //world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 3);
-    }
+	@Override
+	public void onLoad() {
+		// TODO Auto-generated method stub
+		super.onLoad();
+		//world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 3);
+	}
 
-    public void setModelInfo(ModelInfo modelInfo) {
-        this.modelInfo = modelInfo;
-        behavior = modelInfo.behavior.copy(this);
+	public void setModelInfo(ModelInfo modelInfo) {
+		this.modelInfo = modelInfo;
+		behavior = modelInfo.behavior.copy(this);
 
-        if (level != null && level.isClientSide) {
-            modelData.setData(MODEL, modelInfo);
-            requestModelDataUpdate();
-        }
-    }
+		if (level != null && level.isClientSide) {
+			modelData.setData(MODEL, modelInfo);
+			requestModelDataUpdate();
+		}
+	}
 
-    @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        writePacketData(compound);
-        return super.save(compound);
-    }
+	@Override
+	public CompoundNBT save(CompoundNBT compound) {
+		writePacketData(compound);
+		return super.save(compound);
+	}
 
-    @Override
-    protected CompoundNBT writePacketData(CompoundNBT data) {
-        if (modelInfo != null) {
-            data.putString("Model", modelInfo.id.toString());
-            if (behavior != null) {
-                data.put("SubTile", behavior.write(new CompoundNBT()));
-            }
-        }
-        return data;
-    }
+	@Override
+	protected CompoundNBT writePacketData(CompoundNBT data) {
+		if (modelInfo != null) {
+			data.putString("Model", modelInfo.id.toString());
+			if (behavior != null) {
+				data.put("SubTile", behavior.write(new CompoundNBT()));
+			}
+		}
+		return data;
+	}
 
-    public boolean isValid() {
-        return modelInfo != null;
-    }
+	public boolean isValid() {
+		return modelInfo != null;
+	}
 
 }

@@ -57,164 +57,164 @@ import snownee.kaleido.core.tile.MasterTile;
 @EventBusSubscriber(Dist.CLIENT)
 public final class PlacementPreview {
 
-    private static class GhostRenderType extends RenderType {
-        private static Map<RenderType, RenderType> remappedTypes = new IdentityHashMap<>();
+	private static class GhostRenderType extends RenderType {
+		private static Map<RenderType, RenderType> remappedTypes = new IdentityHashMap<>();
 
-        public static RenderType remap(RenderType type) {
-            return type instanceof GhostRenderType ? type : remappedTypes.computeIfAbsent(type, GhostRenderType::new);
-        }
+		public static RenderType remap(RenderType type) {
+			return type instanceof GhostRenderType ? type : remappedTypes.computeIfAbsent(type, GhostRenderType::new);
+		}
 
-        GhostRenderType(RenderType original) {
-            super(original.toString() + "_place_preview", original.format(), original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
-                original.setupRenderState();
-                RenderSystem.disableDepthTest();
-                RenderSystem.enableBlend();
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-                RenderSystem.blendColor(1F, 1F, 1F, KaleidoClientConfig.previewAlpha);
-            }, () -> {
-                RenderSystem.blendColor(1F, 1F, 1F, 1F);
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.disableBlend();
-                RenderSystem.enableDepthTest();
-                original.clearRenderState();
-            });
-        }
-    }
+		GhostRenderType(RenderType original) {
+			super(original.toString() + "_place_preview", original.format(), original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
+				original.setupRenderState();
+				RenderSystem.disableDepthTest();
+				RenderSystem.enableBlend();
+				RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
+				RenderSystem.blendColor(1F, 1F, 1F, KaleidoClientConfig.previewAlpha);
+			}, () -> {
+				RenderSystem.blendColor(1F, 1F, 1F, 1F);
+				RenderSystem.defaultBlendFunc();
+				RenderSystem.disableBlend();
+				RenderSystem.enableDepthTest();
+				original.clearRenderState();
+			});
+		}
+	}
 
-    private static final MethodHandle GET_STATE_FOR_PLACEMENT;
-    private static ItemStack lastStack = ItemStack.EMPTY;
-    private static IRenderTypeBuffer.Impl renderBuffer;
+	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
+	private static ItemStack lastStack = ItemStack.EMPTY;
+	private static IRenderTypeBuffer.Impl renderBuffer;
 
-    private static PreviewTransform transform = new PreviewTransform();
+	private static PreviewTransform transform = new PreviewTransform();
 
-    static {
-        MethodHandle m = null;
-        try {
-            m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "func_195945_b", BlockItemUseContext.class));
-        } catch (Exception e) {
-            throw new RuntimeException("Report this to author", e);
-        }
-        GET_STATE_FOR_PLACEMENT = m;
-    }
+	static {
+		MethodHandle m = null;
+		try {
+			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "func_195945_b", BlockItemUseContext.class));
+		} catch (Exception e) {
+			throw new RuntimeException("Report this to author", e);
+		}
+		GET_STATE_FOR_PLACEMENT = m;
+	}
 
-    private static IRenderTypeBuffer.Impl initRenderBuffer(IRenderTypeBuffer.Impl original) {
-        BufferBuilder fallback = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228457_a_");
-        Map<RenderType, BufferBuilder> layerBuffers = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228458_b_");
-        Map<RenderType, BufferBuilder> remapped = new HashMap<>();
-        for (Map.Entry<RenderType, BufferBuilder> e : layerBuffers.entrySet()) {
-            remapped.put(GhostRenderType.remap(e.getKey()), e.getValue());
-        }
-        return new IRenderTypeBuffer.Impl(fallback, remapped) {
-            @Override
-            public IVertexBuilder getBuffer(RenderType type) {
-                return super.getBuffer(GhostRenderType.remap(type));
-            }
-        };
-    }
+	private static IRenderTypeBuffer.Impl initRenderBuffer(IRenderTypeBuffer.Impl original) {
+		BufferBuilder fallback = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228457_a_");
+		Map<RenderType, BufferBuilder> layerBuffers = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228458_b_");
+		Map<RenderType, BufferBuilder> remapped = new HashMap<>();
+		for (Map.Entry<RenderType, BufferBuilder> e : layerBuffers.entrySet()) {
+			remapped.put(GhostRenderType.remap(e.getKey()), e.getValue());
+		}
+		return new IRenderTypeBuffer.Impl(fallback, remapped) {
+			@Override
+			public IVertexBuilder getBuffer(RenderType type) {
+				return super.getBuffer(GhostRenderType.remap(type));
+			}
+		};
+	}
 
-    @SubscribeEvent
-    public static void render(RenderWorldLastEvent event) {
-        if (!KaleidoClientConfig.previewEnabled) {
-            return;
-        }
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS) {
-            return;
-        }
+	@SubscribeEvent
+	public static void render(RenderWorldLastEvent event) {
+		if (!KaleidoClientConfig.previewEnabled) {
+			return;
+		}
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS) {
+			return;
+		}
 
-        ClientPlayerEntity player = mc.player;
-        ItemStack held = player.getMainHandItem();
-        if (!(held.getItem() instanceof BlockItem)) {
-            held = player.getOffhandItem();
-        }
-        if (!KaleidoClientConfig.previewAllBlocks && held.getItem() != CoreModule.STUFF_ITEM) {
-            return;
-        }
-        if (held.getItem() instanceof BlockItem) {
-            BlockItem theBlockItem = (BlockItem) held.getItem();
-            ModelInfo info = MasterBlock.getInfo(held);
-            if (theBlockItem == CoreModule.STUFF_ITEM) {
-                info = MasterBlock.getInfo(held);
-                TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
-                if (tile instanceof MasterTile) {
-                    MasterTile masterTile = (MasterTile) tile;
-                    if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
-                        return;
-                    }
-                }
-            }
-            BlockItemUseContext context = theBlockItem.updatePlacementContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.hitResult)));
-            if (context == null) {
-                return;
-            }
-            BlockState placeResult;
-            try {
-                placeResult = (BlockState) GET_STATE_FOR_PLACEMENT.invokeExact(theBlockItem, context);
-            } catch (Throwable e) {
-                placeResult = null;
-            }
-            if (placeResult == null) {
-                return;
-            }
-            BlockRenderType renderType = placeResult.getRenderShape();
-            if (renderType == BlockRenderType.INVISIBLE) {
-                return;
-            }
-            BlockPos target = context.getClickedPos();
-            if (lastStack != held) {
-                lastStack = held;
-                transform.pos(target);
-            }
-            if (renderBuffer == null) {
-                renderBuffer = initRenderBuffer(mc.renderBuffers().bufferSource());
-            }
-            MatrixStack transforms = event.getMatrixStack();
-            Vector3d projVec = mc.getEntityRenderDispatcher().camera.getPosition();
-            transforms.translate(-projVec.x, -projVec.y, -projVec.z);
-            transforms.pushPose();
-            transform.target(target).tick(mc.getDeltaFrameTime());
-            transforms.translate(transform.getX(), transform.getY(), transform.getZ());
-            World world = context.getLevel();
-            if (renderType == BlockRenderType.MODEL) {
-                IModelData data = ModelDataManager.getModelData(world, target);
-                if (data == null) {
-                    data = EmptyModelData.INSTANCE;
-                }
-                BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
-                IBakedModel bakedModel;
-                if (theBlockItem == CoreModule.STUFF_ITEM) {
-                    if (info == null) {
-                        bakedModel = mc.getModelManager().getMissingModel();
-                    } else {
-                        Direction direction = placeResult.getValue(HorizontalBlock.FACING);
-                        bakedModel = KaleidoClient.getModel(info, direction);
-                    }
-                } else {
-                    bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
-                }
-                long i = placeResult.getSeed(target);
-                dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
-            }
-            /* Assume renderType is not null.
+		ClientPlayerEntity player = mc.player;
+		ItemStack held = player.getMainHandItem();
+		if (!(held.getItem() instanceof BlockItem)) {
+			held = player.getOffhandItem();
+		}
+		if (!KaleidoClientConfig.previewAllBlocks && held.getItem() != CoreModule.STUFF_ITEM) {
+			return;
+		}
+		if (held.getItem() instanceof BlockItem) {
+			BlockItem theBlockItem = (BlockItem) held.getItem();
+			ModelInfo info = MasterBlock.getInfo(held);
+			if (theBlockItem == CoreModule.STUFF_ITEM) {
+				info = MasterBlock.getInfo(held);
+				TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
+				if (tile instanceof MasterTile) {
+					MasterTile masterTile = (MasterTile) tile;
+					if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
+						return;
+					}
+				}
+			}
+			BlockItemUseContext context = theBlockItem.updatePlacementContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.hitResult)));
+			if (context == null) {
+				return;
+			}
+			BlockState placeResult;
+			try {
+				placeResult = (BlockState) GET_STATE_FOR_PLACEMENT.invokeExact(theBlockItem, context);
+			} catch (Throwable e) {
+				placeResult = null;
+			}
+			if (placeResult == null) {
+				return;
+			}
+			BlockRenderType renderType = placeResult.getRenderShape();
+			if (renderType == BlockRenderType.INVISIBLE) {
+				return;
+			}
+			BlockPos target = context.getClickedPos();
+			if (lastStack != held) {
+				lastStack = held;
+				transform.pos(target);
+			}
+			if (renderBuffer == null) {
+				renderBuffer = initRenderBuffer(mc.renderBuffers().bufferSource());
+			}
+			MatrixStack transforms = event.getMatrixStack();
+			Vector3d projVec = mc.getEntityRenderDispatcher().camera.getPosition();
+			transforms.translate(-projVec.x, -projVec.y, -projVec.z);
+			transforms.pushPose();
+			transform.target(target).tick(mc.getDeltaFrameTime());
+			transforms.translate(transform.getX(), transform.getY(), transform.getZ());
+			World world = context.getLevel();
+			if (renderType == BlockRenderType.MODEL) {
+				IModelData data = ModelDataManager.getModelData(world, target);
+				if (data == null) {
+					data = EmptyModelData.INSTANCE;
+				}
+				BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
+				IBakedModel bakedModel;
+				if (theBlockItem == CoreModule.STUFF_ITEM) {
+					if (info == null) {
+						bakedModel = mc.getModelManager().getMissingModel();
+					} else {
+						Direction direction = placeResult.getValue(HorizontalBlock.FACING);
+						bakedModel = KaleidoClient.getModel(info, direction);
+					}
+				} else {
+					bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
+				}
+				long i = placeResult.getSeed(target);
+				dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
+			}
+			/* Assume renderType is not null.
              *
              * Yes, we use a fake tile entity to workaround this. All exceptions are
              * discared. It is ugly, yes, but it partially solve the problem.
              */
-            if (placeResult.hasTileEntity()) {
-                TileEntity tile = placeResult.createTileEntity(world);
-                tile.setLevelAndPosition(world, target);
-                TileEntityRenderer<? super TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
-                if (renderer != null) {
-                    try {
-                        // 0x00F0_00F0 means "full sky light and full block light".
-                        // Reference: LightTexture.packLight (func_228451_a_)
-                        renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-            transforms.popPose();
-            renderBuffer.endBatch();
-        }
-    }
+			if (placeResult.hasTileEntity()) {
+				TileEntity tile = placeResult.createTileEntity(world);
+				tile.setLevelAndPosition(world, target);
+				TileEntityRenderer<? super TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
+				if (renderer != null) {
+					try {
+						// 0x00F0_00F0 means "full sky light and full block light".
+						// Reference: LightTexture.packLight (func_228451_a_)
+						renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
+					} catch (Exception ignored) {
+					}
+				}
+			}
+			transforms.popPose();
+			renderBuffer.endBatch();
+		}
+	}
 }

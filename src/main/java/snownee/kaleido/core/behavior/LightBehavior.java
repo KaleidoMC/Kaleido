@@ -14,29 +14,29 @@ import snownee.kaleido.core.tile.MasterTile;
 
 public class LightBehavior implements Behavior {
 
-    public static LightBehavior create(JsonObject obj) {
-        return new LightBehavior(JSONUtils.getAsInt(obj, "light", 15));
-    }
+	public static LightBehavior create(JsonObject obj) {
+		return new LightBehavior(JSONUtils.getAsInt(obj, "light", 15));
+	}
 
-    private final int light;
+	private final int light;
 
-    public LightBehavior(int light) {
-        this.light = light;
-    }
+	public LightBehavior(int light) {
+		this.light = light;
+	}
 
-    @Override
-    public Behavior copy(MasterTile tile) {
-        return this;
-    }
+	@Override
+	public Behavior copy(MasterTile tile) {
+		return this;
+	}
 
-    @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        return ActionResultType.PASS;
-    }
+	@Override
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		return ActionResultType.PASS;
+	}
 
-    @Override
-    public int getLightValue() {
-        return light;
-    }
+	@Override
+	public int getLightValue() {
+		return light;
+	}
 
 }

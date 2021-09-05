@@ -13,49 +13,49 @@ import snownee.kiwi.network.ClientPacket;
 
 public class CRedeemPacket extends ClientPacket {
 
-    public static class Handler extends PacketHandler<CRedeemPacket> {
+	public static class Handler extends PacketHandler<CRedeemPacket> {
 
-        @Override
-        public CRedeemPacket decode(PacketBuffer buf) {
-            return new CRedeemPacket(KaleidoDataManager.INSTANCE.get(buf.readResourceLocation()), buf.readVarInt());
-        }
+		@Override
+		public CRedeemPacket decode(PacketBuffer buf) {
+			return new CRedeemPacket(KaleidoDataManager.INSTANCE.get(buf.readResourceLocation()), buf.readVarInt());
+		}
 
-        @Override
-        public void encode(CRedeemPacket pkt, PacketBuffer buf) {
-            if (pkt.info == null) {
-                buf.writeResourceLocation(new ResourceLocation(""));
-            } else {
-                buf.writeResourceLocation(pkt.info.id);
-            }
-            buf.writeVarInt(pkt.amount);
-        }
+		@Override
+		public void encode(CRedeemPacket pkt, PacketBuffer buf) {
+			if (pkt.info == null) {
+				buf.writeResourceLocation(new ResourceLocation(""));
+			} else {
+				buf.writeResourceLocation(pkt.info.id);
+			}
+			buf.writeVarInt(pkt.amount);
+		}
 
-        @Override
-        public void handle(CRedeemPacket pkt, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                if (pkt.info == null || pkt.amount < 1) {
-                    return;
-                }
-                ServerPlayerEntity player = ctx.get().getSender();
-                int coins = KaleidoUtil.getCoins(player);
-                int price = pkt.info.price * pkt.amount;
-                if (coins < price) {
-                    return;
-                }
-                KaleidoUtil.takeCoins(player, price);
-                KaleidoUtil.giveItems(player, pkt.amount, pkt.info.makeItem());
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		public void handle(CRedeemPacket pkt, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				if (pkt.info == null || pkt.amount < 1) {
+					return;
+				}
+				ServerPlayerEntity player = ctx.get().getSender();
+				int coins = KaleidoUtil.getCoins(player);
+				int price = pkt.info.price * pkt.amount;
+				if (coins < price) {
+					return;
+				}
+				KaleidoUtil.takeCoins(player, price);
+				KaleidoUtil.giveItems(player, pkt.amount, pkt.info.makeItem());
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 
-    private final int amount;
+	private final int amount;
 
-    private final ModelInfo info;
+	private final ModelInfo info;
 
-    public CRedeemPacket(ModelInfo info, int amount) {
-        this.info = info;
-        this.amount = amount;
-    }
+	public CRedeemPacket(ModelInfo info, int amount) {
+		this.info = info;
+		this.amount = amount;
+	}
 }

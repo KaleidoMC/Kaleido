@@ -43,122 +43,122 @@ import snownee.kiwi.util.NBTHelper.NBT;
 @KiwiModule.Group("decorations")
 public class CarpentryModule extends AbstractModule {
 
-    //    private static final MethodHandle POPULATE_TRADE_DATA;
-    //
-    //    static {
-    //        MethodHandle m = null;
-    //        try {
-    //            m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(VillagerEntity.class, "func_213712_ef"));
-    //        } catch (Exception e) {
-    //            throw new RuntimeException("Report this to author", e);
-    //        }
-    //        POPULATE_TRADE_DATA = m;
-    //    }
+	//    private static final MethodHandle POPULATE_TRADE_DATA;
+	//
+	//    static {
+	//        MethodHandle m = null;
+	//        try {
+	//            m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(VillagerEntity.class, "func_213712_ef"));
+	//        } catch (Exception e) {
+	//            throw new RuntimeException("Report this to author", e);
+	//        }
+	//        POPULATE_TRADE_DATA = m;
+	//    }
 
-    public static final Item CLOTH = new ModItem(itemProp());
+	public static final Item CLOTH = new ModItem(itemProp());
 
-    public static final WoodworkingBenchBlock WOODWORKING_BENCH = new WoodworkingBenchBlock(blockProp(Material.WOOD));
+	public static final WoodworkingBenchBlock WOODWORKING_BENCH = new WoodworkingBenchBlock(blockProp(Material.WOOD));
 
-    @Name("collector")
-    public static final PointOfInterestType COLLECTOR_POI = PointOfInterestType.registerBlockStates(new PointOfInterestType("kaleido.collector", PointOfInterestType.getBlockStates(WOODWORKING_BENCH), 1, 1));
+	@Name("collector")
+	public static final PointOfInterestType COLLECTOR_POI = PointOfInterestType.registerBlockStates(new PointOfInterestType("kaleido.collector", PointOfInterestType.getBlockStates(WOODWORKING_BENCH), 1, 1));
 
-    public static final VillagerProfession COLLECTOR = new VillagerProfession("kaleido.collector", COLLECTOR_POI, ImmutableSet.of(), ImmutableSet.of(), null);
+	public static final VillagerProfession COLLECTOR = new VillagerProfession("kaleido.collector", COLLECTOR_POI, ImmutableSet.of(), ImmutableSet.of(), null);
 
-    private CollectorTrade trade;
+	private CollectorTrade trade;
 
-    @SubscribeEvent
-    public void addVillagerTrades(VillagerTradesEvent event) {
-        if (event.getType() == COLLECTOR) {
-            Supplier<LootTable> lootTableSupplier = () -> Kiwi.getServer().getLootTables().get(RL("gameplay/collector"));
-            trade = new CollectorTrade(lootTableSupplier);
-            // event.getTrades().put(1, ImmutableList.of(trade, trade));
-            // event.getTrades().put(1, ImmutableList.of(new BasicTrade(1, new ItemStack(Items.DIAMOND), 10, 1)));
-        }
-    }
+	@SubscribeEvent
+	public void addVillagerTrades(VillagerTradesEvent event) {
+		if (event.getType() == COLLECTOR) {
+			Supplier<LootTable> lootTableSupplier = () -> Kiwi.getServer().getLootTables().get(RL("gameplay/collector"));
+			trade = new CollectorTrade(lootTableSupplier);
+			// event.getTrades().put(1, ImmutableList.of(trade, trade));
+			// event.getTrades().put(1, ImmutableList.of(new BasicTrade(1, new ItemStack(Items.DIAMOND), 10, 1)));
+		}
+	}
 
-    @SubscribeEvent
-    public void tickVillager(LivingUpdateEvent event) {
-        if (!(event.getEntityLiving() instanceof VillagerEntity)) {
-            return;
-        }
-        VillagerEntity villager = (VillagerEntity) event.getEntityLiving();
-        if (villager.getVillagerData().getProfession() != COLLECTOR) {
-            return;
-        }
-        if (villager.lastTradedPlayer instanceof ServerPlayerEntity) {
-            // Refresh quests
-            int noUses = 0;
-            for (MerchantOffer offer : villager.getOffers()) {
-                offer.getBaseCostA();
-                if (offer.isOutOfStock()) {
-                    noUses++;
-                }
-            }
-            villager.getOffers().removeIf(MerchantOffer::isOutOfStock);
-            addNewTrades(villager, noUses);
+	@SubscribeEvent
+	public void tickVillager(LivingUpdateEvent event) {
+		if (!(event.getEntityLiving() instanceof VillagerEntity)) {
+			return;
+		}
+		VillagerEntity villager = (VillagerEntity) event.getEntityLiving();
+		if (villager.getVillagerData().getProfession() != COLLECTOR) {
+			return;
+		}
+		if (villager.lastTradedPlayer instanceof ServerPlayerEntity) {
+			// Refresh quests
+			int noUses = 0;
+			for (MerchantOffer offer : villager.getOffers()) {
+				offer.getBaseCostA();
+				if (offer.isOutOfStock()) {
+					noUses++;
+				}
+			}
+			villager.getOffers().removeIf(MerchantOffer::isOutOfStock);
+			addNewTrades(villager, noUses);
 
-            // Check qualification
-            long day = villager.lastTradedPlayer.level.getDayTime() / 24000L;
-            NBTHelper data = NBTHelper.of(villager.getPersistentData());
-            ListNBT list = data.getTagList("Kaleido.Customers", NBT.COMPOUND);
-            if (list == null) {
-                data.setTag("Kaleido.Customers", list = new ListNBT());
-            }
-            if (data.getLong("Kaleido.Day") < day) {
-                list.clear();
-            } else {
-                for (INBT nbt : list) {
-                    if (nbt instanceof CompoundNBT) {
-                        UUID uuid = NBTUtil.loadUUID(nbt);
-                        if (villager.lastTradedPlayer.getUUID().equals(uuid)) {
-                            return;
-                        }
-                    }
-                }
-            }
-            list.add(NBTUtil.createUUID(villager.lastTradedPlayer.getUUID()));
-            data.setLong("Kaleido.Day", day);
+			// Check qualification
+			long day = villager.lastTradedPlayer.level.getDayTime() / 24000L;
+			NBTHelper data = NBTHelper.of(villager.getPersistentData());
+			ListNBT list = data.getTagList("Kaleido.Customers", NBT.COMPOUND);
+			if (list == null) {
+				data.setTag("Kaleido.Customers", list = new ListNBT());
+			}
+			if (data.getLong("Kaleido.Day") < day) {
+				list.clear();
+			} else {
+				for (INBT nbt : list) {
+					if (nbt instanceof CompoundNBT) {
+						UUID uuid = NBTUtil.loadUUID(nbt);
+						if (villager.lastTradedPlayer.getUUID().equals(uuid)) {
+							return;
+						}
+					}
+				}
+			}
+			list.add(NBTUtil.createUUID(villager.lastTradedPlayer.getUUID()));
+			data.setLong("Kaleido.Day", day);
 
-            // Unlock
-            AxisAlignedBB bb = new AxisAlignedBB(villager.position().subtract(5, 5, 5), villager.position().add(5, 5, 5));
-            List<ServerPlayerEntity> players = villager.level.getEntitiesOfClass(ServerPlayerEntity.class, bb, $ -> !$.isSpectator());
-            ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
-            if (info != null) {
-                for (ServerPlayerEntity player : players) {
-                    info.grant(player);
-                }
-            }
-        }
+			// Unlock
+			AxisAlignedBB bb = new AxisAlignedBB(villager.position().subtract(5, 5, 5), villager.position().add(5, 5, 5));
+			List<ServerPlayerEntity> players = villager.level.getEntitiesOfClass(ServerPlayerEntity.class, bb, $ -> !$.isSpectator());
+			ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
+			if (info != null) {
+				for (ServerPlayerEntity player : players) {
+					info.grant(player);
+				}
+			}
+		}
 
-    }
+	}
 
-    @SubscribeEvent
-    public void addExtraTrades(EntityInteractSpecific event) {
-        if (event.getWorld().isClientSide || !(event.getTarget() instanceof VillagerEntity)) {
-            return;
-        }
-        VillagerEntity villager = (VillagerEntity) event.getTarget();
-        if (villager.getVillagerData().getProfession() != COLLECTOR || villager.getVillagerData().getLevel() != 1) {
-            return;
-        }
-        if (villager.getOffers().size() < 4) {
-            addNewTrades(villager, 4 - villager.getOffers().size());
-        }
-    }
+	@SubscribeEvent
+	public void addExtraTrades(EntityInteractSpecific event) {
+		if (event.getWorld().isClientSide || !(event.getTarget() instanceof VillagerEntity)) {
+			return;
+		}
+		VillagerEntity villager = (VillagerEntity) event.getTarget();
+		if (villager.getVillagerData().getProfession() != COLLECTOR || villager.getVillagerData().getLevel() != 1) {
+			return;
+		}
+		if (villager.getOffers().size() < 4) {
+			addNewTrades(villager, 4 - villager.getOffers().size());
+		}
+	}
 
-    public void addNewTrades(VillagerEntity villager, int amount) {
-        MerchantOffers offers = villager.getOffers();
-        Set<Item> existingItems = offers.stream().map(MerchantOffer::getBaseCostA).map(ItemStack::getItem).collect(Collectors.toSet());
-        int failed = 0;
-        while (amount > 0 && failed < 50) {
-            MerchantOffer newOffer = trade.getOffer(villager, villager.getRandom());
-            if (newOffer == null || existingItems.contains(newOffer.getBaseCostA().getItem())) {
-                ++failed;
-            } else {
-                offers.add(newOffer);
-                --amount;
-            }
-        }
-    }
+	public void addNewTrades(VillagerEntity villager, int amount) {
+		MerchantOffers offers = villager.getOffers();
+		Set<Item> existingItems = offers.stream().map(MerchantOffer::getBaseCostA).map(ItemStack::getItem).collect(Collectors.toSet());
+		int failed = 0;
+		while (amount > 0 && failed < 50) {
+			MerchantOffer newOffer = trade.getOffer(villager, villager.getRandom());
+			if (newOffer == null || existingItems.contains(newOffer.getBaseCostA().getItem())) {
+				++failed;
+			} else {
+				offers.add(newOffer);
+				--amount;
+			}
+		}
+	}
 
 }

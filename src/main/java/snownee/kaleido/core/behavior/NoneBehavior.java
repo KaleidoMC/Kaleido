@@ -10,16 +10,16 @@ import net.minecraft.world.World;
 import snownee.kaleido.core.tile.MasterTile;
 
 public enum NoneBehavior implements Behavior {
-    INSTANCE;
+	INSTANCE;
 
-    @Override
-    public Behavior copy(MasterTile tile) {
-        return this;
-    }
+	@Override
+	public Behavior copy(MasterTile tile) {
+		return this;
+	}
 
-    @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        return ActionResultType.PASS;
-    }
+	@Override
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		return ActionResultType.PASS;
+	}
 
 }

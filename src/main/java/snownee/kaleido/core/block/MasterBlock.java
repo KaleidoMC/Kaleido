@@ -36,108 +36,108 @@ import snownee.kiwi.util.Util;
 @RenderLayer(Layer.TRANSLUCENT)
 public class MasterBlock extends HorizontalBlock {
 
-    public static final BooleanProperty AO = BooleanProperty.create("ao");
+	public static final BooleanProperty AO = BooleanProperty.create("ao");
 
-    public static final String NBT_ID = "Kaleido.Id";
+	public static final String NBT_ID = "Kaleido.Id";
 
-    public static ModelInfo getInfo(ItemStack stack) {
-        NBTHelper data = NBTHelper.of(stack);
-        ResourceLocation modelId = Util.RL(data.getString(NBT_ID));
-        if (modelId == null || modelId.getPath().isEmpty()) {
-            return null;
-        }
-        return KaleidoDataManager.INSTANCE.get(modelId);
-    }
+	public static ModelInfo getInfo(ItemStack stack) {
+		NBTHelper data = NBTHelper.of(stack);
+		ResourceLocation modelId = Util.RL(data.getString(NBT_ID));
+		if (modelId == null || modelId.getPath().isEmpty()) {
+			return null;
+		}
+		return KaleidoDataManager.INSTANCE.get(modelId);
+	}
 
-    public MasterBlock(Properties builder) {
-        super(builder);
-    }
+	public MasterBlock(Properties builder) {
+		super(builder);
+	}
 
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new MasterTile();
-    }
+	@Override
+	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+		return new MasterTile();
+	}
 
-    @Override // Need to refresh every time tag updated?
-    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
-        KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap(pack -> Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream())).map(ModelInfo::makeItem).forEach(items::add);
-    }
+	@Override // Need to refresh every time tag updated?
+	public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+		KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap(pack -> Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream())).map(ModelInfo::makeItem).forEach(items::add);
+	}
 
-    @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING, AO);
-    }
+	@Override
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(FACING, AO);
+	}
 
-    @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        ItemStack stack = new ItemStack(this);
-        TileEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof MasterTile) {
-            ModelInfo info = ((MasterTile) tile).getModelInfo();
-            if (info != null) {
-                NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
-            }
-        }
-        return stack;
-    }
+	@Override
+	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		ItemStack stack = new ItemStack(this);
+		TileEntity tile = world.getBlockEntity(pos);
+		if (tile instanceof MasterTile) {
+			ModelInfo info = ((MasterTile) tile).getModelInfo();
+			if (info != null) {
+				NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
+			}
+		}
+		return stack;
+	}
 
-    @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
-        ModelInfo info = getInfo(context.getItemInHand());
-        if (info == null) {
-            return null;
-        }
-        Direction direction = context.getHorizontalDirection();
-        if (info.opposite) {
-            direction = direction.getOpposite();
-        }
-        return defaultBlockState().setValue(FACING, direction).setValue(AO, info.useAO);
-    }
+	@Override
+	public BlockState getStateForPlacement(BlockItemUseContext context) {
+		ModelInfo info = getInfo(context.getItemInHand());
+		if (info == null) {
+			return null;
+		}
+		Direction direction = context.getHorizontalDirection();
+		if (info.opposite) {
+			direction = direction.getOpposite();
+		}
+		return defaultBlockState().setValue(FACING, direction).setValue(AO, info.useAO);
+	}
 
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
+	@Override
+	public boolean hasTileEntity(BlockState state) {
+		return true;
+	}
 
-    @Override
-    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        TileEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof MasterTile) {
-            return ((MasterTile) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
-        }
-        return ActionResultType.PASS;
-    }
+	@Override
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		if (tile instanceof MasterTile) {
+			return ((MasterTile) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+		}
+		return ActionResultType.PASS;
+	}
 
-    @Override
-    public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        ModelInfo info = getInfo(stack);
-        if (info == null) {
-            worldIn.destroyBlock(pos, true);
-            return;
-        }
-        TileEntity tile = worldIn.getBlockEntity(pos);
-        if (tile instanceof MasterTile) {
-            ((MasterTile) tile).setModelInfo(info);
-            if (info.behavior.getLightValue() > 0) {
-                worldIn.getLightEngine().checkBlock(pos);
-            }
-        }
-    }
+	@Override
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		ModelInfo info = getInfo(stack);
+		if (info == null) {
+			worldIn.destroyBlock(pos, true);
+			return;
+		}
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		if (tile instanceof MasterTile) {
+			((MasterTile) tile).setModelInfo(info);
+			if (info.behavior.getLightValue() > 0) {
+				worldIn.getLightEngine().checkBlock(pos);
+			}
+		}
+	}
 
-    @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        //worldIn.getTileEntity(pos);
-        // TODO Auto-generated method stub
-        return super.getShape(state, worldIn, pos, context);
-    }
+	@Override
+	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		//worldIn.getTileEntity(pos);
+		// TODO Auto-generated method stub
+		return super.getShape(state, worldIn, pos, context);
+	}
 
-    @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-        TileEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof MasterTile && ((MasterTile) tile).behavior != null) {
-            return ((MasterTile) tile).behavior.getLightValue();
-        }
-        return super.getLightValue(state, world, pos);
-    }
+	@Override
+	public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+		TileEntity tile = world.getBlockEntity(pos);
+		if (tile instanceof MasterTile && ((MasterTile) tile).behavior != null) {
+			return ((MasterTile) tile).behavior.getLightValue();
+		}
+		return super.getLightValue(state, world, pos);
+	}
 
 }
