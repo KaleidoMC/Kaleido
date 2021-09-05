@@ -26,7 +26,7 @@ import snownee.kiwi.inventory.InvHandlerWrapper;
 public class ItemStorageBehavior implements Behavior {
 
     public static ItemStorageBehavior create(JsonObject obj) {
-        return new ItemStorageBehavior(JSONUtils.getInt(obj, "rows", 3));
+        return new ItemStorageBehavior(JSONUtils.getAsInt(obj, "rows", 3));
     }
 
     private LazyOptional<ItemStackHandler> handler = LazyOptional.empty();
@@ -57,12 +57,12 @@ public class ItemStorageBehavior implements Behavior {
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (title != null && !worldIn.isRemote) {
-            player.openContainer(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
+        if (title != null && !worldIn.isClientSide) {
+            player.openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
                 if (rows == 6) {
-                    return ChestContainer.createGeneric9X6(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
+                    return ChestContainer.sixRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
                 } else {
-                    return ChestContainer.createGeneric9X3(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
+                    return ChestContainer.threeRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
                 }
             }, title));
         }

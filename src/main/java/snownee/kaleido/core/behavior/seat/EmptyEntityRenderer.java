@@ -16,8 +16,8 @@ public class EmptyEntityRenderer<T extends Entity> extends EntityRenderer<T> {
     }
 
     @Override
-    public ResourceLocation getEntityTexture(T entity) {
-        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
+    public ResourceLocation getTextureLocation(T entity) {
+        return PlayerContainer.BLOCK_ATLAS;
     }
 
 }

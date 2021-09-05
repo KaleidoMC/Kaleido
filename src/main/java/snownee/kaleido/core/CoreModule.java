@@ -44,13 +44,13 @@ import snownee.kiwi.network.NetworkChannel;
 public class CoreModule extends AbstractModule {
 
     @NoItem
-    public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).notSolid());
+    public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion());
 
     public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-    public static final TileEntityType<MasterTile> MASTER = new TileEntityType<MasterTile>(MasterTile::new, Collections.singleton(STUFF), null);
+    public static final TileEntityType<MasterTile> MASTER = new TileEntityType<>(MasterTile::new, Collections.singleton(STUFF), null);
 
-    public static final EntityType<?> SEAT = EntityType.Builder.create(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).size(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
+    public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 
     @Name("stuff")
     public static final StuffItem STUFF_ITEM = new StuffItem(STUFF, itemProp());

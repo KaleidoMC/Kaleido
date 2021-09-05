@@ -26,37 +26,37 @@ public class NewModelToast implements IToast {
 
     public void addStacks(List<ItemStack> stacks) {
         if (this.stacks.addAll(stacks)) {
-            this.hasNewOutputs = true;
+            hasNewOutputs = true;
         }
     }
 
     public static void addOrUpdate(ToastGui toastGui, List<ItemStack> stacks) {
         NewModelToast toast = toastGui.getToast(NewModelToast.class, NO_TOKEN);
         if (toast == null) {
-            toastGui.add(new NewModelToast(stacks));
+            toastGui.addToast(new NewModelToast(stacks));
         } else {
             toast.addStacks(stacks);
         }
     }
 
     @Override
-    public Visibility /*draw*/ func_230444_a_(MatrixStack matrix, ToastGui toastGui, long delta) {
-        if (this.hasNewOutputs) {
-            this.firstDrawTime = delta;
-            this.hasNewOutputs = false;
+    public Visibility render(MatrixStack matrix, ToastGui toastGui, long delta) {
+        if (hasNewOutputs) {
+            firstDrawTime = delta;
+            hasNewOutputs = false;
         }
 
-        if (this.stacks.isEmpty()) {
+        if (stacks.isEmpty()) {
             return IToast.Visibility.HIDE;
         } else {
-            toastGui.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
+            toastGui.getMinecraft().getTextureManager().bind(TEXTURE);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             toastGui.blit(matrix, 0, 0, 0, 32, 160, 32);
-            toastGui.getMinecraft().fontRenderer.drawString(matrix, I18n.format("kaleido.toast.title"), 30.0F, 7.0F, -11534256);
-            toastGui.getMinecraft().fontRenderer.drawString(matrix, I18n.format("kaleido.toast.description"), 30.0F, 18.0F, -16777216);
-            ItemStack stack = this.stacks.get((int) ((delta * this.stacks.size() / 5000L) % this.stacks.size())); //Forge: fix math so that it doesn't divide by 0 when there are more than 5000 recipes
-            toastGui.getMinecraft().getItemRenderer().renderItemAndEffectIntoGUI((LivingEntity) null, stack, 8, 8);
-            return delta - this.firstDrawTime >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
+            toastGui.getMinecraft().font.draw(matrix, I18n.get("kaleido.toast.title"), 30.0F, 7.0F, -11534256);
+            toastGui.getMinecraft().font.draw(matrix, I18n.get("kaleido.toast.description"), 30.0F, 18.0F, -16777216);
+            ItemStack stack = stacks.get((int) ((delta * stacks.size() / 5000L) % stacks.size())); //Forge: fix math so that it doesn't divide by 0 when there are more than 5000 recipes
+            toastGui.getMinecraft().getItemRenderer().renderAndDecorateItem((LivingEntity) null, stack, 8, 8);
+            return delta - firstDrawTime >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
         }
     }
 

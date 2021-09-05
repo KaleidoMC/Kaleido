@@ -62,7 +62,7 @@ public class SUnlockModelsPacket extends Packet {
                     }
                 }
                 if (!icons.isEmpty()) {
-                    NewModelToast.addOrUpdate(Minecraft.getInstance().getToastGui(), icons);
+                    NewModelToast.addOrUpdate(Minecraft.getInstance().getToasts(), icons);
                 }
             });
             ctx.get().setPacketHandled(true);

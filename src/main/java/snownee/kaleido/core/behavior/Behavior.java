@@ -41,7 +41,7 @@ public interface Behavior {
             if (json != null) {
                 if (json.isJsonObject()) {
                     JsonObject object = json.getAsJsonObject();
-                    Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getString(object, "type"));
+                    Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getAsString(object, "type"));
                     if (factory != null) {
                         return factory.apply(object);
                     }
@@ -65,7 +65,8 @@ public interface Behavior {
 
     ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
 
-    default void read(CompoundNBT data) {}
+    default void read(CompoundNBT data) {
+    }
 
     default CompoundNBT write(CompoundNBT data) {
         return data;

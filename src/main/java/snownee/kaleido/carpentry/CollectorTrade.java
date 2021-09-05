@@ -28,11 +28,11 @@ public class CollectorTrade implements ITrade {
     @Nullable
     @Override
     public MerchantOffer getOffer(Entity trader, Random rand) {
-        if (!(trader.world instanceof ServerWorld)) {
+        if (!(trader.level instanceof ServerWorld)) {
             return null;
         }
-        LootContext context = new LootContext.Builder((ServerWorld) trader.world).withRandom(rand).build(LootParameterSets.EMPTY);
-        List<ItemStack> stacks = lootTableSupplier.get().generate(context);
+        LootContext context = new LootContext.Builder((ServerWorld) trader.level).withRandom(rand).create(LootParameterSets.EMPTY);
+        List<ItemStack> stacks = lootTableSupplier.get().getRandomItems(context);
         if (stacks.isEmpty()) {
             return null;
         }

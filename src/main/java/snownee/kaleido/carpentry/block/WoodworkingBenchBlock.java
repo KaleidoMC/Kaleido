@@ -23,18 +23,18 @@ public class WoodworkingBenchBlock extends HorizontalBlock {
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(HORIZONTAL_FACING);
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(HORIZONTAL_FACING, context.getPlacementHorizontalFacing());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (worldIn.isRemote) {
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+        if (worldIn.isClientSide) {
             openScreen(worldIn, pos, player);
         } else {
             //player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE); //TODO
@@ -44,7 +44,7 @@ public class WoodworkingBenchBlock extends HorizontalBlock {
 
     @OnlyIn(Dist.CLIENT)
     private void openScreen(World worldIn, BlockPos pos, PlayerEntity player) {
-        Minecraft.getInstance().displayGuiScreen(new CarpentryCraftingScreen(getTranslatedName(), worldIn, pos));
+        Minecraft.getInstance().setScreen(new CarpentryCraftingScreen(getName(), worldIn, pos));
     }
 
 }

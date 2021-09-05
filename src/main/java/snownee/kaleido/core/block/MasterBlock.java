@@ -59,19 +59,19 @@ public class MasterBlock extends HorizontalBlock {
     }
 
     @Override // Need to refresh every time tag updated?
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap(pack -> Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream())).map(ModelInfo::makeItem).forEach(items::add);
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(HORIZONTAL_FACING, AO);
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING, AO);
     }
 
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         ItemStack stack = new ItemStack(this);
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof MasterTile) {
             ModelInfo info = ((MasterTile) tile).getModelInfo();
             if (info != null) {
@@ -83,15 +83,15 @@ public class MasterBlock extends HorizontalBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        ModelInfo info = getInfo(context.getItem());
+        ModelInfo info = getInfo(context.getItemInHand());
         if (info == null) {
             return null;
         }
-        Direction direction = context.getPlacementHorizontalFacing();
+        Direction direction = context.getHorizontalDirection();
         if (info.opposite) {
             direction = direction.getOpposite();
         }
-        return this.getDefaultState().with(HORIZONTAL_FACING, direction).with(AO, info.useAO);
+        return defaultBlockState().setValue(FACING, direction).setValue(AO, info.useAO);
     }
 
     @Override
@@ -100,8 +100,8 @@ public class MasterBlock extends HorizontalBlock {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        TileEntity tile = worldIn.getTileEntity(pos);
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+        TileEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof MasterTile) {
             return ((MasterTile) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
         }
@@ -109,17 +109,17 @@ public class MasterBlock extends HorizontalBlock {
     }
 
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         ModelInfo info = getInfo(stack);
         if (info == null) {
             worldIn.destroyBlock(pos, true);
             return;
         }
-        TileEntity tile = worldIn.getTileEntity(pos);
+        TileEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof MasterTile) {
             ((MasterTile) tile).setModelInfo(info);
             if (info.behavior.getLightValue() > 0) {
-                worldIn.getLightManager().checkBlock(pos);
+                worldIn.getLightEngine().checkBlock(pos);
             }
         }
     }
@@ -133,7 +133,7 @@ public class MasterBlock extends HorizontalBlock {
 
     @Override
     public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof MasterTile && ((MasterTile) tile).behavior != null) {
             return ((MasterTile) tile).behavior.getLightValue();
         }

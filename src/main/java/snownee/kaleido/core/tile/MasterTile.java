@@ -52,9 +52,9 @@ public class MasterTile extends BaseTile {
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundNBT compound) {
         readPacketData(compound);
-        super.read(state, compound);
+        super.load(state, compound);
     }
 
     @Override
@@ -70,14 +70,9 @@ public class MasterTile extends BaseTile {
                 return;
             }
         }
-        if (world != null) {
-            world.destroyBlock(pos, false);
+        if (level != null) {
+            level.destroyBlock(worldPosition, false);
         }
-    }
-
-    @Override
-    public void remove() {
-        super.remove();
     }
 
     @Override
@@ -91,16 +86,16 @@ public class MasterTile extends BaseTile {
         this.modelInfo = modelInfo;
         behavior = modelInfo.behavior.copy(this);
 
-        if (world != null && world.isRemote) {
+        if (level != null && level.isClientSide) {
             modelData.setData(MODEL, modelInfo);
             requestModelDataUpdate();
         }
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         writePacketData(compound);
-        return super.write(compound);
+        return super.save(compound);
     }
 
     @Override

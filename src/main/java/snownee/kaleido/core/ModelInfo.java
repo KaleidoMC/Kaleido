@@ -42,18 +42,18 @@ public class ModelInfo {
 
     public String getTranslationKey() {
         if (translationKey == null) {
-            translationKey = Util.makeTranslationKey("kaleido.decor", id);
+            translationKey = Util.makeDescriptionId("kaleido.decor", id);
         }
         return translationKey;
     }
 
     public boolean grant(ServerPlayerEntity player) {
-        Advancement advancement = Kiwi.getServer().getAdvancementManager().getAdvancement(getAdvancementId());
+        Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
         if (advancement != null) {
             PlayerAdvancements playerAdvancements = player.getAdvancements();
-            AdvancementProgress progress = playerAdvancements.getProgress(advancement);
-            for (String s : progress.getRemaningCriteria()) {
-                playerAdvancements.grantCriterion(advancement, s);
+            AdvancementProgress progress = playerAdvancements.getOrStartProgress(advancement);
+            for (String s : progress.getRemainingCriteria()) {
+                playerAdvancements.award(advancement, s);
             }
             return true;
         }
@@ -61,8 +61,8 @@ public class ModelInfo {
     }
 
     public boolean isAdvancementDone(ServerPlayerEntity player) {
-        Advancement advancement = Kiwi.getServer().getAdvancementManager().getAdvancement(getAdvancementId());
-        return player.getAdvancements().getProgress(advancement).isDone();
+        Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
+        return player.getAdvancements().getOrStartProgress(advancement).isDone(); //FIXME do not start progress
     }
 
     public boolean isLocked() {
@@ -70,7 +70,7 @@ public class ModelInfo {
     }
 
     public boolean isLockedServer(ServerPlayerEntity player) {
-        if (Kiwi.getServer().isServerOwner(player.getGameProfile())) {
+        if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
             return locked;
         } else {
             return !isAdvancementDone(player);

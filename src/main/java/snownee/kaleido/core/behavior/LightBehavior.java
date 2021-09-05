@@ -15,7 +15,7 @@ import snownee.kaleido.core.tile.MasterTile;
 public class LightBehavior implements Behavior {
 
     public static LightBehavior create(JsonObject obj) {
-        return new LightBehavior(JSONUtils.getInt(obj, "light", 15));
+        return new LightBehavior(JSONUtils.getAsInt(obj, "light", 15));
     }
 
     private final int light;

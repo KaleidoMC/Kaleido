@@ -47,7 +47,7 @@ public class KaleidoClient {
 
     @Nullable
     public static IBakedModel getModel(ModelInfo info, Direction direction) {
-        int i = direction.getHorizontalIndex();
+        int i = direction.get2DDataValue();
         if (i == -1) {
             return null;
         }
@@ -62,7 +62,7 @@ public class KaleidoClient {
     public static void registerModels(ModelRegistryEvent event) {
         MODEL_MAP.clear();
         IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-        Collection<ResourceLocation> locations = resourceManager.getAllResourceLocations("models/kaleido", s -> s.endsWith(".json"));
+        Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
         locations.stream().map(KaleidoClient::resolveLocation).forEach(ModelLoader::addSpecialModel);
     }
 

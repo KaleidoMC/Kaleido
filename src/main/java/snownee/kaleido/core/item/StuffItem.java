@@ -13,12 +13,12 @@ public class StuffItem extends ModBlockItem {
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
+    public String getDescriptionId(ItemStack stack) {
         ModelInfo info = MasterBlock.getInfo(stack);
         if (info != null) {
             return info.getTranslationKey();
         }
-        return super.getTranslationKey(stack);
+        return super.getDescriptionId(stack);
     }
 
 }

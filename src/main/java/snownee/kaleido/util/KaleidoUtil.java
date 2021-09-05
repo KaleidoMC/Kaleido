@@ -12,7 +12,7 @@ import snownee.kaleido.core.CoreModule;
 
 public class KaleidoUtil {
 
-    public static Ingredient COIN = Ingredient.fromTag(CoreModule.CLOTH_TAG);
+    public static Ingredient COIN = Ingredient.of(CoreModule.CLOTH_TAG);
 
     public static int getCoins(PlayerEntity player) {
         int count = 0;
@@ -25,7 +25,7 @@ public class KaleidoUtil {
     }
 
     public static Iterable<ItemStack> getInv(PlayerEntity player) {
-        return Iterables.concat(player.inventory.mainInventory, player.inventory.offHandInventory);
+        return Iterables.concat(player.inventory.items, player.inventory.offhand);
     }
 
     public static void giveItems(PlayerEntity player, int amount, ItemStack stack) {

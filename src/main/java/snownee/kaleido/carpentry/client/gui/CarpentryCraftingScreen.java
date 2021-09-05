@@ -59,7 +59,7 @@ public class CarpentryCraftingScreen extends Screen {
 
         public Entry(CarpentryCraftingScreen parent, ModelPack pack) {
             this.parent = parent;
-            this.name = I18n.format(pack.translationKey);
+            name = I18n.get(pack.translationKey);
 
             LinkedList<ModelInfo> allInfos = Lists.newLinkedList(pack.normalInfos);
             allInfos.addAll(pack.rewardInfos);
@@ -82,12 +82,12 @@ public class CarpentryCraftingScreen extends Screen {
         }
 
         @Override
-        public java.util.List<? extends IGuiEventListener> getEventListeners() {
+        public java.util.List<? extends IGuiEventListener> children() {
             return children;
         }
 
         @Override
-        public IGuiEventListener getListener() {
+        public IGuiEventListener getFocused() {
             return null;
         }
 
@@ -104,11 +104,11 @@ public class CarpentryCraftingScreen extends Screen {
         @Override
         public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
             selected = !selected;
-            for (IGuiEventListener iguieventlistener : this.getEventListeners()) {
+            for (IGuiEventListener iguieventlistener : children()) {
                 if (iguieventlistener.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_)) {
-                    this.setListener(iguieventlistener);
+                    setFocused(iguieventlistener);
                     if (p_mouseClicked_5_ == 0) {
-                        this.setDragging(true);
+                        setDragging(true);
                     }
 
                     return true;
@@ -120,18 +120,18 @@ public class CarpentryCraftingScreen extends Screen {
         @Override
         public void render(MatrixStack matrix, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
             AbstractGui.fill(matrix, left, top, left + entryWidth, top + entryHeight, 0x22FFFFFF);
-            parent.font.drawString(matrix, name, left + 8, top + 4, 0xFFFFFF);
+            parent.font.draw(matrix, name, left + 8, top + 4, 0xFFFFFF);
             children.forEach(btn -> {
                 btn.x = btn.originalX + left;
                 btn.y = btn.originalY + top;
                 btn.render(matrix, mouseX, mouseY, partialTicks);
             });
 
-            matrix.push();
+            matrix.pushPose();
             matrix.scale(0.75f, 0.75f, 0.75f);
-            parent.drawCenteredString(matrix, parent.font, unlocked + "/" + size, (int) ((left + entryWidth - 18) * 1.33), (int) ((top + 5.5) * 1.33), 0xFFFFFF);
-            matrix.pop();
-            parent.minecraft.getTextureManager().bindTexture(GUI_BARS_TEXTURES);
+            AbstractGui.drawCenteredString(matrix, parent.font, unlocked + "/" + size, (int) ((left + entryWidth - 18) * 1.33), (int) ((top + 5.5) * 1.33), 0xFFFFFF);
+            matrix.popPose();
+            parent.minecraft.getTextureManager().bind(GUI_BARS_TEXTURES);
             AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 0, 32, 5, 32, 32);
             if (unlocked > 0) {
                 AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 5, unlocked * 32 / size, 10, 32, 32);
@@ -139,10 +139,12 @@ public class CarpentryCraftingScreen extends Screen {
         }
 
         @Override
-        public void setDragging(boolean p_setDragging_1_) {}
+        public void setDragging(boolean p_setDragging_1_) {
+        }
 
         @Override
-        public void setListener(IGuiEventListener p_setFocused_1_) {}
+        public void setFocused(IGuiEventListener p_setFocused_1_) {
+        }
 
     }
 
@@ -192,7 +194,7 @@ public class CarpentryCraftingScreen extends Screen {
         } else {
             cur = Math.max(cur + n, 1);
         }
-        textField.setText(Integer.toString(cur));
+        textField.setValue(Integer.toString(cur));
     }
 
     public int getRedeemAmount() {
@@ -200,7 +202,7 @@ public class CarpentryCraftingScreen extends Screen {
             return 0;
         }
         try {
-            return Integer.parseInt(textField.getText());
+            return Integer.parseInt(textField.getValue());
         } catch (Exception e) {
             return 0;
         }
@@ -211,15 +213,15 @@ public class CarpentryCraftingScreen extends Screen {
         if (!isUsable()) {
             return;
         }
-        tip = font.getCharacterManager().func_238365_g_(I18n.format("tip.kaleido.unlock"), 120, Style.EMPTY);
+        tip = font.getSplitter().splitLines(I18n.get("tip.kaleido.unlock"), 120, Style.EMPTY);
         children.add(list = new List(minecraft, 238, height, 20, height - 20));
         list.setLeftPos(30);
         for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
             list.addEntry(new Entry(this, pack));
         }
 
-        int x = minecraft.getMainWindow().getScaledWidth() / 2 + 125;
-        int y = minecraft.getMainWindow().getScaledHeight() / 2 + 50;
+        int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 125;
+        int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 50;
         addButton(textField = new TextFieldWidget(font, x - 19, y + 1, 38, 18, new StringTextComponent("")));
         //        textField.setResponder(str -> {
         //            if (selectedButton == null) {
@@ -236,7 +238,7 @@ public class CarpentryCraftingScreen extends Screen {
         //            }
         //            textField.setText(Integer.toString(lastNumber));
         //        });
-        textField.setValidator(str -> {
+        textField.setFilter(str -> {
             if (str.isEmpty()) {
                 return true;
             }
@@ -299,7 +301,7 @@ public class CarpentryCraftingScreen extends Screen {
     public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
         alpha += closing ? -pTicks * .4f : pTicks * .2f;
         if (closing && alpha <= 0) {
-            Minecraft.getInstance().displayGuiScreen(null);
+            Minecraft.getInstance().setScreen(null);
             list = null;
             return;
         }
@@ -310,12 +312,11 @@ public class CarpentryCraftingScreen extends Screen {
         if (alpha < 0.5f) {
             return;
         }
-        for (int i = 0; i < this.buttons.size(); ++i) {
-            Widget widget = this.buttons.get(i);
+        for (Widget widget : buttons) {
             widget.render(matrix, mouseX, mouseY, pTicks);
         }
-        int x = minecraft.getMainWindow().getScaledWidth() / 2 + 85;
-        int y = minecraft.getMainWindow().getScaledHeight() / 2 - 65;
+        int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 85;
+        int y = minecraft.getWindow().getGuiScaledHeight() / 2 - 65;
         if (selectedButton != null) {
             ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
             RenderSystem.pushMatrix();
@@ -329,12 +330,12 @@ public class CarpentryCraftingScreen extends Screen {
             y += 40 - 62;
             drawCenteredString(matrix, font, selectedButton.stack.getDisplayName().getString(), x, y, 0xFFFFFFFF);
             if (!selectedButton.info.isLocked()) {
-                itemRenderer.renderItemAndEffectIntoGUI(coinStack, x + 45, y + 95);
+                itemRenderer.renderAndDecorateItem(coinStack, x + 45, y + 95);
                 int amount = getRedeemAmount();
                 if (amount < 1) {
                     amount = 1;
                 }
-                itemRenderer.renderItemOverlayIntoGUI(font, coinStack, x + 50, y + 95, Integer.toString(amount * selectedButton.info.price));
+                itemRenderer.renderGuiItemDecorations(font, coinStack, x + 50, y + 95, Integer.toString(amount * selectedButton.info.price));
             }
         } else {
             x += 40;
@@ -345,9 +346,9 @@ public class CarpentryCraftingScreen extends Screen {
             }
         }
 
-        itemRenderer.renderItemAndEffectIntoGUI(coinStack, width - 20, 5);
+        itemRenderer.renderAndDecorateItem(coinStack, width - 20, 5);
         String numText = Integer.toString(coins);
-        font.drawStringWithShadow(matrix, numText, width - 25 - font.getStringWidth(numText), 9, 0xFFFFFFFF);
+        font.drawShadow(matrix, numText, width - 25 - font.width(numText), 9, 0xFFFFFFFF);
     }
 
     @Override
@@ -369,8 +370,8 @@ public class CarpentryCraftingScreen extends Screen {
             confirmBtn.visible = false;
             textField.visible = false;
         } else {
-            if (textField.getText().isEmpty()) {
-                textField.setText("1");
+            if (textField.getValue().isEmpty()) {
+                textField.setValue("1");
             }
             confirmBtn.visible = true;
             addBtn.visible = true;

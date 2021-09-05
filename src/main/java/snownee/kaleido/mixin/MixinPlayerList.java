@@ -16,11 +16,15 @@ import snownee.kiwi.Kiwi;
 @Mixin(PlayerList.class)
 public class MixinPlayerList {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;updatePermissionLevel(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"), method = "initializeConnectionToPlayer")
+    @Inject(
+            at = @At(
+                    value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;updatePermissionLevel(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"
+            ), method = "initializeConnectionToPlayer"
+    )
     private void kaleido_initializeConnectionToPlayerHook(NetworkManager netManager, ServerPlayerEntity player, CallbackInfo info) {
         MinecraftServer server = Kiwi.getServer();
-        if (!player.world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
-            if (server.isServerOwner(player.getGameProfile())) {
+        if (!player.level.isClientSide && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
+            if (server.isSingleplayerOwner(player.getGameProfile())) {
                 KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
             } else {
                 new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();

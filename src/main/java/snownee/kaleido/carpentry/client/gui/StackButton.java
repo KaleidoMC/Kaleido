@@ -13,10 +13,10 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -28,37 +28,37 @@ import snownee.kaleido.core.ModelInfo;
 public class StackButton extends Button {
 
     public static void renderItemIntoGUI(ItemRenderer renderer, ItemStack stack, int x, int y, int light) {
-        renderItemModelIntoGUI(renderer, stack, x, y, renderer.getItemModelWithOverrides(stack, (World) null, (LivingEntity) null), light);
+        renderItemModelIntoGUI(renderer, stack, x, y, renderer.getModel(stack, (World) null, (LivingEntity) null), light);
     }
 
     @SuppressWarnings("deprecation")
     public static void renderItemModelIntoGUI(ItemRenderer renderer, ItemStack stack, int x, int y, IBakedModel bakedmodel, int light) {
         RenderSystem.pushMatrix();
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        textureManager.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
-        textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmapDirect(false, false);
+        textureManager.bind(PlayerContainer.BLOCK_ATLAS);
+        textureManager.getTexture(PlayerContainer.BLOCK_ATLAS).setFilter(false, false);
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.translatef(x, y, 100.0F + renderer.zLevel);
+        RenderSystem.translatef(x, y, 100.0F + renderer.blitOffset);
         RenderSystem.translatef(8.0F, 8.0F, 0.0F);
         RenderSystem.scalef(1.0F, -1.0F, 1.0F);
         RenderSystem.scalef(16.0F, 16.0F, 16.0F);
         MatrixStack matrixstack = new MatrixStack();
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        boolean flag = !bakedmodel.isSideLit();
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean flag = !bakedmodel.usesBlockLight();
         if (flag) {
-            RenderHelper.setupGuiFlatDiffuseLighting();
+            RenderHelper.setupForFlatItems();
         }
 
-        renderer.renderItem(stack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, light, OverlayTexture.NO_OVERLAY, bakedmodel);
-        irendertypebuffer$impl.finish();
+        renderer.render(stack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, light, OverlayTexture.NO_OVERLAY, bakedmodel);
+        irendertypebuffer$impl.endBatch();
         RenderSystem.enableDepthTest();
         if (flag) {
-            RenderHelper.setupGui3DDiffuseLighting();
+            RenderHelper.setupFor3DItems();
         }
 
         RenderSystem.disableAlphaTest();
@@ -89,7 +89,7 @@ public class StackButton extends Button {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void renderButton(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
+    public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
         //        alpha = Math.min(alpha + pTicks * 0.2F, 1);
         //        int y = (int) (this.y + 15 - 15 * MathHelper.sin(alpha));
         AbstractGui.fill(matrix, x, y, x + width, y + height, 0xAA222222);
@@ -111,8 +111,8 @@ public class StackButton extends Button {
         if (info.isLocked()) {
             RenderSystem.pushMatrix();
             RenderSystem.translatef(0, 0, 500);
-            FontRenderer font = Minecraft.getInstance().fontRenderer;
-            font.drawStringWithShadow(matrix, "?", x + 11, y + 11, 0xFF888888);
+            FontRenderer font = Minecraft.getInstance().font;
+            font.drawShadow(matrix, "?", x + 11, y + 11, 0xFF888888);
             RenderSystem.popMatrix();
         }
     }

@@ -43,7 +43,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     class SimpleArrayList extends java.util.AbstractList<E> {
         private final List<E> field_216871_b = Lists.newArrayList();
 
-        private SimpleArrayList() {}
+        private SimpleArrayList() {
+        }
 
         @Override
         public void add(int p_add_1_, E p_add_2_) {
@@ -117,14 +118,15 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected void centerScrollOn(E entry) {
-        this.setScrollAmount(this.getEventListeners().indexOf(entry) * entry.getHeight() + entry.getHeight() / 2 - (this.y1 - this.y0) / 2);
+        this.setScrollAmount(this.children().indexOf(entry) * entry.getHeight() + entry.getHeight() / 2 - (this.y1 - this.y0) / 2);
     }
 
     protected final void clearEntries() {
         this.children.clear();
     }
 
-    protected void clickedHeader(int p_clickedHeader_1_, int p_clickedHeader_2_) {}
+    protected void clickedHeader(int p_clickedHeader_1_, int p_clickedHeader_2_) {
+    }
 
     protected void ensureVisible(E entry) {
         int i = entry.top;
@@ -145,7 +147,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected E getEntry(int index) {
-        return this.getEventListeners().get(index);
+        return this.children().get(index);
     }
 
     @Nullable
@@ -169,8 +171,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 
     @Override
     @Nullable
-    public E getListener() {
-        return (E) (super.getListener());
+    public E getFocused() {
+        return (E) super.getFocused();
     }
 
     public int getHeight() {
@@ -178,7 +180,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected int getItemCount() {
-        return this.getEventListeners().size();
+        return this.children().size();
     }
 
     public int getLeft() {
@@ -244,7 +246,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected boolean isSelectedItem(int i) {
-        return Objects.equals(this.getSelected(), this.getEventListeners().get(i));
+        return Objects.equals(this.getSelected(), this.children().get(i));
     }
 
     @Override
@@ -271,8 +273,8 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
             E e = this.getEntryAtPosition(mouseX, mouseY);
             if (e != null) {
                 pressTicks = 1;
-                this.setListener(e);
-                this.setDragging(true);
+                setFocused(e);
+                setDragging(true);
                 return true;
             } else if (button == 0) {
                 this.clickedHeader((int) (mouseX - (this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int) (mouseY - this.y0) + (int) this.getScrollAmount() - 4);
@@ -305,14 +307,14 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (this.getListener() != null) {
+        if (this.getFocused() != null) {
             if (pressTicks > 0) {
                 if (pressTicks < 4) {
-                    getListener().mouseClicked(mouseX, mouseY, button);
+                    getFocused().mouseClicked(mouseX, mouseY, button);
                 }
                 pressTicks = 0;
             }
-            this.getListener().mouseReleased(mouseX, mouseY, button);
+            this.getFocused().mouseReleased(mouseX, mouseY, button);
         }
         setDragging(false);
         return false;
@@ -325,15 +327,13 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     protected void moveSelection(AbstractList.Ordering p_241219_1_) {
-        this.func_241572_a_(p_241219_1_, (p_241573_0_) -> {
-            return true;
-        });
+        this.func_241572_a_(p_241219_1_, p_241573_0_ -> true);
     }
 
     protected void func_241572_a_(AbstractList.Ordering p_241572_1_, Predicate<E> p_241572_2_) {
         int i = p_241572_1_ == AbstractList.Ordering.UP ? -1 : 1;
-        if (!this.getEventListeners().isEmpty()) {
-            int j = this.getEventListeners().indexOf(this.getSelected());
+        if (!this.children().isEmpty()) {
+            int j = this.children().indexOf(this.getSelected());
 
             while (true) {
                 int k = MathHelper.clamp(j + i, 0, this.getItemCount() - 1);
@@ -341,7 +341,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
                     break;
                 }
 
-                E e = this.getEventListeners().get(k);
+                E e = this.children().get(k);
                 if (p_241572_2_.test(e)) {
                     this.setSelected(e);
                     this.ensureVisible(e);
@@ -381,15 +381,15 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         int i = this.getScrollbarPosition();
         int j = i + 6;
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        this.minecraft.getTextureManager().bindTexture(AbstractGui.BACKGROUND_LOCATION);
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        this.minecraft.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-        bufferbuilder.pos(this.x0, this.y1, 0.0D).tex(this.x0 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-        bufferbuilder.pos(this.x1, this.y1, 0.0D).tex(this.x1 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-        bufferbuilder.pos(this.x1, this.y0, 0.0D).tex(this.x1 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-        bufferbuilder.pos(this.x0, this.y0, 0.0D).tex(this.x0 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-        tessellator.draw();
+        bufferbuilder.vertex(this.x0, this.y1, 0.0D).uv(this.x0 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.vertex(this.x1, this.y1, 0.0D).uv(this.x1 / 32.0F, (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.vertex(this.x1, this.y0, 0.0D).uv(this.x1 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+        bufferbuilder.vertex(this.x0, this.y0, 0.0D).uv(this.x0 / 32.0F, (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+        tessellator.end();
         int k = this.getRowLeft();
         int l = this.y0 + getSpacer() - (int) this.getScrollAmount();
         if (this.renderHeader) {
@@ -406,17 +406,17 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         RenderSystem.shadeModel(7425);
         RenderSystem.disableTexture();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-        bufferbuilder.pos(this.x0, this.y0 + 4, 0.0D).tex(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-        bufferbuilder.pos(this.x1, this.y0 + 4, 0.0D).tex(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-        bufferbuilder.pos(this.x1, this.y0, 0.0D).tex(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-        bufferbuilder.pos(this.x0, this.y0, 0.0D).tex(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-        tessellator.draw();
+        bufferbuilder.vertex(this.x0, this.y0 + 4, 0.0D).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+        bufferbuilder.vertex(this.x1, this.y0 + 4, 0.0D).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+        bufferbuilder.vertex(this.x1, this.y0, 0.0D).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+        bufferbuilder.vertex(this.x0, this.y0, 0.0D).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+        tessellator.end();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-        bufferbuilder.pos(this.x0, this.y1, 0.0D).tex(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-        bufferbuilder.pos(this.x1, this.y1, 0.0D).tex(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-        bufferbuilder.pos(this.x1, this.y1 - 4, 0.0D).tex(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-        bufferbuilder.pos(this.x0, this.y1 - 4, 0.0D).tex(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-        tessellator.draw();
+        bufferbuilder.vertex(this.x0, this.y1, 0.0D).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+        bufferbuilder.vertex(this.x1, this.y1, 0.0D).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+        bufferbuilder.vertex(this.x1, this.y1 - 4, 0.0D).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+        bufferbuilder.vertex(this.x0, this.y1 - 4, 0.0D).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+        tessellator.end();
         int j1 = this.getMaxScroll();
         if (renderScrollbar && j1 > 0) {
             int k1 = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
@@ -427,23 +427,23 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
             }
 
             bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-            bufferbuilder.pos(i, this.y1, 0.0D).tex(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.pos(j, this.y1, 0.0D).tex(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.pos(j, this.y0, 0.0D).tex(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.pos(i, this.y0, 0.0D).tex(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-            tessellator.draw();
+            bufferbuilder.vertex(i, this.y1, 0.0D).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.vertex(j, this.y1, 0.0D).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.vertex(j, this.y0, 0.0D).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+            bufferbuilder.vertex(i, this.y0, 0.0D).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+            tessellator.end();
             bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-            bufferbuilder.pos(i, l1 + k1, 0.0D).tex(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.pos(j, l1 + k1, 0.0D).tex(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.pos(j, l1, 0.0D).tex(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.pos(i, l1, 0.0D).tex(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-            tessellator.draw();
+            bufferbuilder.vertex(i, l1 + k1, 0.0D).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+            bufferbuilder.vertex(j, l1 + k1, 0.0D).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+            bufferbuilder.vertex(j, l1, 0.0D).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+            bufferbuilder.vertex(i, l1, 0.0D).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+            tessellator.end();
             bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-            bufferbuilder.pos(i, l1 + k1 - 1, 0.0D).tex(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.pos(j - 1, l1 + k1 - 1, 0.0D).tex(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.pos(j - 1, l1, 0.0D).tex(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.pos(i, l1, 0.0D).tex(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-            tessellator.draw();
+            bufferbuilder.vertex(i, l1 + k1 - 1, 0.0D).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+            bufferbuilder.vertex(j - 1, l1 + k1 - 1, 0.0D).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+            bufferbuilder.vertex(j - 1, l1, 0.0D).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+            bufferbuilder.vertex(i, l1, 0.0D).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+            tessellator.end();
         }
 
         this.renderDecorations(matrix, mouseX, mouseY);
@@ -453,29 +453,32 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
         RenderSystem.disableBlend();
     }
 
-    protected void renderBackground(MatrixStack matrix) {}
+    protected void renderBackground(MatrixStack matrix) {
+    }
 
-    protected void renderDecorations(MatrixStack matrix, int p_renderDecorations_1_, int p_renderDecorations_2_) {}
+    protected void renderDecorations(MatrixStack matrix, int p_renderDecorations_1_, int p_renderDecorations_2_) {
+    }
 
-    protected void renderHeader(MatrixStack matrix, int p_renderHeader_1_, int p_renderHeader_2_, Tessellator p_renderHeader_3_) {}
+    protected void renderHeader(MatrixStack matrix, int p_renderHeader_1_, int p_renderHeader_2_, Tessellator p_renderHeader_3_) {
+    }
 
     protected void renderHoleBackground(int p_renderHoleBackground_1_, int p_renderHoleBackground_2_, int p_renderHoleBackground_3_, int p_renderHoleBackground_4_) {
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        this.minecraft.getTextureManager().bindTexture(AbstractGui.BACKGROUND_LOCATION);
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        this.minecraft.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-        bufferbuilder.pos(this.x0, p_renderHoleBackground_2_, 0.0D).tex(0.0F, p_renderHoleBackground_2_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_4_).endVertex();
-        bufferbuilder.pos(this.x0 + this.width, p_renderHoleBackground_2_, 0.0D).tex(this.width / 32.0F, p_renderHoleBackground_2_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_4_).endVertex();
-        bufferbuilder.pos(this.x0 + this.width, p_renderHoleBackground_1_, 0.0D).tex(this.width / 32.0F, p_renderHoleBackground_1_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_3_).endVertex();
-        bufferbuilder.pos(this.x0, p_renderHoleBackground_1_, 0.0D).tex(0.0F, p_renderHoleBackground_1_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_3_).endVertex();
-        tessellator.draw();
+        bufferbuilder.vertex(this.x0, p_renderHoleBackground_2_, 0.0D).uv(0.0F, p_renderHoleBackground_2_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_4_).endVertex();
+        bufferbuilder.vertex(this.x0 + this.width, p_renderHoleBackground_2_, 0.0D).uv(this.width / 32.0F, p_renderHoleBackground_2_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_4_).endVertex();
+        bufferbuilder.vertex(this.x0 + this.width, p_renderHoleBackground_1_, 0.0D).uv(this.width / 32.0F, p_renderHoleBackground_1_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_3_).endVertex();
+        bufferbuilder.vertex(this.x0, p_renderHoleBackground_1_, 0.0D).uv(0.0F, p_renderHoleBackground_1_ / 32.0F).color(64, 64, 64, p_renderHoleBackground_3_).endVertex();
+        tessellator.end();
     }
 
     protected void renderList(MatrixStack matrix, int x, int y, int mouseX, int mouseY, float pTicks) {
         int i = this.getItemCount();
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
 
         int top = this.y0 + getSpacer() - (int) this.getScrollAmount() + this.headerHeight;
         for (int j = 0; j < i; ++j) {
@@ -493,18 +496,18 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
                     float f = this.isFocused() ? 1.0F : 0.5F;
                     RenderSystem.color4f(f, f, f, 1.0F);
                     bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-                    bufferbuilder.pos(l1, i1 + realHeight + 2, 0.0D).endVertex();
-                    bufferbuilder.pos(i2, i1 + realHeight + 2, 0.0D).endVertex();
-                    bufferbuilder.pos(i2, i1 - 2, 0.0D).endVertex();
-                    bufferbuilder.pos(l1, i1 - 2, 0.0D).endVertex();
-                    tessellator.draw();
+                    bufferbuilder.vertex(l1, i1 + realHeight + 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(i2, i1 + realHeight + 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(i2, i1 - 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(l1, i1 - 2, 0.0D).endVertex();
+                    tessellator.end();
                     RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
                     bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-                    bufferbuilder.pos(l1 + 1, i1 + realHeight + 1, 0.0D).endVertex();
-                    bufferbuilder.pos(i2 - 1, i1 + realHeight + 1, 0.0D).endVertex();
-                    bufferbuilder.pos(i2 - 1, i1 - 1, 0.0D).endVertex();
-                    bufferbuilder.pos(l1 + 1, i1 - 1, 0.0D).endVertex();
-                    tessellator.draw();
+                    bufferbuilder.vertex(l1 + 1, i1 + realHeight + 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(i2 - 1, i1 + realHeight + 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(i2 - 1, i1 - 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(l1 + 1, i1 - 1, 0.0D).endVertex();
+                    tessellator.end();
                     RenderSystem.enableTexture();
                 }
                 //System.out.println(mouseY + " " + i1);
@@ -567,7 +570,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
     }
 
     @Override
-    public List<E> getEventListeners() {
+    public List<E> children() {
         return children;
     }
 

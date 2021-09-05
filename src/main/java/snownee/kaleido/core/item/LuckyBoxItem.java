@@ -7,7 +7,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
@@ -20,18 +19,18 @@ public class LuckyBoxItem extends ModItem {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
 
-        ItemStack stack = playerIn.getHeldItem(handIn);
+        ItemStack stack = playerIn.getItemInHand(handIn);
         Collection<ModelInfo> infos = KaleidoDataManager.INSTANCE.allInfos.values();
         if (infos.isEmpty()) {
-            return ActionResult.resultFail(stack);
+            return ActionResult.fail(stack);
         } else {
-            if (!worldIn.isRemote) {
+            if (!worldIn.isClientSide) {
                 //            List<ModelInfo> list = ImmutableList.copyOf(infos);
                 //            ModelInfo info = list.get(worldIn.rand.nextInt(list.size()));
                 //            ItemHandlerHelper.giveItemToPlayer(playerIn, info.makeItem());
-                ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) playerIn, playerIn.getRNG());
+                ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) playerIn, playerIn.getRandom());
                 if (info != null && info.grant((ServerPlayerEntity) playerIn)) {
                     if (!playerIn.isCreative()) {
                         stack.shrink(1);
@@ -39,7 +38,7 @@ public class LuckyBoxItem extends ModItem {
                     //playerIn.sendMessage(new StringTextComponent("Unlock: " + info.id));
                 }
             }
-            return ActionResult.resultSuccess(stack);
+            return ActionResult.success(stack);
         }
     }
 

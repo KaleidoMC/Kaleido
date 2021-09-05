@@ -33,7 +33,7 @@ public class SeatBehavior implements Behavior {
     }
 
     public static Vector3d vecFromJson(JsonObject o) {
-        return new Vector3d(JSONUtils.getFloat(o, "x", 0.5f), JSONUtils.getFloat(o, "y", 0.5f), JSONUtils.getFloat(o, "z", 0.5f));
+        return new Vector3d(JSONUtils.getAsFloat(o, "x", 0.5f), JSONUtils.getAsFloat(o, "y", 0.5f), JSONUtils.getAsFloat(o, "z", 0.5f));
     }
 
     private final Vector3d[] seats;
@@ -49,26 +49,26 @@ public class SeatBehavior implements Behavior {
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (seats.length == 0 || player instanceof FakePlayer || player.getRidingEntity() != null)
+        if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
             return ActionResultType.FAIL;
-        ItemStack stack1 = player.getHeldItemMainhand();
-        ItemStack stack2 = player.getHeldItemOffhand();
+        ItemStack stack1 = player.getMainHandItem();
+        ItemStack stack2 = player.getOffhandItem();
         if (!stack1.isEmpty() || !stack2.isEmpty())
             return ActionResultType.FAIL;
         Vector3d vec = seats[0];
         vec = vec.add(pos.getX(), pos.getY(), pos.getZ());
 
         double maxDist = 2;
-        if ((vec.x - player.getPosX()) * (vec.x - player.getPosX()) + (vec.y - player.getPosY()) * (vec.y - player.getPosY()) + (vec.z - player.getPosZ()) * (vec.z - player.getPosZ()) > maxDist * maxDist)
+        if ((vec.x - player.getX()) * (vec.x - player.getX()) + (vec.y - player.getY()) * (vec.y - player.getY()) + (vec.z - player.getZ()) * (vec.z - player.getZ()) > maxDist * maxDist)
             return ActionResultType.FAIL;
 
-        List<SeatEntity> seats = worldIn.getEntitiesWithinAABB(SeatEntity.class, new AxisAlignedBB(pos, pos.add(1, 1, 1)));
+        List<SeatEntity> seats = worldIn.getEntitiesOfClass(SeatEntity.class, new AxisAlignedBB(pos));
 
         if (!seats.isEmpty()) {
             return ActionResultType.FAIL;
         }
         SeatEntity seat = new SeatEntity(worldIn, vec);
-        worldIn.addEntity(seat);
+        worldIn.addFreshEntity(seat);
         Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, i -> {
             if (player.isPassenger()) {
                 return true;

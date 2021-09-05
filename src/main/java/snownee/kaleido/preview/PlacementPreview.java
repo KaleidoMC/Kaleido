@@ -65,7 +65,7 @@ public final class PlacementPreview {
         }
 
         GhostRenderType(RenderType original) {
-            super(original.toString() + "_place_preview", original.getVertexFormat(), original.getDrawMode(), original.getBufferSize(), original.isUseDelegate(), true, () -> {
+            super(original.toString() + "_place_preview", original.format(), original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
                 original.setupRenderState();
                 RenderSystem.disableDepthTest();
                 RenderSystem.enableBlend();
@@ -118,14 +118,14 @@ public final class PlacementPreview {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        if (mc.loadingGui != null || mc.player == null || mc.gameSettings.hideGUI || mc.gameSettings.keyBindAttack.isKeyDown() || !(mc.objectMouseOver instanceof BlockRayTraceResult) || mc.objectMouseOver.getType() == RayTraceResult.Type.MISS) {
+        if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS) {
             return;
         }
 
         ClientPlayerEntity player = mc.player;
-        ItemStack held = player.getHeldItemMainhand();
+        ItemStack held = player.getMainHandItem();
         if (!(held.getItem() instanceof BlockItem)) {
-            held = player.getHeldItemOffhand();
+            held = player.getOffhandItem();
         }
         if (!KaleidoClientConfig.previewAllBlocks && held.getItem() != CoreModule.STUFF_ITEM) {
             return;
@@ -135,7 +135,7 @@ public final class PlacementPreview {
             ModelInfo info = MasterBlock.getInfo(held);
             if (theBlockItem == CoreModule.STUFF_ITEM) {
                 info = MasterBlock.getInfo(held);
-                TileEntity tile = mc.world.getTileEntity(((BlockRayTraceResult) mc.objectMouseOver).getPos());
+                TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
                 if (tile instanceof MasterTile) {
                     MasterTile masterTile = (MasterTile) tile;
                     if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
@@ -143,7 +143,7 @@ public final class PlacementPreview {
                     }
                 }
             }
-            BlockItemUseContext context = theBlockItem.getBlockItemUseContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.objectMouseOver)));
+            BlockItemUseContext context = theBlockItem.updatePlacementContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.hitResult)));
             if (context == null) {
                 return;
             }
@@ -156,44 +156,44 @@ public final class PlacementPreview {
             if (placeResult == null) {
                 return;
             }
-            BlockRenderType renderType = placeResult.getRenderType();
+            BlockRenderType renderType = placeResult.getRenderShape();
             if (renderType == BlockRenderType.INVISIBLE) {
                 return;
             }
-            BlockPos target = context.getPos();
+            BlockPos target = context.getClickedPos();
             if (lastStack != held) {
                 lastStack = held;
                 transform.pos(target);
             }
             if (renderBuffer == null) {
-                renderBuffer = initRenderBuffer(mc.getRenderTypeBuffers().getBufferSource());
+                renderBuffer = initRenderBuffer(mc.renderBuffers().bufferSource());
             }
             MatrixStack transforms = event.getMatrixStack();
-            Vector3d projVec = mc.getRenderManager().info.getProjectedView();
+            Vector3d projVec = mc.getEntityRenderDispatcher().camera.getPosition();
             transforms.translate(-projVec.x, -projVec.y, -projVec.z);
-            transforms.push();
-            transform.target(target).tick(mc.getTickLength());
+            transforms.pushPose();
+            transform.target(target).tick(mc.getDeltaFrameTime());
             transforms.translate(transform.getX(), transform.getY(), transform.getZ());
-            World world = context.getWorld();
+            World world = context.getLevel();
             if (renderType == BlockRenderType.MODEL) {
                 IModelData data = ModelDataManager.getModelData(world, target);
                 if (data == null) {
                     data = EmptyModelData.INSTANCE;
                 }
-                BlockRendererDispatcher dispatcher = mc.getBlockRendererDispatcher();
+                BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
                 IBakedModel bakedModel;
                 if (theBlockItem == CoreModule.STUFF_ITEM) {
                     if (info == null) {
                         bakedModel = mc.getModelManager().getMissingModel();
                     } else {
-                        Direction direction = placeResult.get(HorizontalBlock.HORIZONTAL_FACING);
+                        Direction direction = placeResult.getValue(HorizontalBlock.FACING);
                         bakedModel = KaleidoClient.getModel(info, direction);
                     }
                 } else {
-                    bakedModel = dispatcher.getBlockModelShapes().getModel(placeResult);
+                    bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
                 }
-                long i = placeResult.getPositionRandom(target);
-                dispatcher.getBlockModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup./*getRenderType*/func_239220_a_(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
+                long i = placeResult.getSeed(target);
+                dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
             }
             /* Assume renderType is not null.
              *
@@ -202,18 +202,19 @@ public final class PlacementPreview {
              */
             if (placeResult.hasTileEntity()) {
                 TileEntity tile = placeResult.createTileEntity(world);
-                tile.setWorldAndPos(world, target);
+                tile.setLevelAndPosition(world, target);
                 TileEntityRenderer<? super TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
                 if (renderer != null) {
                     try {
                         // 0x00F0_00F0 means "full sky light and full block light".
                         // Reference: LightTexture.packLight (func_228451_a_)
                         renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
-            transforms.pop();
-            renderBuffer.finish();
+            transforms.popPose();
+            renderBuffer.endBatch();
         }
     }
 }

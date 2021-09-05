@@ -74,7 +74,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
-        boolean firstTime = allInfos.isEmpty();
+        //boolean firstTime = allInfos.isEmpty();
         allInfos.clear();
         allPacks.clear();
         for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
@@ -89,9 +89,9 @@ public class KaleidoDataManager extends JsonReloadListener {
             }
         }
         if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
-            for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).reloadListeners) {
+            for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
                 if (listener instanceof AdvancementManager) {
-                    makeAdvancements(((AdvancementManager) listener).advancementList);
+                    makeAdvancements(((AdvancementManager) listener).advancements);
                     break;
                 }
             }
@@ -109,17 +109,17 @@ public class KaleidoDataManager extends JsonReloadListener {
     }
 
     public void makeAdvancement(Map<ResourceLocation, Builder> map, Advancement parent, ModelInfo info) {
-        Advancement.Builder builder = Advancement.Builder.builder();
-        builder.withParent(parent);
-        builder.withCriterion("_", new ImpossibleTrigger.Instance());
+        Advancement.Builder builder = Advancement.Builder.advancement();
+        builder.parent(parent);
+        builder.addCriterion("_", new ImpossibleTrigger.Instance());
         map.put(info.getAdvancementId(), builder);
     }
 
     public void makeAdvancements(AdvancementList advancements) {
         Map<ResourceLocation, Builder> map = Maps.newLinkedHashMap();
-        Advancement parent = advancements.getAdvancement(new ResourceLocation(Kaleido.MODID, "root"));
+        Advancement parent = advancements.get(new ResourceLocation(Kaleido.MODID, "root"));
         allInfos.values().forEach(info -> makeAdvancement(map, parent, info));
-        advancements.loadAdvancements(map);
+        advancements.add(map);
     }
 
     public void onAdvancement(AdvancementEvent event) {

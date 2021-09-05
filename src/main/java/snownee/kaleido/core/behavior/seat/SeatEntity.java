@@ -22,32 +22,34 @@ public class SeatEntity extends Entity {
 
     public SeatEntity(World world, Vector3d pos) {
         this(world);
-        setPosition(pos.x, pos.y + 0.001, pos.z);
-        block = world.getBlockState(getPosition()).getBlock();
+        setPos(pos.x, pos.y + 0.001, pos.z);
+        block = world.getBlockState(blockPosition()).getBlock();
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
-    protected void readAdditional(CompoundNBT compound) {}
+    protected void readAdditionalSaveData(CompoundNBT compound) {
+    }
 
     @Override
-    protected void registerData() {}
+    protected void defineSynchedData() {
+    }
 
     @Override
     public void tick() {
-        if (world.isRemote) {
+        if (level.isClientSide) {
             return;
         }
-        if (this.getPosY() < -64.0D) {
-            this.outOfWorld();
+        if (this.getY() < -64.0D) {
+            outOfWorld();
         }
 
-        BlockPos pos = getPosition();
-        if (pos == null || getEntityWorld().getBlockState(pos).getBlock() != block) {
+        BlockPos pos = blockPosition();
+        if (pos == null || level.getBlockState(pos).getBlock() != block) {
             remove();
             return;
         }
@@ -57,16 +59,18 @@ public class SeatEntity extends Entity {
             if (!e.isAlive())
                 e.stopRiding();
         if (passangers.isEmpty()) {
-            if (++portalCounter > 5) {
+            if (++portalTime > 5) {
                 remove();
             }
         } else {
-            portalCounter = 0;
+            portalTime = 0;
         }
 
-        this.firstUpdate = false;
+        firstTick = false;
     }
 
     @Override
-    protected void writeAdditional(CompoundNBT p_213281_1_) {}
+    protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+    }
+
 }

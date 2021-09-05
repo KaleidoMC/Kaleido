@@ -70,10 +70,12 @@ public class KaleidoModel implements IDynamicBakedModel {
         @SuppressWarnings("hiding")
         public static final Loader INSTANCE = new Loader();
 
-        private Loader() {}
+        private Loader() {
+        }
 
         @Override
-        public void onResourceManagerReload(IResourceManager resourceManager) {}
+        public void onResourceManagerReload(IResourceManager resourceManager) {
+        }
 
         @Override
         public Geometry read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
@@ -86,9 +88,9 @@ public class KaleidoModel implements IDynamicBakedModel {
 
         @Nullable
         @Override
-        public IBakedModel getOverrideModel(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
+        public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
             ModelInfo info = MasterBlock.getInfo(stack);
-            if (Minecraft.getInstance().loadingGui != null) {
+            if (Minecraft.getInstance().overlay != null) {
                 return null;
             }
             return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
@@ -115,8 +117,8 @@ public class KaleidoModel implements IDynamicBakedModel {
 
     @Override
     @SuppressWarnings("deprecation")
-    public TextureAtlasSprite getParticleTexture() {
-        return missingno.get().getParticleTexture();
+    public TextureAtlasSprite getParticleIcon() {
+        return missingno.get().getParticleIcon();
     }
 
     @Override
@@ -129,7 +131,7 @@ public class KaleidoModel implements IDynamicBakedModel {
         if (state == null) {
             return missingno.get().getQuads(null, side, rand, extraData);
         }
-        Direction direction = state.hasProperty(HorizontalBlock.HORIZONTAL_FACING) ? state.get(HorizontalBlock.HORIZONTAL_FACING) : Direction.NORTH;
+        Direction direction = state.hasProperty(HorizontalBlock.FACING) ? state.getValue(HorizontalBlock.FACING) : Direction.NORTH;
         return getModel(extraData, direction).getQuads(state, side, rand, extraData);
     }
 
@@ -140,17 +142,17 @@ public class KaleidoModel implements IDynamicBakedModel {
     }
 
     @Override
-    public boolean isAmbientOcclusion() {
+    public boolean useAmbientOcclusion() {
         return true;
     }
 
     @Override
     public boolean isAmbientOcclusion(BlockState state) {
-        return state.hasProperty(MasterBlock.AO) && state.get(MasterBlock.AO) == Boolean.TRUE;
+        return state.hasProperty(MasterBlock.AO) && state.getValue(MasterBlock.AO) == Boolean.TRUE;
     }
 
     @Override
-    public boolean isBuiltInRenderer() {
+    public boolean isCustomRenderer() {
         return false;
     }
 
@@ -160,7 +162,7 @@ public class KaleidoModel implements IDynamicBakedModel {
     }
 
     @Override
-    public boolean isSideLit() {
+    public boolean usesBlockLight() {
         return false;
     }
 }
