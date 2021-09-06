@@ -56,7 +56,7 @@ public class ItemStorageBehavior implements Behavior {
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		if (title != null && !worldIn.isClientSide) {
 			player.openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
 				if (rows == 6) {
@@ -70,12 +70,12 @@ public class ItemStorageBehavior implements Behavior {
 	}
 
 	@Override
-	public void read(CompoundNBT data) {
+	public void load(CompoundNBT data) {
 		handler.ifPresent($ -> $.deserializeNBT(data));
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT data) {
+	public CompoundNBT save(CompoundNBT data) {
 		if (handler.isPresent()) {
 			return handler.orElseGet(ItemStackHandler::new).serializeNBT();
 		}

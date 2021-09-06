@@ -41,7 +41,10 @@ import net.minecraftforge.event.entity.player.AdvancementEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SSyncModelsPacket;
+import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
+import snownee.kaleido.util.ShapeCache;
+import snownee.kaleido.util.ShapeSerializer;
 import snownee.kiwi.util.Util;
 
 public class KaleidoDataManager extends JsonReloadListener {
@@ -62,6 +65,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
 	public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
+	public final ShapeSerializer shapeSerializer;
+	public final ShapeCache shapeCache;
 
 	private KaleidoDataManager() {
 		super(GSON, "kaleido");
@@ -69,6 +74,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 		MinecraftForge.EVENT_BUS.addListener(this::tick);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		MinecraftForge.EVENT_BUS.addListener(this::onSyncDatapack);
+		shapeCache = new ShapeCache();
+		shapeSerializer = new ShapeSerializer(shapeCache);
 	}
 
 	public void add(ModelInfo info) {
@@ -79,7 +86,6 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
-		//boolean firstTime = allInfos.isEmpty();
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
 		allPacks.clear();
@@ -193,10 +199,11 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	private static void sync(ServerPlayerEntity player, MinecraftServer server) {
-		if (!player.level.isClientSide && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
+		if (!player.level.isClientSide && server != null && !INSTANCE.allInfos.isEmpty()) {
 			if (server.isSingleplayerOwner(player.getGameProfile())) {
 				KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
 			} else {
+				new SSyncShapesPacket().send(player);
 				new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
 			}
 		}

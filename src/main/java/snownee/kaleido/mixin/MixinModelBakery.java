@@ -19,6 +19,6 @@ public abstract class MixinModelBakery {
 		KaleidoClient.registerModels(this::addModelToCache);
 	}
 
-	@Shadow
+	@Shadow(remap = false)
 	abstract void addModelToCache(ResourceLocation p_217843_1_);
 }

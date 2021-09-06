@@ -63,12 +63,12 @@ public interface Behavior {
 		return LazyOptional.empty();
 	}
 
-	ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
+	ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
 
-	default void read(CompoundNBT data) {
+	default void load(CompoundNBT data) {
 	}
 
-	default CompoundNBT write(CompoundNBT data) {
+	default CompoundNBT save(CompoundNBT data) {
 		return data;
 	}
 

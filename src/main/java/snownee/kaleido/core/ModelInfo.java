@@ -1,22 +1,27 @@
 package snownee.kaleido.core;
 
+import com.google.common.hash.HashCode;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
+import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.util.ShapeCache;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.NBTHelper;
 
@@ -29,6 +34,10 @@ public class ModelInfo {
 	public boolean reward;
 	private String descriptionId;
 	public boolean expired;
+	public OffsetType offset = OffsetType.NONE;
+	public boolean noCollision;
+	private HashCode shape;
+	private VoxelShape[] shapeCache = ShapeCache.fallback;
 
 	public boolean opposite; // temp
 
@@ -93,6 +102,9 @@ public class ModelInfo {
 		buf.writeBoolean(isLockedServer(player));
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
+		buf.writeEnum(offset);
+		buf.writeByteArray(shape.asBytes());
+		buf.writeBoolean(noCollision);
 
 		buf.writeBoolean(opposite);
 	}
@@ -104,6 +116,9 @@ public class ModelInfo {
 		info.setLocked(buf.readBoolean());
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
+		info.offset = buf.readEnum(OffsetType.class);
+		info.shape = HashCode.fromBytes(buf.readByteArray());
+		info.noCollision = buf.readBoolean();
 
 		info.opposite = buf.readBoolean();
 		return info;
@@ -117,10 +132,33 @@ public class ModelInfo {
 			}
 			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 			info.price = JSONUtils.getAsInt(json, "price", 1);
+			if (json.has("offset"))
+				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
+			if (json.has("shape")) {
+				info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
+				if (info.shape != null) {
+					info.shapeCache = null;
+				}
+			}
+			info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
 
 			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);
 		}
 		return info;
+	}
+
+	public VoxelShape getShape(Direction direction) {
+		if (shapeCache == null && shapeCache == null) {
+			shapeCache = KaleidoDataManager.INSTANCE.shapeCache.get(shape);
+		}
+		if (direction == null) {
+			direction = Direction.NORTH;
+		}
+		int i = direction.get2DDataValue();
+		if (shapeCache[i] == null) {
+			KaleidoDataManager.INSTANCE.shapeCache.update(shape, direction);
+		}
+		return shapeCache[i];
 	}
 
 }

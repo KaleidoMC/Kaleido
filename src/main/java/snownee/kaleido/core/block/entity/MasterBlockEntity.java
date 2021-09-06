@@ -68,7 +68,7 @@ public class MasterBlockEntity extends BaseTile {
 			if (info != null) {
 				setModelInfo(info);
 				if (data.contains("SubTile")) {
-					behavior.read(data.getCompound("SubTile"));
+					behavior.load(data.getCompound("SubTile"));
 				}
 			}
 		}
@@ -102,7 +102,7 @@ public class MasterBlockEntity extends BaseTile {
 		if (getModelData() != null) {
 			data.putString("Model", modelInfo.id.toString());
 			if (behavior != null) {
-				data.put("SubTile", behavior.write(new CompoundNBT()));
+				data.put("SubTile", behavior.save(new CompoundNBT()));
 			}
 		}
 		return data;

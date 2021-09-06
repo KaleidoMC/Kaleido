@@ -48,7 +48,7 @@ public class SeatBehavior implements Behavior {
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
 			return ActionResultType.FAIL;
 		ItemStack stack1 = player.getMainHandItem();

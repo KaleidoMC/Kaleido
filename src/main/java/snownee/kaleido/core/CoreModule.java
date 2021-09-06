@@ -30,6 +30,7 @@ import snownee.kaleido.core.item.LuckyBoxItem;
 import snownee.kaleido.core.item.StuffItem;
 import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
+import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
@@ -91,6 +92,8 @@ public class CoreModule extends AbstractModule {
 	protected void preInit() {
 		NetworkChannel.register(SSyncModelsPacket.class, new SSyncModelsPacket.Handler());
 		NetworkChannel.register(SUnlockModelsPacket.class, new SUnlockModelsPacket.Handler());
+		NetworkChannel.register(SSyncShapesPacket.class, new SSyncShapesPacket.Handler(KaleidoDataManager.INSTANCE.shapeCache));
+
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
 	}
 

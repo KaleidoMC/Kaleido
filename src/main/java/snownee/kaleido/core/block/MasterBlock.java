@@ -22,6 +22,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.KaleidoDataManager;
@@ -100,7 +101,7 @@ public class MasterBlock extends HorizontalBlock {
 	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
-			return ((MasterBlockEntity) tile).behavior.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+			return ((MasterBlockEntity) tile).behavior.use(state, worldIn, pos, player, handIn, hit);
 		}
 		return ActionResultType.PASS;
 	}
@@ -123,9 +124,29 @@ public class MasterBlock extends HorizontalBlock {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		//worldIn.getTileEntity(pos);
-		// TODO Auto-generated method stub
-		return super.getShape(state, worldIn, pos, context);
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		if (tile instanceof MasterBlockEntity) {
+			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
+			if (info != null) {
+				VoxelShape shape = info.getShape(state.getValue(FACING));
+				if (!shape.isEmpty()) {
+					return shape;
+				}
+			}
+		}
+		return VoxelShapes.block();
+	}
+
+	@Override
+	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		TileEntity tile = worldIn.getBlockEntity(pos);
+		if (tile instanceof MasterBlockEntity) {
+			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
+			if (info != null && !info.noCollision) {
+				return info.getShape(state.getValue(FACING));
+			}
+		}
+		return VoxelShapes.empty();
 	}
 
 	@Override
@@ -135,12 +156,6 @@ public class MasterBlock extends HorizontalBlock {
 			return ((MasterBlockEntity) tile).behavior.getLightValue();
 		}
 		return super.getLightValue(state, world, pos);
-	}
-
-	@Override
-	public OffsetType getOffsetType() {
-		// TODO Auto-generated method stub
-		return super.getOffsetType();
 	}
 
 }
