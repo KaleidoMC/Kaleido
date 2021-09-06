@@ -27,6 +27,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
+import snownee.kaleido.core.KaleidoTemplate;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.RenderLayer;
@@ -85,10 +86,12 @@ public class MasterBlock extends HorizontalBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context) {
 		ModelInfo info = getInfo(context.getItemInHand());
-		if (info == null) {
+		if (info == null)
 			return null;
-		}
 		Direction direction = context.getHorizontalDirection();
+		if (info.template == KaleidoTemplate.block) {
+			direction = Direction.NORTH;
+		}
 		if (info.opposite) {
 			direction = direction.getOpposite();
 		}
@@ -127,6 +130,9 @@ public class MasterBlock extends HorizontalBlock {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		if (this != CoreModule.STUFF) {
+			return VoxelShapes.block();
+		}
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
@@ -142,12 +148,14 @@ public class MasterBlock extends HorizontalBlock {
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		if (this != CoreModule.STUFF) {
+			return VoxelShapes.block();
+		}
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-			if (info != null && !info.noCollision) {
+			if (info != null && !info.noCollision)
 				return info.getShape(state.getValue(FACING));
-			}
 		}
 		return VoxelShapes.empty();
 	}

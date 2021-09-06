@@ -37,12 +37,13 @@ public class CRedeemPacket extends ClientPacket {
 					return;
 				}
 				ServerPlayerEntity player = ctx.get().getSender();
-				int coins = KaleidoUtil.getCoins(player);
-				int price = pkt.info.price * pkt.amount;
-				if (coins < price) {
-					return;
+				if (!player.isCreative()) {
+					int coins = KaleidoUtil.getCoins(player);
+					int price = pkt.info.price * pkt.amount;
+					if (coins < price)
+						return;
+					KaleidoUtil.takeCoins(player, price);
 				}
-				KaleidoUtil.takeCoins(player, price);
 				KaleidoUtil.giveItems(player, pkt.amount, pkt.info.makeItem());
 			});
 			ctx.get().setPacketHandled(true);

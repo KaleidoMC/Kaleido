@@ -122,7 +122,7 @@ public class CarpentryModule extends AbstractModule {
 			// Unlock
 			AxisAlignedBB bb = new AxisAlignedBB(villager.position().subtract(5, 5, 5), villager.position().add(5, 5, 5));
 			List<ServerPlayerEntity> players = villager.level.getEntitiesOfClass(ServerPlayerEntity.class, bb, $ -> !$.isSpectator());
-			ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
+			ModelInfo info = KaleidoDataManager.INSTANCE.getRandomLocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
 			if (info != null) {
 				for (ServerPlayerEntity player : players) {
 					info.grant(player);

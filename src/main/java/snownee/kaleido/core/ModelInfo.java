@@ -18,6 +18,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kaleido.core.block.MasterBlock;
@@ -28,8 +29,9 @@ import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo implements Comparable<ModelInfo> {
 
-	public Behavior behavior = NoneBehavior.INSTANCE;
 	public ResourceLocation id;
+	public KaleidoTemplate template = KaleidoTemplate.none;
+	public Behavior behavior = NoneBehavior.INSTANCE;
 	private boolean locked = true;
 	public int price = 1;
 	public boolean reward;
@@ -80,7 +82,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
-			return !isAdvancementDone(player);
+			return !(KaleidoCommonConfig.autoUnlock || isAdvancementDone(player));
 		}
 	}
 
@@ -100,12 +102,15 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player) {
 		buf.writeResourceLocation(id);
+		buf.writeEnum(template);
 		buf.writeBoolean(isLockedServer(player));
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
 		buf.writeEnum(offset);
-		buf.writeByteArray(shape.asBytes());
-		buf.writeBoolean(noCollision);
+		if (!template.solid) {
+			buf.writeByteArray(shape.asBytes());
+			buf.writeBoolean(noCollision);
+		}
 
 		buf.writeBoolean(opposite);
 	}
@@ -114,12 +119,15 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public static ModelInfo fromNetwork(PacketBuffer buf) {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
+		info.template = buf.readEnum(KaleidoTemplate.class);
 		info.setLocked(buf.readBoolean());
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
 		info.offset = buf.readEnum(OffsetType.class);
-		info.shape = HashCode.fromBytes(buf.readByteArray());
-		info.noCollision = buf.readBoolean();
+		if (!info.template.solid) {
+			info.shape = HashCode.fromBytes(buf.readByteArray());
+			info.noCollision = buf.readBoolean();
+		}
 
 		info.opposite = buf.readBoolean();
 		return info;
@@ -128,6 +136,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public static ModelInfo fromJson(JsonObject json) {
 		ModelInfo info = new ModelInfo();
 		if (info != null) {
+			if (json.has("template"))
+				info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
 			if (json.has("behavior")) {
 				info.behavior = KaleidoDataManager.GSON.fromJson(json.get("behavior"), Behavior.class);
 			}
@@ -135,13 +145,15 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			info.price = JSONUtils.getAsInt(json, "price", 1);
 			if (json.has("offset"))
 				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
-			if (json.has("shape")) {
-				info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
-				if (info.shape != null) {
-					info.shapeCache = null;
+			if (!info.template.solid) {
+				if (json.has("shape")) {
+					info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
+					if (info.shape != null) {
+						info.shapeCache = null;
+					}
 				}
+				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
 			}
-			info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
 
 			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);
 		}

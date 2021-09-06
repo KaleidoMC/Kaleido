@@ -118,14 +118,20 @@ public final class PlacementPreview {
 		};
 	}
 
+	private static boolean successLast;
+
 	@SubscribeEvent
 	public static void render(RenderWorldLastEvent event) {
+		successLast = renderInternal(event);
+	}
+
+	private static boolean renderInternal(RenderWorldLastEvent event) {
 		if (!KaleidoClientConfig.previewEnabled) {
-			return;
+			return false;
 		}
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS) {
-			return;
+			return false;
 		}
 
 		ClientPlayerEntity player = mc.player;
@@ -134,26 +140,26 @@ public final class PlacementPreview {
 			held = player.getOffhandItem();
 		}
 		if (!KaleidoClientConfig.previewAllBlocks && held.getItem() != CoreModule.STUFF_ITEM) {
-			return;
+			return false;
 		}
 		if (held.getItem() instanceof BlockItem) {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
 			ModelInfo info = MasterBlock.getInfo(held);
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
 				if (info == null) {
-					return;
+					return false;
 				}
 				TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
 				if (tile instanceof MasterBlockEntity) {
 					MasterBlockEntity masterTile = (MasterBlockEntity) tile;
 					if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
-						return;
+						return false;
 					}
 				}
 			}
 			BlockItemUseContext context = theBlockItem.updatePlacementContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.hitResult)));
 			if (context == null) {
-				return;
+				return false;
 			}
 			BlockState placeResult;
 			try {
@@ -162,11 +168,17 @@ public final class PlacementPreview {
 				placeResult = null;
 			}
 			if (placeResult == null) {
-				return;
+				return false;
 			}
 			BlockRenderType renderType = placeResult.getRenderShape();
 			if (renderType == BlockRenderType.INVISIBLE) {
-				return;
+				return false;
+			}
+
+			BlockPos target = context.getClickedPos();
+			World world = context.getLevel();
+			if (!world.getBlockState(target).isAir()) {
+				return false;
 			}
 
 			Direction direction = null;
@@ -183,7 +195,6 @@ public final class PlacementPreview {
 				transform.rotate(direction.toYRot() + 180);
 			}
 
-			BlockPos target = context.getClickedPos();
 			if (lastStack != held) {
 				lastStack = held;
 				transform.pos(target);
@@ -195,11 +206,15 @@ public final class PlacementPreview {
 			Vector3d projVec = mc.getEntityRenderDispatcher().camera.getPosition();
 			transforms.translate(-projVec.x, -projVec.y, -projVec.z);
 			transforms.pushPose();
-			transform.target(target).tick(mc.getDeltaFrameTime());
+			if (successLast) {
+				transform.target(target);
+			} else {
+				transform.pos(target);
+			}
+			transform.tick(mc.getDeltaFrameTime());
 			transforms.translate(transform.getX() + .5, transform.getY() + .5, transform.getZ() + .5);
 			transforms.mulPose(transform.getRotation());
 			transforms.translate(-.5, -.5, -.5);
-			World world = context.getLevel();
 			if (renderType == BlockRenderType.MODEL) {
 				IModelData data = ModelDataManager.getModelData(world, target);
 				if (data == null) {
@@ -240,5 +255,6 @@ public final class PlacementPreview {
 			transforms.popPose();
 			renderBuffer.endBatch();
 		}
+		return true;
 	}
 }

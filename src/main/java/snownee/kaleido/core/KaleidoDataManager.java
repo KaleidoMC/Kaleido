@@ -210,7 +210,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		}
 	}
 
-	public ModelInfo getRandomUnlocked(ServerPlayerEntity player, Random rand) {
+	public ModelInfo getRandomLocked(ServerPlayerEntity player, Random rand) {
 		List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
 		return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
 	}

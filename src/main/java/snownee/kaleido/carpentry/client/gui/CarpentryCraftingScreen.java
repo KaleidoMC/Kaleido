@@ -34,6 +34,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent.BackgroundDrawnEvent;
 import net.minecraftforge.common.MinecraftForge;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.carpentry.CarpentryModule;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
@@ -128,14 +129,16 @@ public class CarpentryCraftingScreen extends Screen {
 				btn.render(matrix, mouseX, mouseY, partialTicks);
 			});
 
-			matrix.pushPose();
-			matrix.scale(0.75f, 0.75f, 0.75f);
-			AbstractGui.drawCenteredString(matrix, parent.font, unlocked + "/" + size, (int) ((left + entryWidth - 18) * 1.33), (int) ((top + 5.5) * 1.33), 0xFFFFFF);
-			matrix.popPose();
-			parent.minecraft.getTextureManager().bind(GUI_BARS_TEXTURES);
-			AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 0, 32, 5, 32, 32);
-			if (unlocked > 0) {
-				AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 5, (int) (progress * 32), 10, 32, 32);
+			if (!KaleidoCommonConfig.autoUnlock) {
+				matrix.pushPose();
+				matrix.scale(0.75f, 0.75f, 0.75f);
+				AbstractGui.drawCenteredString(matrix, parent.font, unlocked + "/" + size, (int) ((left + entryWidth - 18) * 1.33), (int) ((top + 5.5) * 1.33), 0xFFFFFF);
+				matrix.popPose();
+				parent.minecraft.getTextureManager().bind(GUI_BARS_TEXTURES);
+				AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 0, 32, 5, 32, 32);
+				if (unlocked > 0) {
+					AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 5, (int) (progress * 32), 10, 32, 32);
+				}
 			}
 		}
 
@@ -349,7 +352,7 @@ public class CarpentryCraftingScreen extends Screen {
 				}
 				itemRenderer.renderGuiItemDecorations(font, coinStack, x + 50, y + 95, Integer.toString(amount * selectedButton.info.price));
 			}
-		} else {
+		} else if (!KaleidoCommonConfig.autoUnlock) {
 			x += 40;
 			y += 40;
 			for (ITextProperties s : tip) {

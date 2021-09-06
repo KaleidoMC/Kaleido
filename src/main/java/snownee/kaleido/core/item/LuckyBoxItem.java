@@ -30,7 +30,7 @@ public class LuckyBoxItem extends ModItem {
 				//            List<ModelInfo> list = ImmutableList.copyOf(infos);
 				//            ModelInfo info = list.get(worldIn.rand.nextInt(list.size()));
 				//            ItemHandlerHelper.giveItemToPlayer(playerIn, info.makeItem());
-				ModelInfo info = KaleidoDataManager.INSTANCE.getRandomUnlocked((ServerPlayerEntity) playerIn, playerIn.getRandom());
+				ModelInfo info = KaleidoDataManager.INSTANCE.getRandomLocked((ServerPlayerEntity) playerIn, playerIn.getRandom());
 				if (info != null && info.grant((ServerPlayerEntity) playerIn)) {
 					if (!playerIn.isCreative()) {
 						stack.shrink(1);

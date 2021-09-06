@@ -99,7 +99,7 @@ public class MasterBlockEntity extends BaseTile {
 
 	@Override
 	protected CompoundNBT writePacketData(CompoundNBT data) {
-		if (getModelData() != null) {
+		if (getModelInfo() != null) {
 			data.putString("Model", modelInfo.id.toString());
 			if (behavior != null) {
 				data.put("SubTile", behavior.save(new CompoundNBT()));

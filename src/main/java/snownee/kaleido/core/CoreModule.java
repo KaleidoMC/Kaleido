@@ -1,6 +1,6 @@
 package snownee.kaleido.core;
 
-import java.util.Collections;
+import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityClassification;
@@ -47,9 +47,12 @@ public class CoreModule extends AbstractModule {
 	@NoItem
 	public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion().dynamicShape());
 
+	@NoItem
+	public static final MasterBlock HORIZONTAL = new MasterBlock(blockProp(Blocks.STONE));
+
 	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, Collections.singleton(STUFF), null);
+	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, ImmutableSet.of(STUFF, HORIZONTAL), null);
 
 	public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 
