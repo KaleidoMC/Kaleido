@@ -5,6 +5,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -13,6 +14,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.DirectionalBlock;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -34,6 +36,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -41,6 +44,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -70,7 +74,9 @@ public final class PlacementPreview {
 				RenderSystem.disableDepthTest();
 				RenderSystem.enableBlend();
 				RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-				RenderSystem.blendColor(1F, 1F, 1F, KaleidoClientConfig.previewAlpha);
+				float alpha = KaleidoClientConfig.previewAlpha + MathHelper.sin(Animation.getWorldTime(Minecraft.getInstance().level) * 4) * 0.05F;
+				alpha = MathHelper.clamp(alpha, 0, 1);
+				RenderSystem.blendColor(1F, 1F, 1F, alpha);
 			}, () -> {
 				RenderSystem.blendColor(1F, 1F, 1F, 1F);
 				RenderSystem.defaultBlendFunc();
@@ -133,11 +139,10 @@ public final class PlacementPreview {
 		if (held.getItem() instanceof BlockItem) {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
 			ModelInfo info = MasterBlock.getInfo(held);
-			if (info == null) {
-				return;
-			}
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
-				info = MasterBlock.getInfo(held);
+				if (info == null) {
+					return;
+				}
 				TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
 				if (tile instanceof MasterBlockEntity) {
 					MasterBlockEntity masterTile = (MasterBlockEntity) tile;
@@ -163,6 +168,21 @@ public final class PlacementPreview {
 			if (renderType == BlockRenderType.INVISIBLE) {
 				return;
 			}
+
+			Direction direction = null;
+			if (placeResult.hasProperty(HorizontalBlock.FACING)) {
+				direction = placeResult.getValue(HorizontalBlock.FACING);
+				placeResult = placeResult.setValue(HorizontalBlock.FACING, Direction.NORTH);
+			} else if (placeResult.hasProperty(DirectionalBlock.FACING) && placeResult.getValue(DirectionalBlock.FACING).get2DDataValue() != -1) {
+				direction = placeResult.getValue(DirectionalBlock.FACING);
+				placeResult = placeResult.setValue(DirectionalBlock.FACING, Direction.NORTH);
+			} else {
+				transform.canRotate = false;
+			}
+			if (direction != null) {
+				transform.rotate(direction.toYRot() + 180);
+			}
+
 			BlockPos target = context.getClickedPos();
 			if (lastStack != held) {
 				lastStack = held;
@@ -176,7 +196,9 @@ public final class PlacementPreview {
 			transforms.translate(-projVec.x, -projVec.y, -projVec.z);
 			transforms.pushPose();
 			transform.target(target).tick(mc.getDeltaFrameTime());
-			transforms.translate(transform.getX(), transform.getY(), transform.getZ());
+			transforms.translate(transform.getX() + .5, transform.getY() + .5, transform.getZ() + .5);
+			transforms.mulPose(transform.getRotation());
+			transforms.translate(-.5, -.5, -.5);
 			World world = context.getLevel();
 			if (renderType == BlockRenderType.MODEL) {
 				IModelData data = ModelDataManager.getModelData(world, target);
@@ -189,14 +211,13 @@ public final class PlacementPreview {
 					if (info == null) {
 						bakedModel = mc.getModelManager().getMissingModel();
 					} else {
-						Direction direction = placeResult.getValue(HorizontalBlock.FACING);
-						bakedModel = KaleidoClient.getModel(info, direction);
+						bakedModel = KaleidoClient.getModel(info, Direction.NORTH);
 					}
 				} else {
 					bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
 				}
 				long i = placeResult.getSeed(target);
-				dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, dispatcher.random, i, OverlayTexture.NO_OVERLAY, data);
+				dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
 			}
 			/* Assume renderType is not null.
              *

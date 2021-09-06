@@ -25,6 +25,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
@@ -39,6 +40,8 @@ public class MasterBlock extends HorizontalBlock {
 	public static final String NBT_ID = "Kaleido.Id";
 
 	public static ModelInfo getInfo(ItemStack stack) {
+		if (stack.getItem() != CoreModule.STUFF_ITEM)
+			return null;
 		NBTHelper data = NBTHelper.of(stack);
 		ResourceLocation modelId = Util.RL(data.getString(NBT_ID));
 		if (modelId == null || modelId.getPath().isEmpty()) {

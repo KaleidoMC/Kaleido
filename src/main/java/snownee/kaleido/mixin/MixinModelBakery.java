@@ -14,7 +14,7 @@ import snownee.kaleido.core.client.KaleidoClient;
 @Mixin(ModelBakery.class)
 public abstract class MixinModelBakery {
 
-	@Inject(at = @At("HEAD"), method = "processLoading")
+	@Inject(at = @At("HEAD"), method = "processLoading", remap = false)
 	private void kaleido_OnProcessLoading(IProfiler p_i226056_3_, int p_i226056_4_, CallbackInfo ci) {
 		KaleidoClient.registerModels(this::addModelToCache);
 	}

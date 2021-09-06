@@ -54,8 +54,8 @@ public class CarpentryCraftingScreen extends Screen {
 		private final CarpentryCraftingScreen parent;
 		private boolean selected;
 		private int size;
-
 		private int unlocked;
+		private float progress;
 
 		public Entry(CarpentryCraftingScreen parent, ModelPack pack) {
 			this.parent = parent;
@@ -78,6 +78,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 			size = pack.normalInfos.size();
 			unlocked = (int) pack.normalInfos.stream().filter($ -> !$.isLocked()).count();
+			progress = (float) unlocked / size;
 			height = (children.size() - 1) / 8 * 28 + 50;
 		}
 
@@ -134,7 +135,7 @@ public class CarpentryCraftingScreen extends Screen {
 			parent.minecraft.getTextureManager().bind(GUI_BARS_TEXTURES);
 			AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 0, 32, 5, 32, 32);
 			if (unlocked > 0) {
-				AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 5, unlocked * 32 / size, 10, 32, 32);
+				AbstractGui.blit(matrix, left + entryWidth - 66, top + 5, parent.getBlitOffset(), 0, 5, (int) (progress * 32), 10, 32, 32);
 			}
 		}
 
@@ -217,9 +218,12 @@ public class CarpentryCraftingScreen extends Screen {
 		tip = font.getSplitter().splitLines(I18n.get("tip.kaleido.unlock"), 120, Style.EMPTY);
 		children.add(list = new List(minecraft, 238, height, 20));
 		list.setLeftPos(30);
-		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
-			list.addEntry(new Entry(this, pack));
-		}
+		/* off */
+		KaleidoDataManager.INSTANCE.allPacks.values().stream()
+				.map($ -> new Entry(this, $))
+				.sorted((a,b)->Float.compare(b.progress, a.progress))
+				.forEachOrdered(list::addEntry);
+		/* on */
 
 		int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 125;
 		int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 50;

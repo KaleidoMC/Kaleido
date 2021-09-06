@@ -21,11 +21,12 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.NBTHelper;
 
-public class ModelInfo {
+public class ModelInfo implements Comparable<ModelInfo> {
 
 	public Behavior behavior = NoneBehavior.INSTANCE;
 	public ResourceLocation id;
@@ -159,6 +160,11 @@ public class ModelInfo {
 			KaleidoDataManager.INSTANCE.shapeCache.update(shape, direction);
 		}
 		return shapeCache[i];
+	}
+
+	@Override
+	public int compareTo(ModelInfo o) {
+		return KaleidoUtil.friendlyCompare(id.getPath(), o.id.getPath());
 	}
 
 }

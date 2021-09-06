@@ -101,8 +101,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		this.minecraft = mcIn;
 		this.width = widthIn;
 		this.height = heightIn;
-		this.y0 = topIn;
-		this.y1 = topIn + height - 40;
+		setTop(topIn);
 		this.x0 = 0;
 		this.x1 = widthIn;
 	}

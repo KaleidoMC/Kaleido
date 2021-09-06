@@ -101,6 +101,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 				Kaleido.logger.catching(e);
 			}
 		}
+		allPacks.values().forEach(ModelPack::sort);
 		if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
 			for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
 				if (listener instanceof AdvancementManager) {

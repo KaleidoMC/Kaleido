@@ -1,5 +1,6 @@
 package snownee.kaleido.core;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -19,6 +20,11 @@ public class ModelPack {
 		if (descriptionId == null) {
 			descriptionId = "kaleido.pack." + info.id.getNamespace();
 		}
+	}
+
+	public void sort() {
+		Collections.sort(normalInfos);
+		Collections.sort(rewardInfos);
 	}
 
 }
