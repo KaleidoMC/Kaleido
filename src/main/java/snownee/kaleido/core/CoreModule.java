@@ -1,8 +1,12 @@
 package snownee.kaleido.core;
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -69,6 +73,9 @@ public class CoreModule extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(FMLClientSetupEvent event) {
 		RenderingRegistry.registerEntityRenderingHandler(SEAT, EmptyEntityRenderer::new);
+
+		Set<RenderType> set = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
+		RenderTypeLookup.setRenderLayer(STUFF, set::contains);
 	}
 
 	@Override

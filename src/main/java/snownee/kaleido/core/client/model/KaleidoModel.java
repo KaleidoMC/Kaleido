@@ -17,6 +17,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IModelTransform;
@@ -34,6 +35,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -98,14 +100,19 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	}
 
-	private static KaleidoModel INSTANCE;
+	public static KaleidoModel INSTANCE;
 
 	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
 
 	public static IBakedModel getModel(IModelData extraData, Direction direction) {
 		IBakedModel model = null;
-		if (extraData.getData(MasterBlockEntity.MODEL) != null) {
-			model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), direction);
+		ModelInfo info = extraData.getData(MasterBlockEntity.MODEL);
+		if (info != null) {
+			RenderType layer = MinecraftForgeClient.getRenderLayer();
+			if (layer == null || info.renderTypes.contains(layer))
+				model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), direction);
+			else
+				return null;
 		}
 		return model != null ? model : missingno.get();
 	}

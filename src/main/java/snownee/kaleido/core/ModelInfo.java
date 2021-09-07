@@ -1,12 +1,16 @@
 package snownee.kaleido.core;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.HashCode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock.OffsetType;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -22,6 +26,8 @@ import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.NoneBehavior;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kiwi.Kiwi;
@@ -41,6 +47,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean noCollision;
 	private HashCode shape;
 	private VoxelShape[] shapeCache = ShapeCache.fallback;
+
+	private static final ImmutableSet<RenderType> defaultRenderTypes = ImmutableSet.of(RenderType.solid());
+	public ImmutableSet<RenderType> renderTypes = defaultRenderTypes;
 
 	public boolean opposite; // temp
 
@@ -110,6 +119,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (!template.solid) {
 			buf.writeByteArray(shape.asBytes());
 			buf.writeBoolean(noCollision);
+			buf.writeByte(renderTypes.size());
+			for (RenderType renderType : renderTypes) {
+				buf.writeByte(RenderTypeEnum.fromType(renderType).ordinal());
+			}
 		}
 
 		buf.writeBoolean(opposite);
@@ -127,6 +140,12 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (!info.template.solid) {
 			info.shape = HashCode.fromBytes(buf.readByteArray());
 			info.noCollision = buf.readBoolean();
+			byte size = buf.readByte();
+			ImmutableSet.Builder<RenderType> set = ImmutableSet.builder();
+			for (byte i = 0; i < size; i++) {
+				set.add(RenderTypeEnum.VALUES[buf.readByte()].renderType);
+			}
+			info.renderTypes = set.build();
 		}
 
 		info.opposite = buf.readBoolean();
@@ -153,6 +172,16 @@ public class ModelInfo implements Comparable<ModelInfo> {
 					}
 				}
 				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
+				if (json.has("renderType")) {
+					info.renderTypes = ImmutableSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")).renderType);
+				} else if (json.has("renderTypes")) {
+					JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
+					ImmutableSet.Builder<RenderType> set = ImmutableSet.builder();
+					for (JsonElement e : array) {
+						set.add(RenderTypeEnum.valueOf(e.getAsString()).renderType);
+					}
+					info.renderTypes = set.build();
+				}
 			}
 
 			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);

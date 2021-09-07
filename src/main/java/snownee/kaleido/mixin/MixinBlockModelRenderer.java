@@ -12,13 +12,12 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.client.model.data.IModelData;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.core.client.model.KaleidoModel;
 
 @Mixin(BlockModelRenderer.class)
@@ -26,17 +25,15 @@ public abstract class MixinBlockModelRenderer {
 
 	@Inject(at = @At("HEAD"), method = "renderModel", remap = false, cancellable = true)
 	private void kaleido_renderModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData, CallbackInfoReturnable<Boolean> ci) {
-		if (modelIn.getClass() == KaleidoModel.class) {
-			Direction direction = Direction.NORTH;
-			if (stateIn != null && stateIn.hasProperty(HorizontalBlock.FACING)) {
-				direction = stateIn.getValue(HorizontalBlock.FACING);
-			}
-			modelIn = KaleidoModel.getModel(modelData, direction);
-
-			ci.setReturnValue(renderModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData));
+		if (modelIn == KaleidoModel.INSTANCE) {
+			modelIn = Hooks.onRenderKaleidoBlock(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData);
+			if (modelIn == null)
+				ci.setReturnValue(true);
+			else
+				ci.setReturnValue(renderModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData));
 		}
 	}
 
 	@Shadow(remap = false)
-	abstract boolean renderModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData);
+	public abstract boolean renderModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData);
 }

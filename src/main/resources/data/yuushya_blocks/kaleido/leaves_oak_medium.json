@@ -1,3 +1,4 @@
 {
-"shape": "block"
+"shape": "block",
+"renderType": "cutout"
 }

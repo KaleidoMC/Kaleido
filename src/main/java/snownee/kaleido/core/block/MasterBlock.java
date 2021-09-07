@@ -27,15 +27,12 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
-import snownee.kaleido.core.KaleidoTemplate;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kiwi.RenderLayer;
-import snownee.kiwi.RenderLayer.Layer;
+import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
 
-@RenderLayer(Layer.TRANSLUCENT)
 public class MasterBlock extends HorizontalBlock {
 
 	public static final String NBT_ID = "Kaleido.Id";

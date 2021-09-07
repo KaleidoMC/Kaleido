@@ -1,6 +1,7 @@
-package snownee.kaleido.core;
+package snownee.kaleido.core.util;
 
 import net.minecraft.block.Block;
+import snownee.kaleido.core.CoreModule;
 
 public enum KaleidoTemplate {
 	/* off */
