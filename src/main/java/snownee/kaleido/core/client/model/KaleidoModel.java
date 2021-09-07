@@ -109,7 +109,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 		ModelInfo info = extraData.getData(MasterBlockEntity.MODEL);
 		if (info != null) {
 			RenderType layer = MinecraftForgeClient.getRenderLayer();
-			if (layer == null || info.renderTypes.contains(layer))
+			if (layer == null || info.canRenderInLayer(layer))
 				model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), direction);
 			else
 				return null;

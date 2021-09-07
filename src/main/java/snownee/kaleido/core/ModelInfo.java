@@ -1,6 +1,7 @@
 package snownee.kaleido.core;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.EnumSet;
+
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -48,8 +49,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	private HashCode shape;
 	private VoxelShape[] shapeCache = ShapeCache.fallback;
 
-	private static final ImmutableSet<RenderType> defaultRenderTypes = ImmutableSet.of(RenderType.solid());
-	public ImmutableSet<RenderType> renderTypes = defaultRenderTypes;
+	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
+	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
 
 	public boolean opposite; // temp
 
@@ -120,8 +121,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			buf.writeByteArray(shape.asBytes());
 			buf.writeBoolean(noCollision);
 			buf.writeByte(renderTypes.size());
-			for (RenderType renderType : renderTypes) {
-				buf.writeByte(RenderTypeEnum.fromType(renderType).ordinal());
+			for (RenderTypeEnum renderType : renderTypes) {
+				buf.writeEnum(renderType);
 			}
 		}
 
@@ -141,11 +142,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			info.shape = HashCode.fromBytes(buf.readByteArray());
 			info.noCollision = buf.readBoolean();
 			byte size = buf.readByte();
-			ImmutableSet.Builder<RenderType> set = ImmutableSet.builder();
+			info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
 			for (byte i = 0; i < size; i++) {
-				set.add(RenderTypeEnum.VALUES[buf.readByte()].renderType);
+				info.renderTypes.add(buf.readEnum(RenderTypeEnum.class));
 			}
-			info.renderTypes = set.build();
 		}
 
 		info.opposite = buf.readBoolean();
@@ -173,14 +173,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				}
 				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
 				if (json.has("renderType")) {
-					info.renderTypes = ImmutableSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")).renderType);
+					info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
 				} else if (json.has("renderTypes")) {
 					JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
-					ImmutableSet.Builder<RenderType> set = ImmutableSet.builder();
+					info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
 					for (JsonElement e : array) {
-						set.add(RenderTypeEnum.valueOf(e.getAsString()).renderType);
+						info.renderTypes.add(RenderTypeEnum.valueOf(e.getAsString()));
 					}
-					info.renderTypes = set.build();
 				}
 			}
 
@@ -206,6 +205,14 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	@Override
 	public int compareTo(ModelInfo o) {
 		return KaleidoUtil.friendlyCompare(id.getPath(), o.id.getPath());
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public boolean canRenderInLayer(RenderType layer) {
+		for (RenderTypeEnum e : renderTypes)
+			if (e.renderType.get().get() == layer)
+				return true;
+		return false;
 	}
 
 }
