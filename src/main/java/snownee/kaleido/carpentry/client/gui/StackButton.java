@@ -22,6 +22,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.ModelInfo;
 
 @OnlyIn(Dist.CLIENT)
@@ -82,7 +83,7 @@ public class StackButton extends Button {
 		originalX = x;
 		originalY = y;
 		alpha = 0;
-		if (info.reward) {
+		if (!KaleidoCommonConfig.autoUnlock && info.reward) {
 			frameColor = 0xFFDF00;
 		}
 	}

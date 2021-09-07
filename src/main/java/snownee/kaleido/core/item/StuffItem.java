@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.item.ModBlockItem;
 
 public class StuffItem extends ModBlockItem {
@@ -33,8 +34,9 @@ public class StuffItem extends ModBlockItem {
 	protected BlockState getPlacementState(BlockItemUseContext ctx) {
 		ModelInfo info = MasterBlock.getInfo(ctx.getItemInHand());
 		Block block = CoreModule.STUFF;
-		if (info != null)
-			block = info.template.bloc;
+		if (info == null || info.template == KaleidoTemplate.item)
+			return null;
+		block = info.template.bloc;
 		BlockState blockstate = block.getStateForPlacement(ctx);
 		return blockstate != null && this.canPlace(ctx, blockstate) ? blockstate : null;
 	}

@@ -85,7 +85,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	@OnlyIn(Dist.CLIENT)
 	public boolean isLocked() {
-		return locked;
+		return !KaleidoCommonConfig.autoUnlock && locked;
 	}
 
 	public boolean isLockedServer(ServerPlayerEntity player) {
@@ -116,10 +116,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		buf.writeBoolean(isLockedServer(player));
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
-		buf.writeEnum(offset);
 		if (!template.solid) {
 			buf.writeByteArray(shape.asBytes());
 			buf.writeBoolean(noCollision);
+			buf.writeEnum(offset);
 			buf.writeByte(renderTypes.size());
 			for (RenderTypeEnum renderType : renderTypes) {
 				buf.writeEnum(renderType);
@@ -137,10 +137,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		info.setLocked(buf.readBoolean());
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
-		info.offset = buf.readEnum(OffsetType.class);
 		if (!info.template.solid) {
 			info.shape = HashCode.fromBytes(buf.readByteArray());
 			info.noCollision = buf.readBoolean();
+			info.offset = buf.readEnum(OffsetType.class);
 			byte size = buf.readByte();
 			info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
 			for (byte i = 0; i < size; i++) {
@@ -162,8 +162,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			}
 			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 			info.price = JSONUtils.getAsInt(json, "price", 1);
-			if (json.has("offset"))
-				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
 			if (!info.template.solid) {
 				if (json.has("shape")) {
 					info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
@@ -181,6 +179,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 						info.renderTypes.add(RenderTypeEnum.valueOf(e.getAsString()));
 					}
 				}
+				if (json.has("offset"))
+					info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
 			}
 
 			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);

@@ -2,6 +2,10 @@
 
 Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游戏的模组。目前支持Forge 1.16.5。
 
+## 环境要求
+
+最新版Forge和Kiwi
+
 ## 导入模型
 
 目前提供有方块小镇-Yuushya包（作者几何Coco）以供测试。
@@ -53,7 +57,7 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
 	   - (方块定义).json - 需要与资源包中对应模型同名
 
 (方块定义).json（所有属性均为可选）
- - template - 模板。字符串。目前支持的值："block", "horizontal"
+ - template - 模板。字符串。目前支持的值："block", "horizontal", "item"
  - renderType - 渲染类型。字符串。指定template后无效。目前支持的值："solid", "cutout", "cutoutMipped", "translucent"。默认为"solid"
  - renderTypes - 渲染类型。字符串数组。指定template后无效。提供同时指定多个渲染类型的能力
  - noCollision - 无碰撞体积。true或false。指定template后无效。默认为false

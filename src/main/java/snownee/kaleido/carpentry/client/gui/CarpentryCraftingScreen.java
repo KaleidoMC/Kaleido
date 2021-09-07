@@ -324,6 +324,11 @@ public class CarpentryCraftingScreen extends Screen {
 		list.setTop(top * height - height + 20);
 		list.render(matrix, mouseX, mouseY, pTicks);
 		font.draw(matrix, getTitle(), list.x0 + 4, list.y0 - 14, 0xFFFFFF);
+
+		itemRenderer.renderAndDecorateItem(coinStack, width - 20, (int) (top * 20 - 15));
+		String numText = Integer.toString(coins);
+		font.drawShadow(matrix, numText, width - 25 - font.width(numText), top * 20 - 11, 0xFFFFFFFF);
+
 		if (alpha < 0.5f) {
 			return;
 		}
@@ -360,10 +365,6 @@ public class CarpentryCraftingScreen extends Screen {
 				y += 15;
 			}
 		}
-
-		itemRenderer.renderAndDecorateItem(coinStack, width - 20, 5);
-		String numText = Integer.toString(coins);
-		font.drawShadow(matrix, numText, width - 25 - font.width(numText), 9, 0xFFFFFFFF);
 	}
 
 	@Override

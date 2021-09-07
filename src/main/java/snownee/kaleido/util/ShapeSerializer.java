@@ -1,5 +1,6 @@
 package snownee.kaleido.util;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,11 +10,11 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.gson.JsonElement;
 
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.block.Block;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.api.distmarker.Dist;
@@ -60,11 +61,27 @@ public class ShapeSerializer {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static VoxelShape fromNetwork(ByteBuf buf) {
-		return null;
+	public static VoxelShape fromNetwork(PacketBuffer buf) {
+		int size = buf.readVarInt();
+		VoxelShape shape = VoxelShapes.empty();
+		for (int i = 0; i < size; i++) {
+			VoxelShape shape0 = VoxelShapes.box(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
+			shape = VoxelShapes.or(shape, shape0);
+		}
+		return shape.optimize();
 	}
 
 	public static void toNetwork(PacketBuffer buf, VoxelShape shape) {
+		List<AxisAlignedBB> aabbs = shape.toAabbs();
+		buf.writeVarInt(aabbs.size());
+		for (AxisAlignedBB aabb : aabbs) {
+			buf.writeDouble(aabb.minX);
+			buf.writeDouble(aabb.minY);
+			buf.writeDouble(aabb.minZ);
+			buf.writeDouble(aabb.maxX);
+			buf.writeDouble(aabb.maxY);
+			buf.writeDouble(aabb.maxZ);
+		}
 	}
 
 }
