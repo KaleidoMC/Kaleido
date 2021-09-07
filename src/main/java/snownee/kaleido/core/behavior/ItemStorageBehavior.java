@@ -2,24 +2,19 @@ package snownee.kaleido.core.behavior;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.inventory.InvHandlerWrapper;
 
@@ -56,9 +51,9 @@ public class ItemStorageBehavior implements Behavior {
 	}
 
 	@Override
-	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-		if (title != null && !worldIn.isClientSide) {
-			player.openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
+	public ActionResultType use(ActionContext context) {
+		if (title != null && !context.getLevel().isClientSide) {
+			context.getPlayer().openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {
 				if (rows == 6) {
 					return ChestContainer.sixRows(id, playerInventory, new InvHandlerWrapper(handler.orElse(null)));
 				} else {

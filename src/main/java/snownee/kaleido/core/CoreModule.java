@@ -3,7 +3,9 @@ package snownee.kaleido.core;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -21,13 +23,18 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.core.action.ActionDeserializer;
+import snownee.kaleido.core.action.TransformAction;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.ItemStorageBehavior;
 import snownee.kaleido.core.behavior.LightBehavior;
+import snownee.kaleido.core.behavior.OnUseBlockBehavior;
 import snownee.kaleido.core.behavior.SeatBehavior;
 import snownee.kaleido.core.behavior.seat.EmptyEntityRenderer;
 import snownee.kaleido.core.behavior.seat.SeatEntity;
-import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.KDirectionalBlock;
+import snownee.kaleido.core.block.KHorizontalBlock;
+import snownee.kaleido.core.block.KRotatedPillarBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.item.LuckyBoxItem;
@@ -49,14 +56,21 @@ import snownee.kiwi.network.NetworkChannel;
 public class CoreModule extends AbstractModule {
 
 	@NoItem
-	public static final MasterBlock STUFF = new MasterBlock(blockProp(Blocks.STONE).noOcclusion().dynamicShape());
+	public static final KHorizontalBlock STUFF = new KHorizontalBlock(blockProp(Blocks.STONE).noOcclusion().dynamicShape());
 
 	@NoItem
-	public static final MasterBlock HORIZONTAL = new MasterBlock(blockProp(Blocks.STONE));
+	public static final KHorizontalBlock HORIZONTAL = new KHorizontalBlock(blockProp(Blocks.STONE));
+
+	@NoItem
+	public static final KDirectionalBlock DIRECTIONAL = new KDirectionalBlock(blockProp(Blocks.STONE));
+
+	@NoItem
+	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(Blocks.STONE));
 
 	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, ImmutableSet.of(STUFF, HORIZONTAL), null);
+	public static final Set<Block> ALL_MASTER_BLOCKS = Sets.newHashSet();
+	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, ALL_MASTER_BLOCKS, null);
 
 	public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 
@@ -81,8 +95,11 @@ public class CoreModule extends AbstractModule {
 	@Override
 	protected void init(FMLCommonSetupEvent event) {
 		Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
-		Behavior.Deserializer.registerFactory("item_storage", ItemStorageBehavior::create);
+		Behavior.Deserializer.registerFactory("itemStorage", ItemStorageBehavior::create);
 		Behavior.Deserializer.registerFactory("light", LightBehavior::create);
+		Behavior.Deserializer.registerFactory("onUseBlock", OnUseBlockBehavior::create);
+
+		ActionDeserializer.registerFactory("transform", TransformAction::create);
 	}
 
 	//    @SubscribeEvent

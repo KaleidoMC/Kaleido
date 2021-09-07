@@ -8,11 +8,10 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -25,31 +24,23 @@ public class KaleidoClient {
 	public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
 
 	@Nullable
-	public static synchronized IBakedModel loadModel(ResourceLocation id, Direction direction) {
+	public static synchronized IBakedModel loadModel(ModelInfo info, int variant) {
 		ModelLoader modelLoader = ModelLoader.instance();
 		if (modelLoader == null) {
 			return null;
 		}
-		ModelRotation transform = ModelRotation.X0_Y0;
-		if (direction == Direction.SOUTH) {
-			transform = ModelRotation.X0_Y180;
-		} else if (direction == Direction.WEST) {
-			transform = ModelRotation.X0_Y270;
-		} else if (direction == Direction.EAST) {
-			transform = ModelRotation.X0_Y90;
-		}
-		return modelLoader.getBakedModel(new ResourceLocation(id.getNamespace(), "kaleido/" + id.getPath()), transform, modelLoader.getSpriteMap()::getSprite);
+		return info.template.loadModel(modelLoader, info, variant);
 	}
 
 	@Nullable
-	public static IBakedModel getModel(ModelInfo info, Direction direction) {
-		int i = direction.get2DDataValue();
+	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
+		int i = state == null ? info.template.defaultState : info.template.getState(state);
 		if (i == -1) {
 			return null;
 		}
-		IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[4]);
+		IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[info.template.states]);
 		if (bakedModel[i] == null) {
-			bakedModel[i] = loadModel(info.id, direction);
+			bakedModel[i] = loadModel(info, i);
 		}
 		return bakedModel[i];
 	}

@@ -53,7 +53,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
@@ -145,16 +145,18 @@ public final class PlacementPreview {
 		}
 		if (held.getItem() instanceof BlockItem) {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
-			ModelInfo info = MasterBlock.getInfo(held);
+			ModelInfo info = KaleidoBlocks.getInfo(held);
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
 				if (info == null || info.template == KaleidoTemplate.item) {
 					return false;
 				}
-				TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
-				if (tile instanceof MasterBlockEntity) {
-					MasterBlockEntity masterTile = (MasterBlockEntity) tile;
-					if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
-						return false;
+				if (info.template == KaleidoTemplate.none) {
+					TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
+					if (tile instanceof MasterBlockEntity) {
+						MasterBlockEntity masterTile = (MasterBlockEntity) tile;
+						if (masterTile.getModelInfo() != null && masterTile.getModelInfo().id.equals(info.id)) {
+							return false;
+						}
 					}
 				}
 			}
@@ -224,11 +226,7 @@ public final class PlacementPreview {
 				BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
 				IBakedModel bakedModel;
 				if (theBlockItem == CoreModule.STUFF_ITEM) {
-					if (info == null) {
-						bakedModel = mc.getModelManager().getMissingModel();
-					} else {
-						bakedModel = KaleidoClient.getModel(info, Direction.NORTH);
-					}
+					bakedModel = KaleidoClient.getModel(info, placeResult);
 				} else {
 					bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
 				}

@@ -15,7 +15,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -43,7 +42,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 
@@ -91,11 +90,11 @@ public class KaleidoModel implements IDynamicBakedModel {
 		@Nullable
 		@Override
 		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
-			ModelInfo info = MasterBlock.getInfo(stack);
+			ModelInfo info = KaleidoBlocks.getInfo(stack);
 			if (Minecraft.getInstance().overlay != null) {
 				return null;
 			}
-			return info != null ? KaleidoClient.getModel(info, Direction.NORTH) : null;
+			return info != null ? KaleidoClient.getModel(info, null) : null;
 		}
 
 	}
@@ -104,13 +103,13 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
 
-	public static IBakedModel getModel(IModelData extraData, Direction direction) {
+	public static IBakedModel getModel(IModelData extraData, @Nullable BlockState state) {
 		IBakedModel model = null;
 		ModelInfo info = extraData.getData(MasterBlockEntity.MODEL);
 		if (info != null) {
 			RenderType layer = MinecraftForgeClient.getRenderLayer();
 			if (layer == null || info.canRenderInLayer(layer))
-				model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), direction);
+				model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), state);
 			else
 				return null;
 		}
@@ -130,7 +129,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture(IModelData data) {
-		return getModel(data, Direction.NORTH).getParticleTexture(data);
+		return getModel(data, null).getParticleTexture(data);
 	}
 
 	@Override
@@ -138,8 +137,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 		if (state == null) {
 			return missingno.get().getQuads(null, side, rand, extraData);
 		}
-		Direction direction = state.hasProperty(HorizontalBlock.FACING) ? state.getValue(HorizontalBlock.FACING) : Direction.NORTH;
-		return getModel(extraData, direction).getQuads(state, side, rand, extraData);
+		return getModel(extraData, state).getQuads(state, side, rand, extraData);
 	}
 
 	@Override

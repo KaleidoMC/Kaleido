@@ -2,6 +2,7 @@ package snownee.kaleido.core;
 
 import java.util.EnumSet;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,8 +26,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
-import snownee.kaleido.core.behavior.NoneBehavior;
-import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
@@ -38,7 +38,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public ResourceLocation id;
 	public KaleidoTemplate template = KaleidoTemplate.none;
-	public Behavior behavior = NoneBehavior.INSTANCE;
+	public ImmutableList<Behavior> behaviors = ImmutableList.of();
 	private boolean locked = true;
 	public int price = 1;
 	public boolean reward;
@@ -51,8 +51,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
-
-	public boolean opposite; // temp
 
 	public ResourceLocation getAdvancementId() {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
@@ -102,7 +100,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public ItemStack makeItem(int size) {
 		NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF, size));
-		data.setString(MasterBlock.NBT_ID, id.toString());
+		data.setString(KaleidoBlocks.NBT_ID, id.toString());
 		return data.getItem();
 	}
 
@@ -125,8 +123,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				buf.writeEnum(renderType);
 			}
 		}
-
-		buf.writeBoolean(opposite);
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -147,8 +143,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				info.renderTypes.add(buf.readEnum(RenderTypeEnum.class));
 			}
 		}
-
-		info.opposite = buf.readBoolean();
 		return info;
 	}
 
@@ -158,7 +152,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			if (json.has("template"))
 				info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
 			if (json.has("behavior")) {
-				info.behavior = KaleidoDataManager.GSON.fromJson(json.get("behavior"), Behavior.class);
+				info.behaviors = ImmutableList.of(Behavior.fromJson(json.get("behavior")));
+			} else if (json.has("behaviors")) {
+
 			}
 			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 			info.price = JSONUtils.getAsInt(json, "price", 1);
@@ -182,8 +178,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				if (json.has("offset"))
 					info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
 			}
-
-			info.opposite = JSONUtils.getAsBoolean(json, "opposite", false);
 		}
 		return info;
 	}

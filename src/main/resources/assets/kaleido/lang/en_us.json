@@ -4,6 +4,8 @@
 "item.kaleido.cloth": "Magicloth",
 
 "block.kaleido.stuff": "Kaleido Decor",
+"block.kaleido.horizontal": "Kaleido Decor",
+"block.kaleido.pillar": "Kaleido Decor",
 "block.kaleido.woodworking_bench": "Woodworking Bench",
 
 "entity.minecraft.villager.kaleido.collector": "Collector",

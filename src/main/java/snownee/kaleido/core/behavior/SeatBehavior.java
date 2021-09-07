@@ -4,20 +4,18 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.fml.LogicalSide;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.schedule.Scheduler;
@@ -48,7 +46,10 @@ public class SeatBehavior implements Behavior {
 	}
 
 	@Override
-	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	public ActionResultType use(ActionContext context) {
+		PlayerEntity player = context.getPlayer();
+		BlockPos pos = context.getBlockPos();
+		World worldIn = context.getLevel();
 		if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
 			return ActionResultType.FAIL;
 		ItemStack stack1 = player.getMainHandItem();

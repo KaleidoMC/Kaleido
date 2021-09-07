@@ -11,18 +11,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import snownee.kaleido.core.KaleidoDataManager;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
 public interface Behavior {
@@ -38,23 +34,20 @@ public interface Behavior {
 
 		@Override
 		public Behavior deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-			if (json != null) {
-				if (json.isJsonObject()) {
-					JsonObject object = json.getAsJsonObject();
-					Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getAsString(object, "type"));
-					if (factory != null) {
-						return factory.apply(object);
-					}
-				} else {
-					Function<JsonObject, Behavior> factory = factories.get(json.getAsString());
-					if (factory != null) {
-						return factory.apply(new JsonObject());
-					}
-				}
+			if (json.isJsonObject()) {
+				JsonObject object = json.getAsJsonObject();
+				Function<JsonObject, Behavior> factory = factories.get(JSONUtils.getAsString(object, "type"));
+				return factory.apply(object);
+			} else {
+				Function<JsonObject, Behavior> factory = factories.get(json.getAsString());
+				return factory.apply(new JsonObject());
 			}
-			return NoneBehavior.INSTANCE;
 		}
 
+	}
+
+	public static Behavior fromJson(JsonElement json) {
+		return KaleidoDataManager.GSON.fromJson(json, Behavior.class);
 	}
 
 	Behavior copy(MasterBlockEntity tile);
@@ -63,7 +56,9 @@ public interface Behavior {
 		return LazyOptional.empty();
 	}
 
-	ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit);
+	default ActionResultType use(ActionContext context) {
+		return ActionResultType.PASS;
+	}
 
 	default void load(CompoundNBT data) {
 	}

@@ -11,7 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.MasterBlock;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.item.ModBlockItem;
 
@@ -23,7 +23,7 @@ public class StuffItem extends ModBlockItem {
 
 	@Override
 	public String getDescriptionId(ItemStack stack) {
-		ModelInfo info = MasterBlock.getInfo(stack);
+		ModelInfo info = KaleidoBlocks.getInfo(stack);
 		if (info != null) {
 			return info.getDescriptionId();
 		}
@@ -32,7 +32,7 @@ public class StuffItem extends ModBlockItem {
 
 	@Nullable
 	protected BlockState getPlacementState(BlockItemUseContext ctx) {
-		ModelInfo info = MasterBlock.getInfo(ctx.getItemInHand());
+		ModelInfo info = KaleidoBlocks.getInfo(ctx.getItemInHand());
 		Block block = CoreModule.STUFF;
 		if (info == null || info.template == KaleidoTemplate.item)
 			return null;
@@ -43,14 +43,16 @@ public class StuffItem extends ModBlockItem {
 
 	@Override
 	public void registerBlocks(Map<Block, Item> map, Item item) {
-		super.registerBlocks(map, item);
-		map.put(CoreModule.HORIZONTAL, item);
+		for (Block block : CoreModule.ALL_MASTER_BLOCKS) {
+			map.put(block, item);
+		}
 	}
 
 	@Override
-	public void removeFromBlockToItemMap(Map<Block, Item> blockToItemMap, Item itemIn) {
-		super.removeFromBlockToItemMap(blockToItemMap, itemIn);
-		blockToItemMap.remove(CoreModule.HORIZONTAL);
+	public void removeFromBlockToItemMap(Map<Block, Item> map, Item item) {
+		for (Block block : CoreModule.ALL_MASTER_BLOCKS) {
+			map.remove(block, item);
+		}
 	}
 
 }
