@@ -16,8 +16,6 @@ Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游
 4. 在游戏中按下`F3`+`T`重载资源包；
 5. 此时在创造模式装饰标签下可以看到新添加的方块。
 
-目前有一个bug：木工台中新加入的方块显示为锁定。可以通过`/advancement grant @s everything`解锁。
-
 ## 自定义模型
 
 示例可参考方块小镇-Yuushya包（作者几何Coco）。
@@ -57,11 +55,11 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
 	   - (方块定义).json - 需要与资源包中对应模型同名
 
 (方块定义).json（所有属性均为可选）
- - template - 模板。字符串。目前支持的值："block", "horizontal", "item"
+ - template - 模板。字符串。目前支持的值："block", "horizontal", "directional", "pillar", "item"
  - renderType - 渲染类型。字符串。指定template后无效。目前支持的值："solid", "cutout", "cutoutMipped", "translucent"。默认为"solid"
  - renderTypes - 渲染类型。字符串数组。指定template后无效。提供同时指定多个渲染类型的能力
  - noCollision - 无碰撞体积。true或false。指定template后无效。默认为false
  - shape - 碰撞形状。字符串。指定template后无效。目前支持的值："empty", "block", 或使用Blockbench插件VoxelShape Generators导出的结果。默认为"empty"
  - price - 魔法布匹兑换价格。整数。默认为1
  - reward - 是否为收集奖励。true或false。默认为false
- - behavior - 行为。字符串或对象。待补充。
+ - behavior - 行为。字符串或对象。可实现右键方块切换模型等功能。待补充。
