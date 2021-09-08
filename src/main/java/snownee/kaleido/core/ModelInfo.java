@@ -2,6 +2,8 @@ package snownee.kaleido.core;
 
 import java.util.EnumSet;
 
+import org.codehaus.plexus.util.StringUtils;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
@@ -13,6 +15,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -23,6 +26,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
@@ -59,6 +63,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public String getDescriptionId() {
 		if (descriptionId == null) {
 			descriptionId = Util.makeDescriptionId("kaleido.decor", id);
+			if (FMLEnvironment.dist.isClient()) {
+				if (!I18n.exists(descriptionId)) {
+					descriptionId = StringUtils.capitaliseAllWords(id.getPath().replace('_', ' ').trim());
+				}
+			}
 		}
 		return descriptionId;
 	}

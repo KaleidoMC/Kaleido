@@ -6,13 +6,9 @@ import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
@@ -32,18 +28,6 @@ public class StuffItem extends ModBlockItem {
 			return info.getDescriptionId();
 		}
 		return super.getDescriptionId(stack);
-	}
-
-	@Override
-	public ITextComponent getName(ItemStack stack) {
-		String descriptionId = getDescriptionId(stack);
-		if (!I18n.exists(descriptionId)) {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
-			if (info != null) {
-				return new StringTextComponent(info.id.getPath());
-			}
-		}
-		return new TranslationTextComponent(descriptionId);
 	}
 
 	@Nullable
