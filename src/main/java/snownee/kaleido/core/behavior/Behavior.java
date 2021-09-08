@@ -46,7 +46,7 @@ public interface Behavior {
 
 	}
 
-	public static Behavior fromJson(JsonElement json) {
+	static Behavior fromJson(JsonElement json) {
 		return KaleidoDataManager.GSON.fromJson(json, Behavior.class);
 	}
 

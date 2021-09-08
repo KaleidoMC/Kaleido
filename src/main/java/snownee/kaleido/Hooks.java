@@ -23,7 +23,7 @@ public final class Hooks {
 		ModelInfo info = modelData.getData(MasterBlockEntity.MODEL);
 		if (info != null && info.offset != AbstractBlock.OffsetType.NONE) {
 			long i = MathHelper.getSeed(posIn.getX(), 0, posIn.getZ());
-			Vector3d offset = new Vector3d(((double) ((float) (i & 15L) / 15.0F) - 0.5D) * 0.5D, info.offset == AbstractBlock.OffsetType.XYZ ? ((double) ((float) (i >> 4 & 15L) / 15.0F) - 1.0D) * 0.2D : 0.0D, ((double) ((float) (i >> 8 & 15L) / 15.0F) - 0.5D) * 0.5D);
+			Vector3d offset = new Vector3d(((i & 15L) / 15.0F - 0.5D) * 0.5D, info.offset == AbstractBlock.OffsetType.XYZ ? ((i >> 4 & 15L) / 15.0F - 1.0D) * 0.2D : 0.0D, ((i >> 8 & 15L) / 15.0F - 0.5D) * 0.5D);
 			matrixIn.translate(offset.x, offset.y, offset.z);
 		}
 		return KaleidoModel.getModel(info, stateIn);

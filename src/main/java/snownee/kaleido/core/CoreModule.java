@@ -102,19 +102,6 @@ public class CoreModule extends AbstractModule {
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
 	}
 
-	//    @SubscribeEvent
-	//    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-	//        MinecraftServer server = Kiwi.getServer();
-	//        if (!event.getEntity().world.isRemote && server != null && !KaleidoDataManager.INSTANCE.allInfos.isEmpty()) {
-	//            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-	//            if (server.isServerOwner(player.getGameProfile())) {
-	//                KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
-	//            } else {
-	//                new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
-	//            }
-	//        }
-	//    }
-
 	@Override
 	protected void preInit() {
 		NetworkChannel.register(SSyncModelsPacket.class, new SSyncModelsPacket.Handler());
@@ -129,4 +116,5 @@ public class CoreModule extends AbstractModule {
 	public void registerModelLoader(ModelRegistryEvent event) {
 		ModelLoaderRegistry.registerLoader(RL("dynamic"), KaleidoModel.Loader.INSTANCE);
 	}
+
 }

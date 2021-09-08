@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
@@ -87,7 +88,7 @@ public final class KaleidoBlocks {
 	}
 
 	public static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		if (state.getBlock() != CoreModule.STUFF) {
+		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
 		TileEntity tile = worldIn.getBlockEntity(pos);
@@ -104,7 +105,7 @@ public final class KaleidoBlocks {
 	}
 
 	public static VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		if (state.getBlock() != CoreModule.STUFF) {
+		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
 		TileEntity tile = worldIn.getBlockEntity(pos);
@@ -117,6 +118,18 @@ public final class KaleidoBlocks {
 	}
 
 	public static void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
-		KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap(pack -> Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream())).map(ModelInfo::makeItem).forEach(items::add);
+		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
+			fillEmpty(items);
+			Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream()).map(ModelInfo::makeItem).forEach(items::add);
+		}
+		if (!KaleidoDataManager.INSTANCE.allPacks.isEmpty()) {
+			fillEmpty(items);
+		}
+	}
+
+	private static void fillEmpty(NonNullList<ItemStack> items) {
+		while (items.size() % 9 != 0) {
+			items.add(ItemStack.EMPTY);
+		}
 	}
 }

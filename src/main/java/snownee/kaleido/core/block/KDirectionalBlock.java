@@ -29,21 +29,25 @@ public class KDirectionalBlock extends DirectionalBlock {
 
 	public KDirectionalBlock(Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP));
 	}
 
+	@Override
 	public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
 		return p_185499_1_.setValue(FACING, p_185499_2_.rotate(p_185499_1_.getValue(FACING)));
 	}
 
+	@Override
 	public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
 		return p_185471_1_.setValue(FACING, p_185471_2_.mirror(p_185471_1_.getValue(FACING)));
 	}
 
+	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
-		return this.defaultBlockState().setValue(FACING, p_196258_1_.getNearestLookingDirection());
+		return defaultBlockState().setValue(FACING, p_196258_1_.getNearestLookingDirection());
 	}
 
+	@Override
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_) {
 		p_206840_1_.add(FACING);
 	}

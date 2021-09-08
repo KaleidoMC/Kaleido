@@ -33,8 +33,8 @@ public enum KaleidoTemplate {
 	public final int states;
 	public final int defaultState;
 
-	private KaleidoTemplate(Block block, boolean solid, int states, int defaultState) {
-		this.bloc = block;
+	KaleidoTemplate(Block block, boolean solid, int states, int defaultState) {
+		bloc = block;
 		this.solid = solid;
 		this.states = states;
 		this.defaultState = defaultState;
@@ -95,6 +95,10 @@ public enum KaleidoTemplate {
 				transform = ModelRotation.X90_Y0;
 			}
 		}
-		return modelLoader.getBakedModel(new ResourceLocation(info.id.getNamespace(), "kaleido/" + info.id.getPath()), transform, modelLoader.getSpriteMap()::getSprite);
+		return modelLoader.getBakedModel(getModelLocation(info, variant), transform, modelLoader.getSpriteMap()::getSprite);
+	}
+
+	public ResourceLocation getModelLocation(ModelInfo info, int variant) {
+		return new ResourceLocation(info.id.getNamespace(), "kaleido/" + info.id.getPath());
 	}
 }

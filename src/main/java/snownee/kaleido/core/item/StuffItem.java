@@ -9,6 +9,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
@@ -30,15 +32,29 @@ public class StuffItem extends ModBlockItem {
 		return super.getDescriptionId(stack);
 	}
 
+	@Override
 	@Nullable
 	protected BlockState getPlacementState(BlockItemUseContext ctx) {
 		ModelInfo info = KaleidoBlocks.getInfo(ctx.getItemInHand());
-		Block block = CoreModule.STUFF;
+		Block block;
 		if (info == null || info.template == KaleidoTemplate.item)
 			return null;
 		block = info.template.bloc;
 		BlockState blockstate = block.getStateForPlacement(ctx);
-		return blockstate != null && this.canPlace(ctx, blockstate) ? blockstate : null;
+		return blockstate != null && canPlace(ctx, blockstate) ? blockstate : null;
+	}
+
+	@Override
+	protected boolean canPlace(BlockItemUseContext ctx, BlockState state) {
+		ModelInfo info = KaleidoBlocks.getInfo(ctx.getItemInHand());
+		if (info != null && info.template == KaleidoTemplate.none) {
+			if (info.noCollision)
+				return true;
+			VoxelShape shape = info.getShape(ctx.getHorizontalDirection());
+			BlockPos pos = ctx.getClickedPos();
+			return ctx.getLevel().isUnobstructed(null, shape.move(pos.getX(), pos.getY(), pos.getZ()));
+		}
+		return super.canPlace(ctx, state);
 	}
 
 	@Override

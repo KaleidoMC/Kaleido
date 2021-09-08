@@ -45,6 +45,7 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
+import snownee.kaleido.core.util.KaleidoTemplate;
 
 @OnlyIn(Dist.CLIENT)
 public class KaleidoModel implements IDynamicBakedModel {
@@ -91,12 +92,15 @@ public class KaleidoModel implements IDynamicBakedModel {
 		@Override
 		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
 			ModelInfo info = KaleidoBlocks.getInfo(stack);
-			if (Minecraft.getInstance().overlay != null) {
+			if (info == null || Minecraft.getInstance().overlay != null) {
 				return null;
 			}
-			return info != null ? KaleidoClient.getModel(info, null) : null;
+			if (KaleidoClient.ctm && info.template != KaleidoTemplate.item) {
+				return KaleidoClient.getModel(info, info.template.states);
+			} else {
+				return KaleidoClient.getModel(info, null);
+			}
 		}
-
 	}
 
 	public static KaleidoModel INSTANCE;

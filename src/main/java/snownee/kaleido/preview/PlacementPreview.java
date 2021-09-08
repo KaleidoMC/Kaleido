@@ -194,6 +194,9 @@ public final class PlacementPreview {
 			} else {
 				transform.canRotate = false;
 			}
+			if (info != null && info.template == KaleidoTemplate.block) {
+				direction = null;
+			}
 			if (direction != null) {
 				transform.rotate(direction.toYRot() + 180);
 			}

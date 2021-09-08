@@ -103,6 +103,8 @@ dependencies {
 	compile fg.deobf("curse.maven:kiwi-303657:3377053")
     //compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
     
+    compile fg.deobf("curse.maven:ctm-267602:3137659")
+    
     compile 'org.spongepowered:mixin:0.8'
 }
 

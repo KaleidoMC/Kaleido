@@ -20,12 +20,14 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kaleido.core.util.KaleidoTemplate;
 
 public class KHorizontalBlock extends HorizontalBlock {
 
@@ -44,9 +46,6 @@ public class KHorizontalBlock extends HorizontalBlock {
 		if (info == null)
 			return null;
 		Direction direction = context.getHorizontalDirection();
-		if (info.template == KaleidoTemplate.block) {
-			direction = Direction.NORTH;
-		}
 		return defaultBlockState().setValue(FACING, direction);
 	}
 
@@ -101,5 +100,47 @@ public class KHorizontalBlock extends HorizontalBlock {
 		if (this == CoreModule.STUFF)
 			return false;
 		return super.isPathfindable(p_196266_1_, p_196266_2_, p_196266_3_, p_196266_4_);
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	@OnlyIn(Dist.CLIENT)
+	public float getShadeBrightness(BlockState state, IBlockReader level, BlockPos pos) {
+		if (state.is(CoreModule.STUFF)) {
+			TileEntity tile = level.getBlockEntity(pos);
+			if (tile instanceof MasterBlockEntity) {
+				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
+				if (info != null && info.glass)
+					return 1;
+			}
+		}
+		return super.getShadeBrightness(state, level, pos);
+	}
+
+	@Override
+	public boolean propagatesSkylightDown(BlockState state, IBlockReader level, BlockPos pos) {
+		if (state.is(CoreModule.STUFF)) {
+			TileEntity tile = level.getBlockEntity(pos);
+			if (tile instanceof MasterBlockEntity) {
+				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
+				if (info != null && info.glass)
+					return true;
+			}
+		}
+		return super.propagatesSkylightDown(state, level, pos);
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public VoxelShape getVisualShape(BlockState state, IBlockReader level, BlockPos pos, ISelectionContext context) {
+		if (state.is(CoreModule.STUFF)) {
+			TileEntity tile = level.getBlockEntity(pos);
+			if (tile instanceof MasterBlockEntity) {
+				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
+				if (info != null && info.glass)
+					return VoxelShapes.empty();
+			}
+		}
+		return super.getVisualShape(state, level, pos, context);
 	}
 }

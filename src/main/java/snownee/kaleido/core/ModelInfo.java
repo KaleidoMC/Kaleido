@@ -2,8 +2,6 @@ package snownee.kaleido.core;
 
 import java.util.EnumSet;
 
-import org.codehaus.plexus.util.StringUtils;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
@@ -50,6 +48,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean expired;
 	public OffsetType offset = OffsetType.NONE;
 	public boolean noCollision;
+	public boolean glass;
 	private HashCode shape;
 	private VoxelShape[] shapeCache = ShapeCache.fallback;
 
@@ -65,11 +64,30 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			descriptionId = Util.makeDescriptionId("kaleido.decor", id);
 			if (FMLEnvironment.dist.isClient()) {
 				if (!I18n.exists(descriptionId)) {
-					descriptionId = StringUtils.capitaliseAllWords(id.getPath().replace('_', ' ').trim());
+					descriptionId = capitaliseAllWords(id.getPath().replace('_', ' ').trim());
 				}
 			}
 		}
 		return descriptionId;
+	}
+
+	public static String capitaliseAllWords(String str) {
+		int sz = str.length();
+		StringBuilder buffer = new StringBuilder(sz);
+		boolean space = true;
+		for (int i = 0; i < sz; i++) {
+			char ch = str.charAt(i);
+			if (Character.isWhitespace(ch)) {
+				buffer.append(ch);
+				space = true;
+			} else if (space) {
+				buffer.append(Character.toTitleCase(ch));
+				space = false;
+			} else {
+				buffer.append(ch);
+			}
+		}
+		return buffer.toString();
 	}
 
 	public boolean grant(ServerPlayerEntity player) {
@@ -99,7 +117,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
-			return !(KaleidoCommonConfig.autoUnlock || isAdvancementDone(player));
+			return (!KaleidoCommonConfig.autoUnlock && !isAdvancementDone(player));
 		}
 	}
 
@@ -126,6 +144,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (!template.solid) {
 			buf.writeByteArray(shape.asBytes());
 			buf.writeBoolean(noCollision);
+			buf.writeBoolean(glass);
 			buf.writeEnum(offset);
 			buf.writeByte(renderTypes.size());
 			for (RenderTypeEnum renderType : renderTypes) {
@@ -145,6 +164,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (!info.template.solid) {
 			info.shape = HashCode.fromBytes(buf.readByteArray());
 			info.noCollision = buf.readBoolean();
+			info.glass = buf.readBoolean();
 			info.offset = buf.readEnum(OffsetType.class);
 			byte size = buf.readByte();
 			info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
@@ -179,6 +199,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 					}
 				}
 				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
+				info.glass = JSONUtils.getAsBoolean(json, "glass", false);
 				if (json.has("renderType")) {
 					info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
 				} else if (json.has("renderTypes")) {
