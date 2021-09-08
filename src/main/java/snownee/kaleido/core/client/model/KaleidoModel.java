@@ -103,14 +103,13 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
 
-	public static IBakedModel getModel(IModelData extraData, @Nullable BlockState state) {
+	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
 		IBakedModel model = null;
-		ModelInfo info = extraData.getData(MasterBlockEntity.MODEL);
 		if (info != null) {
 			RenderType layer = MinecraftForgeClient.getRenderLayer();
-			if (layer == null || info.canRenderInLayer(layer))
-				model = KaleidoClient.getModel(extraData.getData(MasterBlockEntity.MODEL), state);
-			else
+			if (layer == null || info.canRenderInLayer(layer)) {
+				model = KaleidoClient.getModel(info, state);
+			} else
 				return null;
 		}
 		return model != null ? model : missingno.get();
@@ -128,8 +127,8 @@ public class KaleidoModel implements IDynamicBakedModel {
 	}
 
 	@Override
-	public TextureAtlasSprite getParticleTexture(IModelData data) {
-		return getModel(data, null).getParticleTexture(data);
+	public TextureAtlasSprite getParticleTexture(IModelData extraData) {
+		return getModel(extraData.getData(MasterBlockEntity.MODEL), null).getParticleTexture(extraData);
 	}
 
 	@Override
@@ -137,7 +136,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 		if (state == null) {
 			return missingno.get().getQuads(null, side, rand, extraData);
 		}
-		return getModel(extraData, state).getQuads(state, side, rand, extraData);
+		return getModel(extraData.getData(MasterBlockEntity.MODEL), state).getQuads(state, side, rand, extraData);
 	}
 
 	@Override

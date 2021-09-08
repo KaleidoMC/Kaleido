@@ -154,7 +154,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			if (json.has("behavior")) {
 				info.behaviors = ImmutableList.of(Behavior.fromJson(json.get("behavior")));
 			} else if (json.has("behaviors")) {
-
+				ImmutableList.Builder<Behavior> list = ImmutableList.builder();
+				for (JsonElement e : JSONUtils.getAsJsonArray(json, "behaviors")) {
+					list.add(Behavior.fromJson(e));
+				}
+				info.behaviors = list.build();
 			}
 			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 			info.price = JSONUtils.getAsInt(json, "price", 1);

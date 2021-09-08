@@ -55,11 +55,13 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
 	   - (方块定义).json - 需要与资源包中对应模型同名
 
 (方块定义).json（所有属性均为可选）
- - template - 模板。字符串。目前支持的值："block", "horizontal", "directional", "pillar", "item"
- - renderType - 渲染类型。字符串。指定template后无效。目前支持的值："solid", "cutout", "cutoutMipped", "translucent"。默认为"solid"
+ - template - 模板。目前支持的值："block", "horizontal", "directional", "pillar", "item"
+ - renderType - 渲染类型。指定template后无效。目前支持的值："solid", "cutout", "cutoutMipped", "translucent"。默认为"solid"
  - renderTypes - 渲染类型。字符串数组。指定template后无效。提供同时指定多个渲染类型的能力
- - noCollision - 无碰撞体积。true或false。指定template后无效。默认为false
- - shape - 碰撞形状。字符串。指定template后无效。目前支持的值："empty", "block", 或使用Blockbench插件VoxelShape Generators导出的结果。默认为"empty"
+ - noCollision - 无碰撞体积。指定template后无效。目前支持的值：true, false。默认为false
+ - shape - 碰撞形状。指定template后无效。目前支持的值："empty", "block", 或使用Blockbench插件VoxelShape Generators导出的结果。默认为"empty"
  - price - 魔法布匹兑换价格。整数。默认为1
- - reward - 是否为收集奖励。true或false。默认为false
- - behavior - 行为。字符串或对象。可实现右键方块切换模型等功能。待补充。
+ - reward - 是否为收集奖励。目前支持的值：true, false。默认为false
+ - behavior - 行为。字符串或对象。可实现右键方块切换模型等功能。待补充
+ - behaviors - 行为。字符串或对象数组。可实现右键方块切换模型等功能。待补充
+ - offset - 随机偏移。目前支持的值："XZ", "XYZ"
