@@ -65,3 +65,5 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
  - behavior - 行为。字符串或对象。可实现右键方块切换模型等功能。待补充
  - behaviors - 行为。字符串或对象数组。可实现右键方块切换模型等功能。待补充
  - offset - 随机偏移。目前支持的值："XZ", "XYZ"
+
+模型显示名称的语言ID为"kaleido.decor.(命名空间).(方块定义)"
