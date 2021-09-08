@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -86,6 +87,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
+		Stopwatch stopWatch = Stopwatch.createStarted();
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
 		allPacks.clear();
@@ -101,7 +103,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 				Kaleido.logger.catching(e);
 			}
 		}
-		allPacks.values().forEach(ModelPack::sort);
+		allPacks.values().parallelStream().forEach(ModelPack::sort);
 		if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
 			for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
 				if (listener instanceof AdvancementManager) {
@@ -110,6 +112,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 				}
 			}
 		}
+		Kaleido.logger.info("Loading {} Kaleido instances took {}", allInfos.size(), stopWatch.stop());
 		//        if (!firstTime && server.getServerOwner() != null) {
 		//            ServerPlayerEntity owner = server.getPlayerList().getPlayerByUsername(server.getServerOwner());
 		//            if (server.isServerOwner(owner.getGameProfile())) {
