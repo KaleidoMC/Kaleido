@@ -112,6 +112,10 @@ jar {
     exclude "**/*.psd"
     exclude "**/*.txt"
     exclude "**/*.d"
+    exclude "**/yuushya"
+    exclude "**/yuushya_blocks"
+    exclude "**/yuushya_life"
+    
     manifest {
         attributes([
             "Implementation-Title": project.name,
