@@ -260,13 +260,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	@Nullable
 	public static ModelInfo get(IBlockReader level, BlockPos pos) {
 		ModelInfo info = null;
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.dist.isClient() && Minecraft.getInstance().level != null) {
 			level = Minecraft.getInstance().level;
 		}
 		if (level instanceof World) {
 			GlobalPos globalPos = GlobalPos.of(((World) level).dimension(), pos.immutable());
 			info = cache.getIfPresent(globalPos);
-			if (info == null) {
+			if (info == null || info.expired) {
 				TileEntity blockEntity = level.getBlockEntity(pos);
 				if (blockEntity instanceof MasterBlockEntity) {
 					info = ((MasterBlockEntity) blockEntity).getModelInfo();

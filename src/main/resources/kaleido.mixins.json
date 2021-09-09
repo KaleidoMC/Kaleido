@@ -9,7 +9,8 @@
     "MixinModelBakery",
     "MixinBlockModelRenderer",
     "MixinCTMLogic",
-    "MixinBlock"
+    "MixinBlock",
+    "MixinClientModLoader"
   ],
   "injectors": {
     "defaultRequire": 1

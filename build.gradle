@@ -117,6 +117,7 @@ jar {
     exclude "**/yuushya"
     exclude "**/yuushya_blocks"
     exclude "**/yuushya_life"
+    exclude "**/cocricot"
     
     manifest {
         attributes([

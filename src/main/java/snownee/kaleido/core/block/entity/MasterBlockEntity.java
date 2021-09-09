@@ -63,7 +63,10 @@ public class MasterBlockEntity extends BaseTile {
 
 	public ModelInfo getModelInfo() {
 		if (modelInfo != null && modelInfo.expired) {
-			modelInfo = KaleidoDataManager.get(modelInfo.id);
+			ModelInfo newInfo = KaleidoDataManager.get(modelInfo.id);
+			if (newInfo != null) {
+				modelInfo = newInfo;
+			}
 		}
 		return modelInfo;
 	}

@@ -77,6 +77,8 @@ public final class KaleidoBlocks {
 	}
 
 	public static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+//		ModelInfo info = ModelInfo.get(worldIn, pos);
+//		System.out.println(info);
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			return ((MasterBlockEntity) tile).use(state, worldIn, pos, player, handIn, hit);
