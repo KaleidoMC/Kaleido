@@ -22,12 +22,8 @@ public final class Hooks {
 		return Objects.equals(getId(mc.level, fromPos, from), getId(mc.level, toPos, to));
 	}
 
-	public static boolean isKaleidoBlock(BlockState state) {
-		return Kaleido.MODID.equals(state.getBlock().getRegistryName().getNamespace());
-	}
-
 	private static ResourceLocation getId(World level, BlockPos pos, BlockState state) {
-		if (isKaleidoBlock(state)) {
+		if (Kaleido.isKaleidoBlock(state)) {
 			IModelData data = ModelDataManager.getModelData(level, pos);
 			if (data != null) {
 				ModelInfo info = data.getData(MasterBlockEntity.MODEL);

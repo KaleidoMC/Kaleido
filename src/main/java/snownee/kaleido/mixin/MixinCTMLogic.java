@@ -14,6 +14,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import snownee.kaleido.Kaleido;
 import snownee.kaleido.compat.ctm.Hooks;
 import team.chisel.ctm.Configurations;
 import team.chisel.ctm.client.util.CTMLogic;
@@ -58,7 +59,7 @@ public abstract class MixinCTMLogic {
 	}
 
 	private boolean stateComparator(IBlockReader world, BlockPos fromPos, BlockPos toPos, BlockState from, BlockState to, Direction dir) {
-		if (!Hooks.isKaleidoBlock(from) && !Hooks.isKaleidoBlock(to)) {
+		if (!Kaleido.isKaleidoBlock(from) && !Kaleido.isKaleidoBlock(to)) {
 			return stateComparator(from, to, dir);
 		}
 		return Hooks.stateComparator(fromPos, toPos, from, to, dir);

@@ -8,7 +8,8 @@
   "client": [
     "MixinModelBakery",
     "MixinBlockModelRenderer",
-    "MixinCTMLogic"
+    "MixinCTMLogic",
+    "MixinBlock"
   ],
   "injectors": {
     "defaultRequire": 1

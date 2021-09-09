@@ -17,6 +17,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock.OffsetType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -259,6 +260,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	@Nullable
 	public static ModelInfo get(IBlockReader level, BlockPos pos) {
 		ModelInfo info = null;
+		if (FMLEnvironment.dist.isClient()) {
+			level = Minecraft.getInstance().level;
+		}
 		if (level instanceof World) {
 			GlobalPos globalPos = GlobalPos.of(((World) level).dimension(), pos.immutable());
 			info = cache.getIfPresent(globalPos);
@@ -269,6 +273,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 					if (info != null)
 						cache.put(globalPos, info);
 				}
+			}
+		} else {
+			TileEntity blockEntity = level.getBlockEntity(pos);
+			if (blockEntity instanceof MasterBlockEntity) {
+				info = ((MasterBlockEntity) blockEntity).getModelInfo();
 			}
 		}
 		return info;

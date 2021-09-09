@@ -28,18 +28,23 @@ public class KaleidoClient {
 	public static boolean ctm = ModList.get().isLoaded("ctm");
 
 	@Nullable
-	public static synchronized IBakedModel loadModel(ModelInfo info, int variant) {
+	public static synchronized void loadModel(IBakedModel[] models, ModelInfo info, int variant) {
 		ModelLoader modelLoader = ModelLoader.instance();
 		if (modelLoader == null) {
-			return null;
+			return;
+		}
+		if (info.template != KaleidoTemplate.item && ctm) {
+			if (variant == info.template.states) {
+				variant = info.template.defaultState;
+			}
 		}
 		IBakedModel bakedModel = info.template.loadModel(modelLoader, info, variant);
 		if (info.template != KaleidoTemplate.item && ctm) {
 			if (info.template.defaultState == variant)
-				MODEL_MAP.get(info)[info.template.states] = bakedModel;
+				models[info.template.states] = bakedModel;
 			bakedModel = CTMCompat.tryWrap(info, variant, bakedModel, modelLoader);
 		}
-		return bakedModel;
+		models[variant] = bakedModel;
 	}
 
 	@Nullable
@@ -56,7 +61,7 @@ public class KaleidoClient {
 		int states = ctm ? info.template.states + 1 : info.template.states;
 		IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[states]);
 		if (bakedModel[i] == null) {
-			bakedModel[i] = loadModel(info, i);
+			loadModel(bakedModel, info, i);
 		}
 		return bakedModel[i];
 	}

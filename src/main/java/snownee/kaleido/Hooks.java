@@ -8,10 +8,14 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IBlockReader;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
@@ -29,4 +33,17 @@ public final class Hooks {
 		return KaleidoModel.getModel(info, stateIn);
 	}
 
+	@OnlyIn(Dist.CLIENT)
+	public static boolean skipRender(BlockState state, IBlockReader level, BlockPos pos, Direction direction) {
+		BlockPos blockpos = pos.relative(direction);
+		BlockState blockstate = level.getBlockState(blockpos);
+		if (state.is(blockstate.getBlock())) {
+			ModelInfo info1 = ModelInfo.get(level, pos);
+			ModelInfo info2 = ModelInfo.get(level, blockpos);
+			if (info1 != null && info1 == info2 && info1.glass) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

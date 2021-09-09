@@ -57,6 +57,7 @@ import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import team.chisel.ctm.Configurations;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(Dist.CLIENT)
@@ -234,7 +235,15 @@ public final class PlacementPreview {
 					bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
 				}
 				long i = placeResult.getSeed(target);
+				boolean preDisableCTM = false;
+				if (KaleidoClient.ctm) {
+					preDisableCTM = Configurations.disableCTM;
+					Configurations.disableCTM = true;
+				}
 				dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
+				if (KaleidoClient.ctm) {
+					Configurations.disableCTM = preDisableCTM;
+				}
 			}
 			/* Assume renderType is not null.
              *
