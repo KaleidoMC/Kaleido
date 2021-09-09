@@ -107,12 +107,9 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@OnlyIn(Dist.CLIENT)
 	public float getShadeBrightness(BlockState state, IBlockReader level, BlockPos pos) {
 		if (state.is(CoreModule.STUFF)) {
-			TileEntity tile = level.getBlockEntity(pos);
-			if (tile instanceof MasterBlockEntity) {
-				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-				if (info != null && info.glass)
-					return 1;
-			}
+			ModelInfo info = ModelInfo.get(level, pos);
+			if (info != null && info.glass)
+				return 1;
 		}
 		return super.getShadeBrightness(state, level, pos);
 	}
@@ -120,12 +117,9 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@Override
 	public boolean propagatesSkylightDown(BlockState state, IBlockReader level, BlockPos pos) {
 		if (state.is(CoreModule.STUFF)) {
-			TileEntity tile = level.getBlockEntity(pos);
-			if (tile instanceof MasterBlockEntity) {
-				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-				if (info != null && info.glass)
-					return true;
-			}
+			ModelInfo info = ModelInfo.get(level, pos);
+			if (info != null && info.glass)
+				return true;
 		}
 		return super.propagatesSkylightDown(state, level, pos);
 	}
@@ -134,12 +128,9 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@Override
 	public VoxelShape getVisualShape(BlockState state, IBlockReader level, BlockPos pos, ISelectionContext context) {
 		if (state.is(CoreModule.STUFF)) {
-			TileEntity tile = level.getBlockEntity(pos);
-			if (tile instanceof MasterBlockEntity) {
-				ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-				if (info != null && info.glass)
-					return VoxelShapes.empty();
-			}
+			ModelInfo info = ModelInfo.get(level, pos);
+			if (info != null && info.glass)
+				return VoxelShapes.empty();
 		}
 		return super.getVisualShape(state, level, pos, context);
 	}

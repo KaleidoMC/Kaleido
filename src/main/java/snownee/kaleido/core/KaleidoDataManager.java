@@ -88,9 +88,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
 		Stopwatch stopWatch = Stopwatch.createStarted();
-		allInfos.values().forEach($ -> $.expired = true);
-		allInfos.clear();
-		allPacks.clear();
+		invalidate();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			try {
 				JsonObject json = GSON.fromJson(entry.getValue(), JsonObject.class);
@@ -157,15 +155,20 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	@OnlyIn(Dist.CLIENT)
 	public void read(Collection<ModelInfo> infos) {
-		allInfos.clear();
-		allPacks.clear();
+		invalidate();
 		infos.forEach(this::add);
 	}
 
 	private void serverInit(AddReloadListenerEvent event) {
+		invalidate();
+		event.addListener(this);
+	}
+
+	private void invalidate() {
+		ModelInfo.cache.invalidateAll();
+		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
 		allPacks.clear();
-		event.addListener(this);
 	}
 
 	public void syncAllLockInfo(ServerPlayerEntity player) {

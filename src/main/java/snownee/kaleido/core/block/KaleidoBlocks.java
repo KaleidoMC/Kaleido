@@ -46,12 +46,9 @@ public final class KaleidoBlocks {
 
 	public static ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
 		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM);
-		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-			if (info != null) {
-				NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
-			}
+		ModelInfo info = ModelInfo.get(world, pos);
+		if (info != null) {
+			NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
 		}
 		return stack;
 	}
@@ -91,14 +88,11 @@ public final class KaleidoBlocks {
 		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
-		TileEntity tile = worldIn.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-			if (info != null) {
-				VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING));
-				if (!shape.isEmpty()) {
-					return shape;
-				}
+		ModelInfo info = ModelInfo.get(worldIn, pos);
+		if (info != null) {
+			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING));
+			if (!shape.isEmpty()) {
+				return shape;
 			}
 		}
 		return VoxelShapes.block();
@@ -108,12 +102,9 @@ public final class KaleidoBlocks {
 		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
-		TileEntity tile = worldIn.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			ModelInfo info = ((MasterBlockEntity) tile).getModelInfo();
-			if (info != null && !info.noCollision)
-				return info.getShape(state.getValue(HorizontalBlock.FACING));
-		}
+		ModelInfo info = ModelInfo.get(worldIn, pos);
+		if (info != null && !info.noCollision)
+			return info.getShape(state.getValue(HorizontalBlock.FACING));
 		return VoxelShapes.empty();
 	}
 

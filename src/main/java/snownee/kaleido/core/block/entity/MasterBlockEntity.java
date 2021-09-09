@@ -94,9 +94,27 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	@Override
-	public void onLoad() {
-		super.onLoad();
-		//world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), 3);
+	public void onChunkUnloaded() {
+		invalidate();
+		super.onChunkUnloaded();
+	}
+
+	@Override
+	public void setRemoved() {
+		invalidate();
+		super.setRemoved();
+	}
+
+	@Override
+	public void setLevelAndPosition(World p_226984_1_, BlockPos p_226984_2_) {
+		invalidate();
+		super.setLevelAndPosition(p_226984_1_, p_226984_2_);
+	}
+
+	public void invalidate() {
+		if (level != null && modelInfo != null) {
+			ModelInfo.invalidateCache(level, worldPosition);
+		}
 	}
 
 	public void setModelInfo(ModelInfo modelInfo) {

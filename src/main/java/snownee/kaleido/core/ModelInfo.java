@@ -1,7 +1,12 @@
 package snownee.kaleido.core;
 
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
@@ -17,11 +22,16 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -29,6 +39,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
@@ -241,6 +252,30 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			if (e.renderType.get().get() == layer)
 				return true;
 		return false;
+	}
+
+	public static final Cache<GlobalPos, ModelInfo> cache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
+
+	@Nullable
+	public static ModelInfo get(IBlockReader level, BlockPos pos) {
+		ModelInfo info = null;
+		if (level instanceof World) {
+			GlobalPos globalPos = GlobalPos.of(((World) level).dimension(), pos.immutable());
+			info = cache.getIfPresent(globalPos);
+			if (info == null) {
+				TileEntity blockEntity = level.getBlockEntity(pos);
+				if (blockEntity instanceof MasterBlockEntity) {
+					info = ((MasterBlockEntity) blockEntity).getModelInfo();
+					if (info != null)
+						cache.put(globalPos, info);
+				}
+			}
+		}
+		return info;
+	}
+
+	public static void invalidateCache(World level, BlockPos pos) {
+		cache.invalidate(GlobalPos.of(level.dimension(), pos.immutable()));
 	}
 
 }
