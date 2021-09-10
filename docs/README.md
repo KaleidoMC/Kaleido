@@ -20,6 +20,8 @@ Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游
 4. 在游戏中按下`F3`+`T`重载资源包；
 5. 此时在创造模式装饰标签下可以看到新添加的方块。或使用模组中的木工台查看。
 
+**注意：Kaleido不对因版本更新而导致的问题负责，更新前请先备份。**
+
 ## Cocricot
 
 1. 从[Cocricot官网](https://cocricot.pics/)下载Java 1.12.2 - Resourcepack & Mod
@@ -27,6 +29,7 @@ Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游
 3. 下载并安装Kaleido - Cocricot兼容包。方法同导入模型部分的步骤。
 4. 大功告成！
 
+**注意：目前Cocricot支持仍存在很多问题，欢迎给[转换脚本](https://github.com/KaleidoMC/Kaleido/blob/1.16/scripts/compat.py)提交PR来修复问题。**
 
 ## 自定义模型
 
