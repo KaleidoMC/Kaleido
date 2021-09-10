@@ -7,6 +7,7 @@ import com.google.common.collect.Iterables;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.Hand;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.items.ItemHandlerHelper;
 import snownee.kaleido.core.CoreModule;
@@ -30,6 +31,16 @@ public class KaleidoUtil {
 	}
 
 	public static void giveItems(PlayerEntity player, int amount, ItemStack stack) {
+		if (player.isCreative()) {
+			ItemStack held = player.getMainHandItem();
+			if (!held.equals(stack, true)) {
+				int size = Math.min(amount, stack.getMaxStackSize());
+				ItemStack newStack = ItemHandlerHelper.copyStackWithSize(stack, size);
+				player.setItemInHand(Hand.MAIN_HAND, newStack);
+				ItemHandlerHelper.giveItemToPlayer(player, held);
+				amount -= size;
+			}
+		}
 		while (amount > 0) {
 			int size = Math.min(amount, stack.getMaxStackSize());
 			ItemStack newStack = ItemHandlerHelper.copyStackWithSize(stack, size);

@@ -26,3 +26,8 @@ run
 
 /.factorypath
 /logs/
+/scripts/data/
+/scripts/models/
+/scripts/resources/
+/src/main/resources/assets/cocricot/
+/src/main/resources/data/cocricot/

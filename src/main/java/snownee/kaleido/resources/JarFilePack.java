@@ -21,11 +21,13 @@ public class JarFilePack extends FilePack {
 			return super.getMetadataSection(serializer);
 		} else {
 			JsonObject jsonobject = new JsonObject();
-			int version = SharedConstants.getCurrentVersion().getPackVersion();
-			if (hasResource("mcmod.info"))
-				version = 3;
-			jsonobject.addProperty("pack_format", version);
-			jsonobject.addProperty("description", "Jar resources loaded by Kaleido");
+			if ("pack".equals(serializer.getMetadataSectionName())) {
+				int version = SharedConstants.getCurrentVersion().getPackVersion();
+				if (hasResource("mcmod.info"))
+					version = 3;
+				jsonobject.addProperty("pack_format", version);
+				jsonobject.addProperty("description", "Jar resources loaded by Kaleido");
+			}
 			return serializer.fromJson(jsonobject);
 		}
 	}

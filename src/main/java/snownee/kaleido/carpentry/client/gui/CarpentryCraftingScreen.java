@@ -124,8 +124,10 @@ public class CarpentryCraftingScreen extends Screen {
 			AbstractGui.fill(matrix, left, top, left + entryWidth, top + entryHeight, 0x22FFFFFF);
 			parent.font.draw(matrix, name, left + 8, top + 4, 0xFFFFFF);
 			children.forEach(btn -> {
-				btn.x = btn.originalX + left;
 				btn.y = btn.originalY + top;
+				if (btn.y < -btn.getHeight() || btn.y > parent.height)
+					return;
+				btn.x = btn.originalX + left;
 				btn.render(matrix, mouseX, mouseY, partialTicks);
 			});
 
