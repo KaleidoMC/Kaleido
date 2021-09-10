@@ -8,9 +8,10 @@
   "client": [
     "MixinModelBakery",
     "MixinBlockModelRenderer",
-    "MixinCTMLogic",
     "MixinBlock",
-    "MixinClientModLoader"
+    "MixinClientModLoader",
+    "MixinCTMLogic",
+    "MixinItemStackListFactory"
   ],
   "injectors": {
     "defaultRequire": 1

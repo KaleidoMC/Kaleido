@@ -22,8 +22,10 @@ skip_models = { "block/stairs", "block/inner_stairs", "block/outer_stairs", "blo
 block_models = { "cocricotmod:block/base_cube_topside" }
 cutout_models = { "cocricotmod:block/climbing_rose", "block/cross", "cocricotmod:block/wall_ornament", "cocricotmod:block/base_cube_topside_nobottom",
                   "cocricotmod:block/base_nothickness_all", "cocricotmod:block/base_nothickness_both", "cocricotmod:block/base_nothickness_side",
-                  "cocricotmod:block/base_nothickness_slant", "cocricotmod:block/base_nothickness_three" }
-cutout_prefixes = [ "parkbench_", "wheel_" ]
+                  "cocricotmod:block/base_nothickness_slant", "cocricotmod:block/base_nothickness_three", "cocricotmod:block/awning_black_lower", "cocricotmod:block/awning_black",
+                  "cocricotmod:block/base_cross_double", "cocricotmod:block/clothes_polehanger_dark", "cocricotmod:block/rug_jute_round_true",
+                  "cocricotmod:block/rug_jute_round_true_corner", "cocricotmod:block/rug_jute_round_true_side" }
+cutout_prefixes = [ "parkbench_", "wheel_", "laundrypole_", "neon_", "roundtable_" ]
 
 for filename in json_files:
     print("Process " + filename)
@@ -39,8 +41,10 @@ for filename in json_files:
             if glass:
                 rendertype = "cutout"
             elif "leaves" in filename:
+                rendertype = "cutout"  
+            elif (namespace+":block/"+filename[:len(filename)-5]) in cutout_models: #TODO: 最后再检查
                 rendertype = "cutout"
-                
+            
             if "parent" in json_text:
                 parent = json_text["parent"]
                 if parent in skip_models:
