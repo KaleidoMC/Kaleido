@@ -95,7 +95,8 @@ public enum KaleidoTemplate {
 				transform = ModelRotation.X90_Y0;
 			}
 		}
-		return modelLoader.getBakedModel(getModelLocation(info, variant), transform, modelLoader.getSpriteMap()::getSprite);
+		ResourceLocation modelLocation = getModelLocation(info, variant);
+		return modelLoader.getBakedModel(modelLocation, transform, modelLoader.getSpriteMap()::getSprite);
 	}
 
 	public ResourceLocation getModelLocation(ModelInfo info, int variant) {

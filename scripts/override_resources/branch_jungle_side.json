@@ -1,0 +1,6 @@
+{
+    "parent": "cocricotmod:block/branch_side",
+    "textures": {
+        "0": "block/jungle_log"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "cocricotmod:block/fireplace_brown",
+    "textures": {
+		"1": "block/iron_block"
+  	}
+}

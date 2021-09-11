@@ -1,0 +1,6 @@
+{
+    "parent": "cocricotmod:block/base_rod",
+    "textures": {
+        "0": "block/dark_oak_log"
+    }
+}

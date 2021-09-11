@@ -145,7 +145,6 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	@Override
 	public IBakedModel handlePerspective(TransformType cameraTransformType, MatrixStack mat) {
-		// TODO Auto-generated method stub
 		return IDynamicBakedModel.super.handlePerspective(cameraTransformType, mat);
 	}
 

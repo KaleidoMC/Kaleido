@@ -1,0 +1,6 @@
+{
+    "parent": "cocricotmod:block/base_stick",
+    "textures": {
+        "0": "block/oak_log"
+    }
+}

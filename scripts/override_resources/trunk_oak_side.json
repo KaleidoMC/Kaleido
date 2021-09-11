@@ -1,0 +1,6 @@
+{
+    "parent": "cocricotmod:block/trunk_side",
+    "textures": {
+        "0": "block/oak_log"
+    }
+}

@@ -1,0 +1,18 @@
+{
+	"ambientocclusion": false,
+	"textures": {
+		"particle": "#0"
+	},
+	"elements": [
+		{
+			"from": [6, 0, -4],
+			"to": [10, 4, 6],
+			"faces": {
+				"east": {"uv": [6, 5.5, 10, 11.5], "rotation": 270, "texture": "#0"},
+				"west": {"uv": [6, 5.5, 10, 11.5], "rotation": 270, "texture": "#0"},
+				"up": {"uv": [6.5, 0, 10.5, 6], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [6.5, 0, 10.5, 6], "rotation": 180, "texture": "#0"}
+			}
+		}
+	]
+}
