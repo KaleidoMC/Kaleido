@@ -1,11 +1,4 @@
 {
 "shape": "block",
-"renderType": "cutout",
-"behavior": {
-  "type": "onUseBlock",
-  "action": {
-    "type": "transform",
-    "block": "stone"
-  }
-}
+"renderType": "cutout"
 }

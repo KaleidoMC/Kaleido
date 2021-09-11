@@ -1,5 +1,6 @@
 {
-	"credit": "Yuushya", "ambientocclusion": false,
+	"credit": "Yuushya",
+	"ambientocclusion": false,
 	"textures": {
 		"0": "block/white_terracotta",
 		"1": "block/anvil",

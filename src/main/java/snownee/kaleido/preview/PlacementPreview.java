@@ -132,7 +132,7 @@ public final class PlacementPreview {
 			return false;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS) {
+		if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS/* || mc.level.isDebug()*/) {
 			return false;
 		}
 

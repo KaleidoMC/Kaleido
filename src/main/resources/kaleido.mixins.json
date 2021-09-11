@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "kaleido.refmap.json",
   "mixins": [
+    "MixinDebugChunkGenerator"
   ],
   "client": [
     "MixinModelBakery",

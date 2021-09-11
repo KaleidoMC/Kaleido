@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -35,6 +36,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.JsonUtils;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
@@ -63,6 +65,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean glass;
 	private HashCode shape;
 	private VoxelShape[] shapeCache = ShapeCache.fallback;
+	public CompoundNBT nbt;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
@@ -138,7 +141,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public ItemStack makeItem(int size) {
-		NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF, size));
+		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM, size);
+		if (nbt != null)
+			stack.setTag(nbt.copy());
+		NBTHelper data = NBTHelper.of(stack);
 		data.setString(KaleidoBlocks.NBT_ID, id.toString());
 		return data.getItem();
 	}
@@ -153,6 +159,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		buf.writeBoolean(isLockedServer(player));
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
+		buf.writeNbt(nbt);
 		if (!template.solid) {
 			buf.writeByteArray(shape.asBytes());
 			buf.writeBoolean(noCollision);
@@ -173,6 +180,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		info.setLocked(buf.readBoolean());
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
+		info.nbt = buf.readNbt();
 		if (!info.template.solid) {
 			info.shape = HashCode.fromBytes(buf.readByteArray());
 			info.noCollision = buf.readBoolean();
@@ -203,6 +211,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			}
 			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 			info.price = JSONUtils.getAsInt(json, "price", 1);
+			info.nbt = JsonUtils.readNBT(json, "nbt");
 			if (!info.template.solid) {
 				if (json.has("shape")) {
 					info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
