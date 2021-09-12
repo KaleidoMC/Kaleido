@@ -38,6 +38,7 @@ public class MasterBlockEntity extends BaseTile {
 	public ImmutableList<Behavior> behaviors = ImmutableList.of();
 	private IModelData modelData = FMLEnvironment.dist.isClient() ? new ModelDataMap.Builder().build() : EmptyModelData.INSTANCE;
 
+	private ResourceLocation modelId;
 	private ModelInfo modelInfo;
 
 	public MasterBlockEntity() {
@@ -79,9 +80,9 @@ public class MasterBlockEntity extends BaseTile {
 
 	@Override
 	protected void readPacketData(CompoundNBT data) {
-		ResourceLocation id = Util.RL(data.getString("Model"));
-		if (id != null) {
-			ModelInfo info = KaleidoDataManager.get(id);
+		modelId = Util.RL(data.getString("Model"));
+		if (modelId != null) {
+			ModelInfo info = KaleidoDataManager.get(modelId);
 			if (info != null) {
 				setModelInfo(info);
 				int i = 0;
@@ -122,6 +123,7 @@ public class MasterBlockEntity extends BaseTile {
 
 	public void setModelInfo(ModelInfo modelInfo) {
 		this.modelInfo = modelInfo;
+		this.modelId = modelInfo.id;
 		if (!modelInfo.behaviors.isEmpty()) {
 			ImmutableList.Builder<Behavior> list = ImmutableList.builder();
 			for (Behavior behavior : modelInfo.behaviors) {
@@ -143,8 +145,8 @@ public class MasterBlockEntity extends BaseTile {
 
 	@Override
 	protected CompoundNBT writePacketData(CompoundNBT data) {
-		if (getModelInfo() != null) {
-			data.putString("Model", modelInfo.id.toString());
+		if (modelId != null) {
+			data.putString("Model", modelId.toString());
 			if (!behaviors.isEmpty()) {
 				ListNBT list = new ListNBT();
 				for (Behavior behavior : behaviors) {
