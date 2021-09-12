@@ -12,9 +12,7 @@ import net.minecraft.resources.ResourcePackInfo;
 
 // FolderPackFinder
 public class JarPackFinder implements IPackFinder {
-	private static final FileFilter RESOURCEPACK_FILTER = file -> {
-		return file.isFile() && file.getName().endsWith(".jar");
-	};
+	private static final FileFilter RESOURCEPACK_FILTER = file -> (file.isFile() && file.getName().endsWith(".jar"));
 
 	private final File folder;
 	private final IPackNameDecorator packSource;
@@ -26,15 +24,15 @@ public class JarPackFinder implements IPackFinder {
 
 	@Override
 	public void loadPacks(Consumer<ResourcePackInfo> p_230230_1_, ResourcePackInfo.IFactory p_230230_2_) {
-		if (!this.folder.isDirectory()) {
-			this.folder.mkdirs();
+		if (!folder.isDirectory()) {
+			folder.mkdirs();
 		}
 
-		File[] afile = this.folder.listFiles(RESOURCEPACK_FILTER);
+		File[] afile = folder.listFiles(RESOURCEPACK_FILTER);
 		if (afile != null) {
 			for (File file1 : afile) {
 				String s = "file/" + file1.getName();
-				ResourcePackInfo resourcepackinfo = ResourcePackInfo.create(s, false, this.createSupplier(file1), p_230230_2_, ResourcePackInfo.Priority.TOP, this.packSource);
+				ResourcePackInfo resourcepackinfo = ResourcePackInfo.create(s, false, createSupplier(file1), p_230230_2_, ResourcePackInfo.Priority.TOP, packSource);
 				if (resourcepackinfo != null) {
 					p_230230_1_.accept(resourcepackinfo);
 				}

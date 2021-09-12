@@ -1,5 +1,7 @@
 package snownee.kaleido.core.block.entity;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockState;
@@ -74,12 +76,19 @@ public class MasterBlockEntity extends BaseTile {
 
 	@Override
 	public void load(BlockState state, CompoundNBT compound) {
-		readPacketData(compound);
+		loadInternal(compound);
 		super.load(state, compound);
 	}
 
 	@Override
 	protected void readPacketData(CompoundNBT data) {
+		loadInternal(data);
+		if (modelInfo != null && level != null) {
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
+		}
+	}
+
+	private void loadInternal(CompoundNBT data) {
 		modelId = Util.RL(data.getString("Model"));
 		if (modelId != null) {
 			ModelInfo info = KaleidoDataManager.get(modelId);
@@ -123,7 +132,7 @@ public class MasterBlockEntity extends BaseTile {
 
 	public void setModelInfo(ModelInfo modelInfo) {
 		this.modelInfo = modelInfo;
-		this.modelId = modelInfo.id;
+		modelId = modelInfo.id;
 		if (!modelInfo.behaviors.isEmpty()) {
 			ImmutableList.Builder<Behavior> list = ImmutableList.builder();
 			for (Behavior behavior : modelInfo.behaviors) {
@@ -167,6 +176,8 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+		if (!isValid())
+			return ActionResultType.PASS;
 		ItemStack stack = player.getItemInHand(handIn);
 		ActionContext context = new ActionContext(player, handIn, stack, hit);
 		for (Behavior behavior : behaviors) {
@@ -175,7 +186,28 @@ public class MasterBlockEntity extends BaseTile {
 				return resultType;
 			}
 		}
+		if (stack.isEmpty() && modelInfo.group != null) {
+			if (cycleModels()) {
+				return ActionResultType.SUCCESS;
+			}
+		}
 		return ActionResultType.PASS;
+	}
+
+	public boolean cycleModels() {
+		List<ModelInfo> infos = modelInfo.group.infos;
+		if (infos.size() < 2)
+			return false;
+		int i = infos.indexOf(modelInfo);
+		if (i < 0)
+			return false;
+		++i;
+		if (i >= infos.size())
+			i = 0;
+		ModelInfo newInfo = infos.get(i);
+		setModelInfo(newInfo);
+		refresh();
+		return true;
 	}
 
 }

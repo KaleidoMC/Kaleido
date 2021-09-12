@@ -25,14 +25,17 @@ public class KaleidoLootFunction extends LootFunction {
 		super(conditions);
 	}
 
+	@Override
 	public LootFunctionType getType() {
 		return CoreModule.LOOT_FUNCTION_TYPE;
 	}
 
+	@Override
 	public Set<LootParameter<?>> getReferencedContextParams() {
 		return ImmutableSet.of(LootParameters.BLOCK_ENTITY);
 	}
 
+	@Override
 	public ItemStack run(ItemStack stack, LootContext ctx) {
 		TileEntity blockEntity = ctx.getParamOrNull(LootParameters.BLOCK_ENTITY);
 		if (blockEntity instanceof MasterBlockEntity) {
@@ -49,10 +52,12 @@ public class KaleidoLootFunction extends LootFunction {
 	}
 
 	public static class Serializer extends LootFunction.Serializer<KaleidoLootFunction> {
+		@Override
 		public void serialize(JsonObject json, KaleidoLootFunction lootFunction, JsonSerializationContext ctx) {
 			super.serialize(json, lootFunction, ctx);
 		}
 
+		@Override
 		public KaleidoLootFunction deserialize(JsonObject json, JsonDeserializationContext ctx, ILootCondition[] conditions) {
 			return new KaleidoLootFunction(conditions);
 		}

@@ -1,16 +1,23 @@
 package snownee.kaleido.core.item;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
@@ -30,6 +37,19 @@ public class StuffItem extends ModBlockItem {
 			return info.getDescriptionId();
 		}
 		return super.getDescriptionId(stack);
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		if (flagIn.isAdvanced()) {
+			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			if (info != null && info.group != null) {
+				int i = info.group.infos.indexOf(info);
+				tooltip.add(new TranslationTextComponent("tip.kaleido.group", info.group.id.toString(), i));
+			}
+		}
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}
 
 	@Override

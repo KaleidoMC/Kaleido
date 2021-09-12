@@ -1,9 +1,12 @@
 package snownee.kaleido.core.block;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
@@ -15,6 +18,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -22,6 +26,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
@@ -45,9 +50,35 @@ public final class KaleidoBlocks {
 		return KaleidoDataManager.get(modelId);
 	}
 
+	@Nullable
+	public static ModelInfo getInfo(IBlockReader level, BlockPos pos) {
+		ModelInfo info = null;
+		if (FMLEnvironment.dist.isClient() && Minecraft.getInstance().level != null) {
+			level = Minecraft.getInstance().level;
+		}
+		if (level instanceof World) {
+			GlobalPos globalPos = GlobalPos.of(((World) level).dimension(), pos.immutable());
+			info = ModelInfo.cache.getIfPresent(globalPos);
+			if (info == null || info.expired) {
+				TileEntity blockEntity = level.getBlockEntity(pos);
+				if (blockEntity instanceof MasterBlockEntity) {
+					info = ((MasterBlockEntity) blockEntity).getModelInfo();
+					if (info != null)
+						ModelInfo.cache.put(globalPos, info);
+				}
+			}
+		} else {
+			TileEntity blockEntity = level.getBlockEntity(pos);
+			if (blockEntity instanceof MasterBlockEntity) {
+				info = ((MasterBlockEntity) blockEntity).getModelInfo();
+			}
+		}
+		return info;
+	}
+
 	public static ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
 		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM);
-		ModelInfo info = ModelInfo.get(world, pos);
+		ModelInfo info = getInfo(world, pos);
 		if (info != null) {
 			NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
 		}
@@ -78,8 +109,8 @@ public final class KaleidoBlocks {
 	}
 
 	public static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-		//		ModelInfo info = ModelInfo.get(worldIn, pos);
-		//		System.out.println(info);
+		if (handIn == Hand.OFF_HAND)
+			return ActionResultType.PASS;
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			return ((MasterBlockEntity) tile).use(state, worldIn, pos, player, handIn, hit);
@@ -91,7 +122,7 @@ public final class KaleidoBlocks {
 		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
-		ModelInfo info = ModelInfo.get(worldIn, pos);
+		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null) {
 			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
 			if (!shape.isEmpty()) {
@@ -105,7 +136,7 @@ public final class KaleidoBlocks {
 		if (!state.is(CoreModule.STUFF)) {
 			return VoxelShapes.block();
 		}
-		ModelInfo info = ModelInfo.get(worldIn, pos);
+		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null && !info.noCollision) {
 			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
 			if (info.outOfBlock()) {

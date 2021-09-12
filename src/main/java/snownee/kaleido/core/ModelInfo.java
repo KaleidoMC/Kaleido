@@ -3,8 +3,6 @@ package snownee.kaleido.core;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -18,14 +16,12 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractBlock.OffsetType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -36,7 +32,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -46,7 +41,6 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.block.KaleidoBlocks;
-import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
@@ -57,6 +51,7 @@ import snownee.kiwi.util.NBTHelper;
 public class ModelInfo implements Comparable<ModelInfo> {
 
 	public ResourceLocation id;
+	public ModelGroup group;
 	public KaleidoTemplate template = KaleidoTemplate.none;
 	public ImmutableList<Behavior> behaviors = ImmutableList.of();
 	private boolean locked = true;
@@ -135,7 +130,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
-			return (!KaleidoCommonConfig.autoUnlock && !isAdvancementDone(player));
+			return !KaleidoCommonConfig.autoUnlock && !isAdvancementDone(player);
 		}
 	}
 
@@ -200,39 +195,41 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public static ModelInfo fromJson(JsonObject json) {
 		ModelInfo info = new ModelInfo();
-		if (info != null) {
-			if (json.has("template"))
-				info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
-			if (json.has("behavior")) {
-				info.behaviors = ImmutableList.of(Behavior.fromJson(json.get("behavior")));
-			} else if (json.has("behaviors")) {
-				ImmutableList.Builder<Behavior> list = ImmutableList.builder();
-				for (JsonElement e : JSONUtils.getAsJsonArray(json, "behaviors")) {
-					list.add(Behavior.fromJson(e));
-				}
-				info.behaviors = list.build();
+		if (json.has("group")) {
+			info.group = KaleidoDataManager.getGroup(new ResourceLocation(JSONUtils.getAsString(json, "group")));
+			info.group.infos.add(info);
+		}
+		if (json.has("template"))
+			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
+		if (json.has("behavior")) {
+			info.behaviors = ImmutableList.of(Behavior.fromJson(json.get("behavior")));
+		} else if (json.has("behaviors")) {
+			ImmutableList.Builder<Behavior> list = ImmutableList.builder();
+			for (JsonElement e : JSONUtils.getAsJsonArray(json, "behaviors")) {
+				list.add(Behavior.fromJson(e));
 			}
-			info.reward = JSONUtils.getAsBoolean(json, "reward", false);
-			info.price = JSONUtils.getAsInt(json, "price", 1);
-			info.nbt = JsonUtils.readNBT(json, "nbt");
-			if (!info.template.solid) {
-				if (json.has("shape")) {
-					info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
-				}
-				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
-				info.glass = JSONUtils.getAsBoolean(json, "glass", false);
-				if (json.has("renderType")) {
-					info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
-				} else if (json.has("renderTypes")) {
-					JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
-					info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
-					for (JsonElement e : array) {
-						info.renderTypes.add(RenderTypeEnum.valueOf(e.getAsString()));
-					}
-				}
-				if (json.has("offset"))
-					info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
+			info.behaviors = list.build();
+		}
+		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
+		info.price = JSONUtils.getAsInt(json, "price", 1);
+		info.nbt = JsonUtils.readNBT(json, "nbt");
+		if (!info.template.solid) {
+			if (json.has("shape")) {
+				info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
 			}
+			info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
+			info.glass = JSONUtils.getAsBoolean(json, "glass", false);
+			if (json.has("renderType")) {
+				info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
+			} else if (json.has("renderTypes")) {
+				JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
+				info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
+				for (JsonElement e : array) {
+					info.renderTypes.add(RenderTypeEnum.valueOf(e.getAsString()));
+				}
+			}
+			if (json.has("offset"))
+				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
 		}
 		return info;
 	}
@@ -265,32 +262,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public static final Cache<GlobalPos, ModelInfo> cache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
-
-	@Nullable
-	public static ModelInfo get(IBlockReader level, BlockPos pos) {
-		ModelInfo info = null;
-		if (FMLEnvironment.dist.isClient() && Minecraft.getInstance().level != null) {
-			level = Minecraft.getInstance().level;
-		}
-		if (level instanceof World) {
-			GlobalPos globalPos = GlobalPos.of(((World) level).dimension(), pos.immutable());
-			info = cache.getIfPresent(globalPos);
-			if (info == null || info.expired) {
-				TileEntity blockEntity = level.getBlockEntity(pos);
-				if (blockEntity instanceof MasterBlockEntity) {
-					info = ((MasterBlockEntity) blockEntity).getModelInfo();
-					if (info != null)
-						cache.put(globalPos, info);
-				}
-			}
-		} else {
-			TileEntity blockEntity = level.getBlockEntity(pos);
-			if (blockEntity instanceof MasterBlockEntity) {
-				info = ((MasterBlockEntity) blockEntity).getModelInfo();
-			}
-		}
-		return info;
-	}
 
 	public static void invalidateCache(World level, BlockPos pos) {
 		cache.invalidate(GlobalPos.of(level.dimension(), pos.immutable()));

@@ -1,6 +1,7 @@
 package snownee.kaleido.core;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,10 +62,11 @@ public class KaleidoDataManager extends JsonReloadListener {
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .registerTypeAdapter(Behavior.class, Behavior.Deserializer.INSTANCE)
             .create();
-
     /* on */
+
 	public static final KaleidoDataManager INSTANCE = new KaleidoDataManager();
 	public final Map<ResourceLocation, ModelInfo> allInfos = Maps.newLinkedHashMap();
+	public final Map<ResourceLocation, ModelGroup> allGroups = Maps.newHashMap();
 
 	public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
 	public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
@@ -107,11 +109,14 @@ public class KaleidoDataManager extends JsonReloadListener {
 			}
 		}
 		allPacks.values().parallelStream().forEach(ModelPack::sort);
-		if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
-			for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
-				if (listener instanceof AdvancementManager) {
-					makeAdvancements(((AdvancementManager) listener).advancements);
-					break;
+		allGroups.values().parallelStream().forEach($ -> Collections.sort($.infos));
+		if (KaleidoCommonConfig.generateAdvancements()) {
+			if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
+				for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
+					if (listener instanceof AdvancementManager) {
+						makeAdvancements(((AdvancementManager) listener).advancements);
+						break;
+					}
 				}
 			}
 		}
@@ -126,6 +131,10 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	public static ModelInfo get(ResourceLocation id) {
 		return INSTANCE.allInfos.get(id);
+	}
+
+	public static ModelGroup getGroup(ResourceLocation id) {
+		return INSTANCE.allGroups.computeIfAbsent(id, ModelGroup::new);
 	}
 
 	public void makeAdvancement(Map<ResourceLocation, Builder> map, Advancement parent, ModelInfo info) {
@@ -173,10 +182,13 @@ public class KaleidoDataManager extends JsonReloadListener {
 		ModelInfo.cache.invalidateAll();
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
+		allGroups.clear();
 		allPacks.clear();
 	}
 
 	public void syncAllLockInfo(ServerPlayerEntity player) {
+		if (KaleidoCommonConfig.autoUnlock)
+			return;
 		/* off */
         List<ResourceLocation> list = allInfos.values().stream()
                 .filter($ -> $.isAdvancementDone(player))

@@ -52,7 +52,6 @@ public class CRedeemPacket extends ClientPacket {
 	}
 
 	private final int amount;
-
 	private final ModelInfo info;
 
 	public CRedeemPacket(ModelInfo info, int amount) {

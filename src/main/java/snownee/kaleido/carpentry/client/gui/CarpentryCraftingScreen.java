@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.widget.button.Button.ITooltip;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CHeldItemChangePacket;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -183,6 +185,7 @@ public class CarpentryCraftingScreen extends Screen {
 	private java.util.List<ITextProperties> tip;
 
 	private final World world;
+	private boolean redeemed;
 
 	public CarpentryCraftingScreen(ITextComponent title, World world, BlockPos pos) {
 		super(title);
@@ -220,7 +223,14 @@ public class CarpentryCraftingScreen extends Screen {
 		if (!isUsable()) {
 			return;
 		}
-		tip = font.getSplitter().splitLines(I18n.get("tip.kaleido.unlock"), 120, Style.EMPTY);
+		ClientPlayerEntity player = minecraft.player;
+		String s;
+		if (KaleidoCommonConfig.autoUnlock || player.isCreative()) {
+			s = I18n.get("tip.kaleido.quickSelect", minecraft.options.keyJump.getTranslatedKeyMessage().getString());
+		} else {
+			s = I18n.get("tip.kaleido.unlock");
+		}
+		tip = font.getSplitter().splitLines(s, 120, Style.EMPTY);
 		children.add(list = new List(minecraft, 238, height, 20));
 		list.setLeftPos(30);
 		/* off */
@@ -271,9 +281,14 @@ public class CarpentryCraftingScreen extends Screen {
 				return;
 			}
 			if (selectedButton != null) {
+				if (redeemed && !selectedButton.stack.equals(player.getMainHandItem(), true)) {
+					player.inventory.selected = (player.inventory.selected + 1) % 9;
+					player.connection.send(new CHeldItemChangePacket(player.inventory.selected));
+				}
 				new CRedeemPacket(selectedButton.info, getRedeemAmount()).send();
 				timer = 17; // defer update coins
 				cooldown = 8;
+				redeemed = true;
 			}
 		}));
 		addButton(addBtn = new Button(x + 20, y, 20, 20, new StringTextComponent("+"), btn -> {
@@ -359,7 +374,7 @@ public class CarpentryCraftingScreen extends Screen {
 				}
 				itemRenderer.renderGuiItemDecorations(font, coinStack, x + 50, y + 95, Integer.toString(amount * selectedButton.info.price));
 			}
-		} else if (!KaleidoCommonConfig.autoUnlock) {
+		} else {
 			x += 40;
 			y += 40;
 			for (ITextProperties s : tip) {
@@ -412,6 +427,13 @@ public class CarpentryCraftingScreen extends Screen {
 			timer = 0;
 			update();
 		}
+		//		System.out.println(minecraft.options.keyUp.isDown());
+		//		if (minecraft.options.keyUp.matches(key, scan)) {
+		//			list.setScrollAmount(list.getScrollAmount() - list.scrollFactor * 2);
+		//		}
+		//		else if (minecraft.options.keyDown.matches(key, scan)) {
+		//			list.setScrollAmount(list.getScrollAmount() + list.scrollFactor * 2);
+		//		}
 	}
 
 	public void update() {
@@ -420,6 +442,27 @@ public class CarpentryCraftingScreen extends Screen {
 		} else {
 			coins = KaleidoUtil.getCoins(minecraft.player);
 		}
+	}
+
+	@Override
+	public boolean keyPressed(int key, int scan, int mods) {
+		if (minecraft.options.keyJump.matches(key, scan)) {
+			int x = (int) (minecraft.mouseHandler.xpos() * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth());
+			int y = (int) (minecraft.mouseHandler.ypos() * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight());
+			IGuiEventListener widget = list.getChildAt(x, y).orElse(null);
+			if (widget instanceof Entry) {
+				widget = ((Entry) widget).getChildAt(x, y).orElse(null);
+				if (widget instanceof StackButton) {
+					((StackButton) widget).playDownSound(minecraft.getSoundManager());
+					((StackButton) widget).onPress();
+					if (minecraft.player.isCreative()) {
+						confirmBtn.onPress();
+					}
+					return true;
+				}
+			}
+		}
+		return super.keyPressed(key, scan, mods);
 	}
 
 }

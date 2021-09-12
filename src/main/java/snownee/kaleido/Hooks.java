@@ -24,6 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.model.KaleidoModel;
 
@@ -47,8 +48,8 @@ public final class Hooks {
 		BlockPos blockpos = pos.relative(direction);
 		BlockState blockstate = level.getBlockState(blockpos);
 		if (state.is(blockstate.getBlock())) {
-			ModelInfo info1 = ModelInfo.get(level, pos);
-			ModelInfo info2 = ModelInfo.get(level, blockpos);
+			ModelInfo info1 = KaleidoBlocks.getInfo(level, pos);
+			ModelInfo info2 = KaleidoBlocks.getInfo(level, blockpos);
 			if (info1 != null && info1 == info2 && info1.glass) {
 				return true;
 			}
@@ -67,15 +68,7 @@ public final class Hooks {
 			set.add(blockModel);
 			location = blockModel.parentLocation;
 			IUnbakedModel iunbakedmodel = modelGetter.apply(location);
-			if (iunbakedmodel == null) {
-				return;
-			}
-
-			if (set.contains(iunbakedmodel)) {
-				return;
-			}
-
-			if (!(iunbakedmodel instanceof BlockModel)) {
+			if ((iunbakedmodel == null) || set.contains(iunbakedmodel) || !(iunbakedmodel instanceof BlockModel)) {
 				return;
 			}
 

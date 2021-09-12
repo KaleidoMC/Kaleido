@@ -10,7 +10,9 @@
 
 "entity.minecraft.villager.kaleido.collector": "Collector",
 
+"tip.kaleido.group": "Group: %s#%s",
 "tip.kaleido.unlock": "Trade with collector to unlock a new decoration per day",
+"tip.kaleido.quickSelect": "Press %s on item to quick-select",
 
 "kaleido.toast.title": "New Decors Unlocked!",
 "kaleido.toast.description": "Check woodworking bench"

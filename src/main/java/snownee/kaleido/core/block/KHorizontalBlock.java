@@ -107,7 +107,7 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@OnlyIn(Dist.CLIENT)
 	public float getShadeBrightness(BlockState state, IBlockReader level, BlockPos pos) {
 		if (state.is(CoreModule.STUFF)) {
-			ModelInfo info = ModelInfo.get(level, pos);
+			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
 			if (info != null && info.glass)
 				return 1;
 		}
@@ -117,7 +117,7 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@Override
 	public boolean propagatesSkylightDown(BlockState state, IBlockReader level, BlockPos pos) {
 		if (state.is(CoreModule.STUFF)) {
-			ModelInfo info = ModelInfo.get(level, pos);
+			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
 			if (info != null && info.glass)
 				return true;
 		}
@@ -128,7 +128,7 @@ public class KHorizontalBlock extends HorizontalBlock {
 	@Override
 	public VoxelShape getVisualShape(BlockState state, IBlockReader level, BlockPos pos, ISelectionContext context) {
 		if (state.is(CoreModule.STUFF)) {
-			ModelInfo info = ModelInfo.get(level, pos);
+			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
 			if (info != null && info.glass)
 				return VoxelShapes.empty();
 		}
