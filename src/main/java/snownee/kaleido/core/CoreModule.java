@@ -46,6 +46,7 @@ import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
+import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -86,6 +87,7 @@ public class CoreModule extends AbstractModule {
 
 	public CoreModule() {
 		KaleidoDataManager.INSTANCE.hashCode();
+		KaleidoTemplate.none.hashCode();
 	}
 
 	@Override

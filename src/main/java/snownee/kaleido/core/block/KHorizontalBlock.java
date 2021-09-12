@@ -12,7 +12,6 @@ import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -42,11 +41,7 @@ public class KHorizontalBlock extends HorizontalBlock {
 
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context) {
-		ModelInfo info = KaleidoBlocks.getInfo(context.getItemInHand());
-		if (info == null)
-			return null;
-		Direction direction = context.getHorizontalDirection();
-		return defaultBlockState().setValue(FACING, direction);
+		return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
 	}
 
 	@Override
