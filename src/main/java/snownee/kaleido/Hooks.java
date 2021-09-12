@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IBlockReader;
@@ -33,11 +32,11 @@ public final class Hooks {
 	@OnlyIn(Dist.CLIENT)
 	private static final ResourceLocation DEFAULT_PARENT = new ResourceLocation("block/block");
 
+	@OnlyIn(Dist.CLIENT)
 	public static IBakedModel replaceKaleidoModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData) {
 		ModelInfo info = modelData.getData(MasterBlockEntity.MODEL);
 		if (info != null && info.offset != AbstractBlock.OffsetType.NONE) {
-			long i = MathHelper.getSeed(posIn.getX(), 0, posIn.getZ());
-			Vector3d offset = new Vector3d(((i & 15L) / 15.0F - 0.5D) * 0.5D, info.offset == AbstractBlock.OffsetType.XYZ ? ((i >> 4 & 15L) / 15.0F - 1.0D) * 0.2D : 0.0D, ((i >> 8 & 15L) / 15.0F - 0.5D) * 0.5D);
+			Vector3d offset = info.getOffset(posIn);
 			matrixIn.translate(offset.x, offset.y, offset.z);
 		}
 		return KaleidoModel.getModel(info, stateIn);

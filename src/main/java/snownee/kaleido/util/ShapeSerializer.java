@@ -29,12 +29,12 @@ public class ShapeSerializer {
 		this.shapeCache = shapeCache;
 	}
 
-	public HashCode fromJson(JsonElement json) {
+	public ShapeCache.Instance fromJson(JsonElement json) {
 		String s = json.getAsString();
 		if ("empty".equals(s))
-			return null;
+			return shapeCache.empty();
 		if ("block".equals(s))
-			return ShapeCache.BLOCK;
+			return shapeCache.block();
 		DoubleList doubleList = new DoubleArrayList();
 		Hasher hasher = shapeCache.newHasher();
 		s = StringUtils.deleteWhitespace(s);
@@ -49,15 +49,16 @@ public class ShapeSerializer {
 			}
 		}
 		HashCode hashCode = hasher.hash();
-		if (!shapeCache.has(hashCode)) {
+		if (shapeCache.has(hashCode)) {
+			return shapeCache.get(hashCode);
+		} else {
 			VoxelShape shape = VoxelShapes.empty();
 			for (int i = 0; i < doubleList.size(); i += 6) {
 				shape = VoxelShapes.or(shape, Block.box(doubleList.getDouble(i), doubleList.getDouble(i + 1), doubleList.getDouble(i + 2), doubleList.getDouble(i + 3), doubleList.getDouble(i + 4), doubleList.getDouble(i + 5)));
 			}
 			shape = shape.optimize();
-			shapeCache.put(hashCode, shape);
+			return shapeCache.put(hashCode, shape);
 		}
-		return hashCode;
 	}
 
 	@OnlyIn(Dist.CLIENT)

@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.ModList;
+import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.compat.ctm.CTMCompat;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.util.KaleidoTemplate;
@@ -73,7 +74,12 @@ public class KaleidoClient {
 		MODEL_MAP.clear();
 		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
-		locations.stream().map(KaleidoClient::resolveLocation).forEach(consumer::accept);
+		/* off */
+		locations.stream()
+				.filter($ -> !KaleidoCommonConfig.ignoredNamespaces.contains($.getNamespace()))
+				.map(KaleidoClient::resolveLocation)
+				.forEach(consumer::accept);
+		/* on */
 	}
 
 	private static ResourceLocation resolveLocation(ResourceLocation location) {

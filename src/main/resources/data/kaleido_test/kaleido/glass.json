@@ -1,5 +1,6 @@
 {
 "shape": "block",
 "renderType": "cutout",
-"glass": true
+"glass": true,
+"offset": "XZ"
 }

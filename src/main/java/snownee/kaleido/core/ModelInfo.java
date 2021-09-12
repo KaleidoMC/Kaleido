@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -31,7 +32,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,8 +67,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public OffsetType offset = OffsetType.NONE;
 	public boolean noCollision;
 	public boolean glass;
-	private HashCode shape;
-	private VoxelShape[] shapeCache = ShapeCache.fallback;
+	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
@@ -161,7 +164,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		buf.writeByte(price);
 		buf.writeNbt(nbt);
 		if (!template.solid) {
-			buf.writeByteArray(shape.asBytes());
+			buf.writeByteArray(shapes.hashCode.asBytes());
 			buf.writeBoolean(noCollision);
 			buf.writeBoolean(glass);
 			buf.writeEnum(offset);
@@ -182,7 +185,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		info.price = buf.readByte();
 		info.nbt = buf.readNbt();
 		if (!info.template.solid) {
-			info.shape = HashCode.fromBytes(buf.readByteArray());
+			info.shapes = KaleidoDataManager.INSTANCE.shapeCache.get(HashCode.fromBytes(buf.readByteArray()));
 			info.noCollision = buf.readBoolean();
 			info.glass = buf.readBoolean();
 			info.offset = buf.readEnum(OffsetType.class);
@@ -214,10 +217,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			info.nbt = JsonUtils.readNBT(json, "nbt");
 			if (!info.template.solid) {
 				if (json.has("shape")) {
-					info.shape = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
-					if (info.shape != null) {
-						info.shapeCache = null;
-					}
+					info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
 				}
 				info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
 				info.glass = JSONUtils.getAsBoolean(json, "glass", false);
@@ -237,18 +237,18 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return info;
 	}
 
-	public VoxelShape getShape(Direction direction) {
-		if (shapeCache == null && shapeCache == null) {
-			shapeCache = KaleidoDataManager.INSTANCE.shapeCache.get(shape);
-		}
-		if (direction == null) {
+	public VoxelShape getShape(Direction direction, BlockPos pos) {
+		if (template.solid)
+			return VoxelShapes.block();
+		if (direction == null)
 			direction = Direction.NORTH;
+
+		VoxelShape shape = shapes.get(direction);
+		if (!shape.isEmpty() && offset != OffsetType.NONE) {
+			Vector3d offset = getOffset(pos);
+			shape = shape.move(offset.x, offset.y, offset.z);
 		}
-		int i = direction.get2DDataValue();
-		if (shapeCache[i] == null) {
-			KaleidoDataManager.INSTANCE.shapeCache.update(shape, direction);
-		}
-		return shapeCache[i];
+		return shape;
 	}
 
 	@Override
@@ -294,6 +294,15 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public static void invalidateCache(World level, BlockPos pos) {
 		cache.invalidate(GlobalPos.of(level.dimension(), pos.immutable()));
+	}
+
+	public Vector3d getOffset(BlockPos pos) {
+		long i = MathHelper.getSeed(pos.getX(), 0, pos.getZ());
+		return new Vector3d(((i & 15L) / 15.0F - 0.5D) * 0.5D, offset == AbstractBlock.OffsetType.XYZ ? ((i >> 4 & 15L) / 15.0F - 1.0D) * 0.2D : 0.0D, ((i >> 8 & 15L) / 15.0F - 0.5D) * 0.5D);
+	}
+
+	public boolean outOfBlock() {
+		return shapes.outOfBlock;
 	}
 
 }

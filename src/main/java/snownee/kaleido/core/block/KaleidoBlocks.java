@@ -16,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -77,8 +78,8 @@ public final class KaleidoBlocks {
 	}
 
 	public static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-//		ModelInfo info = ModelInfo.get(worldIn, pos);
-//		System.out.println(info);
+		//		ModelInfo info = ModelInfo.get(worldIn, pos);
+		//		System.out.println(info);
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			return ((MasterBlockEntity) tile).use(state, worldIn, pos, player, handIn, hit);
@@ -92,7 +93,7 @@ public final class KaleidoBlocks {
 		}
 		ModelInfo info = ModelInfo.get(worldIn, pos);
 		if (info != null) {
-			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING));
+			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
 			if (!shape.isEmpty()) {
 				return shape;
 			}
@@ -105,8 +106,13 @@ public final class KaleidoBlocks {
 			return VoxelShapes.block();
 		}
 		ModelInfo info = ModelInfo.get(worldIn, pos);
-		if (info != null && !info.noCollision)
-			return info.getShape(state.getValue(HorizontalBlock.FACING));
+		if (info != null && !info.noCollision) {
+			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
+			if (info.outOfBlock()) {
+				shape = VoxelShapes.join(shape, VoxelShapes.block(), IBooleanFunction.AND);
+			}
+			return shape;
+		}
 		return VoxelShapes.empty();
 	}
 

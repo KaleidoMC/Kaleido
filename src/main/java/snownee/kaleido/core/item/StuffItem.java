@@ -50,8 +50,8 @@ public class StuffItem extends ModBlockItem {
 		if (info != null && info.template == KaleidoTemplate.none) {
 			if (info.noCollision)
 				return true;
-			VoxelShape shape = info.getShape(ctx.getHorizontalDirection());
 			BlockPos pos = ctx.getClickedPos();
+			VoxelShape shape = info.getShape(ctx.getHorizontalDirection(), pos);
 			return ctx.getLevel().isUnobstructed(null, shape.move(pos.getX(), pos.getY(), pos.getZ()));
 		}
 		return super.canPlace(ctx, state);

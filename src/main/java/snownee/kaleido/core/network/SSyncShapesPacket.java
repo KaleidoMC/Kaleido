@@ -1,15 +1,14 @@
 package snownee.kaleido.core.network;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Collection;
 import java.util.function.Supplier;
 
 import com.google.common.hash.HashCode;
 
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.util.ShapeCache;
+import snownee.kaleido.util.ShapeCache.Instance;
 import snownee.kaleido.util.ShapeSerializer;
 import snownee.kiwi.network.Packet;
 
@@ -34,12 +33,11 @@ public class SSyncShapesPacket extends Packet {
 
 		@Override
 		public void encode(SSyncShapesPacket pkt, PacketBuffer buf) {
-			Map<HashCode, VoxelShape[]> map = shapeCache.getMap();
-			buf.writeVarInt(map.size());
-			for (Entry<HashCode, VoxelShape[]> e : map.entrySet()) {
-				buf.writeByteArray(e.getKey().asBytes());
-				VoxelShape shape = e.getValue()[0];
-				ShapeSerializer.toNetwork(buf, shape);
+			Collection<Instance> shapes = shapeCache.getMap().values();
+			buf.writeVarInt(shapes.size());
+			for (Instance shape : shapes) {
+				buf.writeByteArray(shape.hashCode.asBytes());
+				ShapeSerializer.toNetwork(buf, shape.shapes[0]);
 			}
 		}
 

@@ -12,6 +12,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -40,6 +41,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
@@ -75,7 +77,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		MinecraftForge.EVENT_BUS.addListener(this::tick);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		MinecraftForge.EVENT_BUS.addListener(this::onSyncDatapack);
-		shapeCache = new ShapeCache();
+		shapeCache = new ShapeCache(Hashing.md5());
 		shapeSerializer = new ShapeSerializer(shapeCache);
 	}
 
@@ -90,6 +92,9 @@ public class KaleidoDataManager extends JsonReloadListener {
 		Stopwatch stopWatch = Stopwatch.createStarted();
 		invalidate();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
+			if (KaleidoCommonConfig.ignoredNamespaces.contains(entry.getKey().getNamespace())) {
+				continue;
+			}
 			try {
 				JsonObject json = GSON.fromJson(entry.getValue(), JsonObject.class);
 				ModelInfo info = ModelInfo.fromJson(json);
