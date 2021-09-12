@@ -1,0 +1,61 @@
+package snownee.kaleido.core;
+
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootFunction;
+import net.minecraft.loot.LootFunctionType;
+import net.minecraft.loot.LootParameter;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.tileentity.TileEntity;
+import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kiwi.util.NBTHelper;
+
+public class KaleidoLootFunction extends LootFunction {
+
+	private KaleidoLootFunction(ILootCondition[] conditions) {
+		super(conditions);
+	}
+
+	public LootFunctionType getType() {
+		return CoreModule.LOOT_FUNCTION_TYPE;
+	}
+
+	public Set<LootParameter<?>> getReferencedContextParams() {
+		return ImmutableSet.of(LootParameters.BLOCK_ENTITY);
+	}
+
+	public ItemStack run(ItemStack stack, LootContext ctx) {
+		TileEntity blockEntity = ctx.getParamOrNull(LootParameters.BLOCK_ENTITY);
+		if (blockEntity instanceof MasterBlockEntity) {
+			ModelInfo info = ((MasterBlockEntity) blockEntity).getModelInfo();
+			if (info != null) {
+				if (info.nbt != null) {
+					stack.getOrCreateTag().merge(info.nbt);
+				}
+				NBTHelper data = NBTHelper.of(stack);
+				data.setString(KaleidoBlocks.NBT_ID, info.id.toString());
+			}
+		}
+		return stack;
+	}
+
+	public static class Serializer extends LootFunction.Serializer<KaleidoLootFunction> {
+		public void serialize(JsonObject json, KaleidoLootFunction lootFunction, JsonSerializationContext ctx) {
+			super.serialize(json, lootFunction, ctx);
+		}
+
+		public KaleidoLootFunction deserialize(JsonObject json, JsonDeserializationContext ctx, ILootCondition[] conditions) {
+			return new KaleidoLootFunction(conditions);
+		}
+	}
+
+}

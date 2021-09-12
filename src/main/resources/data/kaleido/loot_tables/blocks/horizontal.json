@@ -8,15 +8,7 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "minecraft:copy_nbt",
-              "source": "block_entity",
-              "ops": [
-                {
-                  "source": "Model",
-                  "target": "Kaleido.Id",
-                  "op": "replace"
-                }
-              ]
+              "function": "kaleido:data"
             }
           ],
           "name": "kaleido:stuff"

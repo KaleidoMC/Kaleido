@@ -6,14 +6,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.loot.LootFunctionType;
 import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -56,16 +59,16 @@ import snownee.kiwi.network.NetworkChannel;
 public class CoreModule extends AbstractModule {
 
 	@NoItem
-	public static final KHorizontalBlock STUFF = new KHorizontalBlock(blockProp(Blocks.STONE).noOcclusion().dynamicShape());
+	public static final KHorizontalBlock HORIZONTAL = new KHorizontalBlock(blockProp(Material.STONE).strength(0.5F));
 
 	@NoItem
-	public static final KHorizontalBlock HORIZONTAL = new KHorizontalBlock(blockProp(Blocks.STONE));
+	public static final KHorizontalBlock STUFF = new KHorizontalBlock(blockProp(HORIZONTAL).noOcclusion().dynamicShape());
 
 	@NoItem
-	public static final KDirectionalBlock DIRECTIONAL = new KDirectionalBlock(blockProp(Blocks.STONE));
+	public static final KDirectionalBlock DIRECTIONAL = new KDirectionalBlock(blockProp(HORIZONTAL));
 
 	@NoItem
-	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(Blocks.STONE));
+	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(HORIZONTAL));
 
 	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
@@ -78,6 +81,8 @@ public class CoreModule extends AbstractModule {
 	public static final StuffItem STUFF_ITEM = new StuffItem(STUFF, itemProp());
 
 	public static final INamedTag<Item> CLOTH_TAG = itemTag(Kaleido.MODID, "cloth");
+
+	public static final LootFunctionType LOOT_FUNCTION_TYPE = Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(Kaleido.MODID, "data"), new LootFunctionType(new KaleidoLootFunction.Serializer()));
 
 	public CoreModule() {
 		KaleidoDataManager.INSTANCE.hashCode();
