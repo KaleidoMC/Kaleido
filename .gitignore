@@ -1,5 +1,3 @@
-!kaleido-parser.js
-
 # eclipse
 bin
 *.launch
@@ -21,7 +19,6 @@ build
 
 # other
 eclipse
-run
 #*.jar
 !gradle-wrapper.jar
 /Projects/
@@ -34,3 +31,9 @@ run
 /src/main/resources/assets/cocricot/
 /src/main/resources/data/cocricot/
 /scripts/models_cocricot/
+
+run/*
+!run/config
+run/config/*
+!run/config/worldedit
+kaleido-mappings.json
