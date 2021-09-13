@@ -41,14 +41,17 @@ import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
+import net.minecraftforge.fml.ModList;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
+import snownee.kaleido.compat.worldedit.WorldEditModule;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kaleido.util.ShapeSerializer;
+import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.Util;
 
 public class KaleidoDataManager extends JsonReloadListener {
@@ -72,6 +75,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 	public final ShapeSerializer shapeSerializer;
 	public final ShapeCache shapeCache;
+	private boolean skip;
 
 	private KaleidoDataManager() {
 		super(GSON, "kaleido");
@@ -91,6 +95,11 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
+		if (skip) {
+			Kaleido.logger.info("Skip loading Kaleido data");
+			skip = false;
+			return;
+		}
 		Stopwatch stopWatch = Stopwatch.createStarted();
 		invalidate();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
@@ -127,6 +136,9 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//                syncAllLockInfo(owner);
 		//            }
 		//        }
+
+		if (ModList.get().isLoaded("worldedit"))
+			WorldEditModule.generateMappings(Kiwi.getServer());
 	}
 
 	public static ModelInfo get(ResourceLocation id) {
@@ -174,7 +186,6 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	private void serverInit(AddReloadListenerEvent event) {
-		invalidate();
 		event.addListener(this);
 	}
 
@@ -236,6 +247,10 @@ public class KaleidoDataManager extends JsonReloadListener {
 	public ModelInfo getRandomLocked(ServerPlayerEntity player, Random rand) {
 		List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
 		return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
+	}
+
+	public void skipOnce() {
+		skip = true;
 	}
 
 }
