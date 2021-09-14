@@ -56,7 +56,7 @@ function getBlock(input, ctx) {
 		value = "kaleido:" + value
 
 	let block = ctx.getBlock(value)
-	nbt = CompoundTagBuilder.create()
+	let nbt = CompoundTagBuilder.create()
 	nbt.putString("Model", input)
 	block = block.toBaseBlock(nbt.build())
 	return block

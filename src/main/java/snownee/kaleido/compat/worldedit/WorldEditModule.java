@@ -11,8 +11,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
@@ -20,6 +22,8 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.schedule.Scheduler;
+import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
 @KiwiModule(value = "worldedit", dependencies = "worldedit")
 @KiwiModule.Subscriber
@@ -39,8 +43,12 @@ public class WorldEditModule extends AbstractModule {
 		}
 
 		worldLoaded = true;
-		if (generateMappings(serverWorld.getServer()))
-			runScript(serverWorld);
+		Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.START, i -> {
+			MinecraftServer server = serverWorld.getServer();
+			if (generateMappings(server))
+				runScript(server);
+			return true;
+		}));
 	}
 
 	public static boolean generateMappings(MinecraftServer server) {
@@ -77,8 +85,7 @@ public class WorldEditModule extends AbstractModule {
 		}
 	}
 
-	public static void runScript(ServerWorld serverWorld) {
-		MinecraftServer server = serverWorld.getServer();
+	public static void runScript(MinecraftServer server) {
 		server.getCommands().performCommand(server.createCommandSourceStack(), "cs kaleido-parser");
 	}
 }
