@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -46,7 +47,7 @@ public class StuffItem extends ModBlockItem {
 			ModelInfo info = KaleidoBlocks.getInfo(stack);
 			if (info != null && info.group != null) {
 				int i = info.group.infos.indexOf(info);
-				tooltip.add(new TranslationTextComponent("tip.kaleido.group", info.group.id.toString(), i));
+				tooltip.add(new TranslationTextComponent("tip.kaleido.group", info.group.id.toString(), i).withStyle(TextFormatting.GRAY));
 			}
 		}
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);

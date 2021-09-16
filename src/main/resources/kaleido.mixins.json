@@ -12,8 +12,12 @@
     "MixinBlock",
     "MixinMinecraft",
     "MixinClientModLoader",
-    "MixinCTMLogic",
-    "MixinItemStackListFactory"
+    "ctm.MixinCTMLogic",
+    "jei.MixinItemStackListFactory",
+    "buildinggadgets.MixinBaseRenderer",
+    "buildinggadgets.MixinCopyPasteRender",
+    "buildinggadgets.MixinBuildRender",
+    "buildinggadgets.MixinEffectBlockTER"
   ],
   "injectors": {
     "defaultRequire": 1

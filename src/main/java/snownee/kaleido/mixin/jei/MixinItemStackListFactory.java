@@ -1,4 +1,4 @@
-package snownee.kaleido.mixin;
+package snownee.kaleido.mixin.jei;
 
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
