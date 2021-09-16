@@ -62,7 +62,7 @@ public abstract class MixinCTMLogic {
 		if (!Kaleido.isKaleidoBlock(from) && !Kaleido.isKaleidoBlock(to)) {
 			return stateComparator(from, to, dir);
 		}
-		return Hooks.stateComparator(fromPos, toPos, from, to, dir);
+		return Hooks.stateComparator((CTMLogic) (Object) this, fromPos, toPos, from, to, dir);
 	}
 
 	@Shadow

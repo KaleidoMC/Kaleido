@@ -13,12 +13,15 @@ import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import team.chisel.ctm.client.util.CTMLogic;
 
 public final class Hooks {
 
 	private static final Minecraft mc = Minecraft.getInstance();
 
-	public static boolean stateComparator(BlockPos fromPos, BlockPos toPos, BlockState from, BlockState to, Direction dir) {
+	public static boolean stateComparator(CTMLogic ctmLogic, BlockPos fromPos, BlockPos toPos, BlockState from, BlockState to, Direction dir) {
+		if (!ctmLogic.ignoreStates() && from != to)
+			return false;
 		return Objects.equals(getId(mc.level, fromPos, from), getId(mc.level, toPos, to));
 	}
 
