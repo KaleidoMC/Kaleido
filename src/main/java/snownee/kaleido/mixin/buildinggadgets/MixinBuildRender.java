@@ -59,7 +59,7 @@ public class MixinBuildRender extends BaseRenderer {
 	private static BlockState DEFAULT_EFFECT_BLOCK;
 
 	@Inject(at = @At("HEAD"), method = "render", cancellable = true)
-	private void render(RenderWorldLastEvent evt, PlayerEntity player, ItemStack heldItem, CallbackInfo ci) {
+	private void kaleido_render(RenderWorldLastEvent evt, PlayerEntity player, ItemStack heldItem, CallbackInfo ci) {
 		ci.cancel();
 		super.render(evt, player, heldItem);
 

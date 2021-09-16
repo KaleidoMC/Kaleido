@@ -42,7 +42,7 @@ public class MixinCopyPasteRender {
 	private int tickTrack = 0;
 
 	@Inject(at = @At("HEAD"), method = "renderTargets", cancellable = true)
-	private void renderTargets(MatrixStack matrix, Vector3d projectedView, BuildContext context, List<PlacementTarget> targets, BlockPos startPos, CallbackInfo ci) {
+	private void kaleido_renderTargets(MatrixStack matrix, Vector3d projectedView, BuildContext context, List<PlacementTarget> targets, BlockPos startPos, CallbackInfo ci) {
 		ci.cancel();
 		tickTrack++;
 		if (renderBuffer != null && tickTrack < 300) {
