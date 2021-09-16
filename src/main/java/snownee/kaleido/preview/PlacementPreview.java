@@ -12,6 +12,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
@@ -31,6 +32,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -43,7 +45,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -165,19 +166,18 @@ public final class PlacementPreview {
 			if (context == null) {
 				return false;
 			}
-			BlockState placeResult;
+			BlockState placeResult = null;
 			try {
 				placeResult = (BlockState) GET_STATE_FOR_PLACEMENT.invokeExact(theBlockItem, context);
 			} catch (Throwable e) {
-				placeResult = null;
 			}
 			if (placeResult == null) {
 				return false;
 			}
 			BlockRenderType renderType = placeResult.getRenderShape();
-			if (renderType == BlockRenderType.INVISIBLE) {
-				return false;
-			}
+			//			if (renderType == BlockRenderType.INVISIBLE) {
+			//				return false;
+			//			}
 
 			BlockPos target = context.getClickedPos();
 			World world = context.getLevel();
@@ -220,13 +220,14 @@ public final class PlacementPreview {
 			}
 			transform.tick(mc.getDeltaFrameTime());
 			transforms.translate(transform.getX() + .5, transform.getY() + .5, transform.getZ() + .5);
-			transforms.mulPose(transform.getRotation());
+			if (transform.canRotate)
+				transforms.mulPose(transform.getRotation());
 			transforms.translate(-.5, -.5, -.5);
 			if (renderType == BlockRenderType.MODEL) {
-				IModelData data = ModelDataManager.getModelData(world, target);
-				if (data == null) {
-					data = EmptyModelData.INSTANCE;
-				}
+				IModelData data = EmptyModelData.INSTANCE;//ModelDataManager.getModelData(world, target);
+				//				if (data == null) {
+				//					data = EmptyModelData.INSTANCE;
+				//				}
 				BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
 				IBakedModel bakedModel;
 				if (theBlockItem == CoreModule.STUFF_ITEM) {
@@ -252,8 +253,13 @@ public final class PlacementPreview {
              */
 			if (placeResult.hasTileEntity()) {
 				TileEntity tile = placeResult.createTileEntity(world);
+				@SuppressWarnings("rawtypes")
+				TileEntityRenderer renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
 				tile.setLevelAndPosition(world, target);
-				TileEntityRenderer<? super TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
+				tile.blockState = placeResult;
+				if (tile instanceof BannerTileEntity && placeResult.getBlock() instanceof AbstractBannerBlock) {
+					((BannerTileEntity) tile).fromItem(held, ((AbstractBannerBlock) placeResult.getBlock()).getColor());
+				}
 				if (renderer != null) {
 					try {
 						// 0x00F0_00F0 means "full sky light and full block light".
