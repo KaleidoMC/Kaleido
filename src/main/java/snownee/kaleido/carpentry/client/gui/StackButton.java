@@ -71,15 +71,15 @@ public class StackButton extends Button {
 	private float hoverProgress;
 	public final ModelInfo info;
 	public int originalX, originalY;
-
 	public boolean selected;
-
 	public final ItemStack stack;
+	private final CarpentryCraftingScreen.List list;
 
-	public StackButton(int x, int y, ModelInfo info, ItemStack stack, IPressable onPress, Button.ITooltip onTooltip) {
+	public StackButton(CarpentryCraftingScreen.List list, int x, int y, ModelInfo info, ItemStack stack, IPressable onPress, Button.ITooltip onTooltip) {
 		super(x, y, 27, 27, stack.getDisplayName(), onPress, onTooltip);
 		this.stack = stack;
 		this.info = info;
+		this.list = list;
 		originalX = x;
 		originalY = y;
 		alpha = 0;
@@ -94,6 +94,7 @@ public class StackButton extends Button {
 		//        alpha = Math.min(alpha + pTicks * 0.2F, 1);
 		//        int y = (int) (this.y + 15 - 15 * MathHelper.sin(alpha));
 		AbstractGui.fill(matrix, x, y, x + width, y + height, 0xAA222222);
+		isHovered = isHovered && list.isMouseOver(mouseX, mouseY);
 		if (!info.isLocked()) {
 			hoverProgress += isHovered ? pTicks * .2f : -pTicks * .2f;
 		}

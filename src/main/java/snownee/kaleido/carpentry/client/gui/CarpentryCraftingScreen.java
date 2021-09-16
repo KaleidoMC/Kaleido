@@ -48,7 +48,7 @@ import snownee.kaleido.util.KaleidoUtil;
 @OnlyIn(Dist.CLIENT)
 public class CarpentryCraftingScreen extends Screen {
 
-	private static class Entry extends MyList.MyEntry<Entry> implements INestedGuiEventHandler {
+	static class Entry extends MyList.MyEntry<Entry> implements INestedGuiEventHandler {
 
 		private static final ResourceLocation GUI_BARS_TEXTURES = new ResourceLocation(Kaleido.MODID, "textures/gui/bars.png");
 		private final java.util.List<StackButton> children = Lists.newArrayList();
@@ -74,7 +74,7 @@ public class CarpentryCraftingScreen extends Screen {
 				parent.renderTooltip(matrix, btn.getMessage(), mouseX, mouseY);
 			};
 			for (ModelInfo info : allInfos) {
-				StackButton button = new StackButton(5 + i % 8 * 28, 17 + i / 8 * 28, info, info.makeItem(), pressable, tooltip);
+				StackButton button = new StackButton(parent.list, 5 + i % 8 * 28, 17 + i / 8 * 28, info, info.makeItem(), pressable, tooltip);
 				children.add(button);
 				++i;
 			}
@@ -156,7 +156,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 	}
 
-	private static class List extends MyList<Entry> {
+	static class List extends MyList<Entry> {
 
 		public List(Minecraft mcIn, int widthIn, int heightIn, int topIn) {
 			super(mcIn, widthIn, heightIn, topIn);
@@ -174,7 +174,7 @@ public class CarpentryCraftingScreen extends Screen {
 	private ItemStack coinStack;
 	private Button confirmBtn;
 	private int cooldown;
-	private MyList list;
+	private List list;
 	private final BlockPos pos;
 	private StackButton selectedButton;
 	private Button shrinkBtn;
