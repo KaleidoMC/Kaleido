@@ -89,7 +89,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	public void add(ModelInfo info) {
 		allInfos.put(info.id, info);
-		ModelPack pack = allPacks.computeIfAbsent(info.id.getNamespace(), $ -> new ModelPack());
+		ModelPack pack = allPacks.computeIfAbsent(info.id.getNamespace(), ModelPack::new);
 		pack.add(info);
 	}
 

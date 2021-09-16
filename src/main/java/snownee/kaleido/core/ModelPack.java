@@ -9,16 +9,19 @@ public class ModelPack {
 
 	public final List<ModelInfo> normalInfos = Lists.newArrayList();
 	public final List<ModelInfo> rewardInfos = Lists.newArrayList();
+	public final String id;
 	public String descriptionId;
+
+	public ModelPack(String id) {
+		this.id = id;
+		descriptionId = "kaleido.pack." + id;
+	}
 
 	public void add(ModelInfo info) {
 		if (info.reward) {
 			rewardInfos.add(info);
 		} else {
 			normalInfos.add(info);
-		}
-		if (descriptionId == null) {
-			descriptionId = "kaleido.pack." + info.id.getNamespace();
 		}
 	}
 

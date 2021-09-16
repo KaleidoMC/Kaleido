@@ -2,8 +2,10 @@ package snownee.kaleido.carpentry.client.gui;
 
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -55,13 +57,16 @@ public class CarpentryCraftingScreen extends Screen {
 		private int height;
 		private final String name;
 		private final CarpentryCraftingScreen parent;
-		private boolean selected;
 		private int size;
 		private int unlocked;
 		private float progress;
+		private boolean fold;
+		public final String id;
 
-		public Entry(CarpentryCraftingScreen parent, ModelPack pack) {
+		public Entry(CarpentryCraftingScreen parent, ModelPack pack, boolean fold) {
 			this.parent = parent;
+			this.fold = fold;
+			id = pack.id;
 			name = I18n.get(pack.descriptionId);
 
 			LinkedList<ModelInfo> allInfos = Lists.newLinkedList(pack.normalInfos);
@@ -97,7 +102,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 		@Override
 		public int getHeight() {
-			return height;
+			return fold ? 18 : height;
 		}
 
 		@Override
@@ -107,7 +112,11 @@ public class CarpentryCraftingScreen extends Screen {
 
 		@Override
 		public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-			selected = !selected;
+			if (p_mouseClicked_3_ - top < 35) {
+				setFold(!fold);
+				parent.list.refreshHeight();
+				return true;
+			}
 			for (IGuiEventListener iguieventlistener : children()) {
 				if (iguieventlistener.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_)) {
 					setFocused(iguieventlistener);
@@ -121,17 +130,24 @@ public class CarpentryCraftingScreen extends Screen {
 			return true;
 		}
 
+		public void setFold(boolean fold) {
+			this.fold = fold;
+		}
+
 		@Override
 		public void render(MatrixStack matrix, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hover, float partialTicks) {
 			AbstractGui.fill(matrix, left, top, left + entryWidth, top + entryHeight, 0x22FFFFFF);
 			parent.font.draw(matrix, name, left + 8, top + 4, 0xFFFFFF);
-			children.forEach(btn -> {
-				btn.y = btn.originalY + top;
-				if (btn.y < -btn.getHeight() || btn.y > parent.height)
-					return;
-				btn.x = btn.originalX + left;
-				btn.render(matrix, mouseX, mouseY, partialTicks);
-			});
+
+			if (!fold) {
+				children.forEach(btn -> {
+					btn.y = btn.originalY + top;
+					if (btn.y < -btn.getHeight() || btn.y > parent.height)
+						return;
+					btn.x = btn.originalX + left;
+					btn.render(matrix, mouseX, mouseY, partialTicks);
+				});
+			}
 
 			if (!KaleidoCommonConfig.autoUnlock) {
 				matrix.pushPose();
@@ -166,6 +182,8 @@ public class CarpentryCraftingScreen extends Screen {
 
 	}
 
+	private static final Set<String> foldEntries = Sets.newHashSet();
+	private static double scrollAmount;
 	private static final Random RANDOM = new Random();
 	private Button addBtn;
 	private float alpha;
@@ -224,40 +242,33 @@ public class CarpentryCraftingScreen extends Screen {
 			return;
 		}
 		ClientPlayerEntity player = minecraft.player;
-		String s;
-		if (KaleidoCommonConfig.autoUnlock || player.isCreative()) {
-			s = I18n.get("tip.kaleido.quickSelect", minecraft.options.keyJump.getTranslatedKeyMessage().getString());
-		} else {
-			s = I18n.get("tip.kaleido.unlock");
+		if (tip == null) {
+			String s;
+			if (KaleidoCommonConfig.autoUnlock || player.isCreative()) {
+				s = I18n.get("tip.kaleido.quickSelect", minecraft.options.keyJump.getTranslatedKeyMessage().getString());
+			} else {
+				s = I18n.get("tip.kaleido.unlock");
+			}
+			tip = font.getSplitter().splitLines(s, 120, Style.EMPTY);
 		}
-		tip = font.getSplitter().splitLines(s, 120, Style.EMPTY);
-		children.add(list = new List(minecraft, 238, height, 20));
-		list.setLeftPos(30);
-		/* off */
-		KaleidoDataManager.INSTANCE.allPacks.values().stream()
-				.map($ -> new Entry(this, $))
-				.sorted((a,b)->Float.compare(b.progress, a.progress))
-				.forEachOrdered(list::addEntry);
-		/* on */
+		if (list == null) {
+			list = new List(minecraft, 238, height, 20);
+			list.setLeftPos(30);
+			/* off */
+			KaleidoDataManager.INSTANCE.allPacks.values().stream()
+					.map($ -> new Entry(this, $, foldEntries.contains($.id)))
+					.sorted((a,b)->Float.compare(b.progress, a.progress))
+					.forEachOrdered(list::addEntry);
+			/* on */
+			list.setScrollAmount(scrollAmount);
+		} else {
+			list.height = height;
+		}
+		children.add(list);
 
 		int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 125;
 		int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 50;
 		addButton(textField = new TextFieldWidget(font, x - 19, y + 1, 38, 18, new StringTextComponent("")));
-		//        textField.setResponder(str -> {
-		//            if (selectedButton == null) {
-		//                return;
-		//            }
-		//            int n = 1;
-		//            try {
-		//                n = Integer.parseInt(str);
-		//            } catch (Exception e) {}
-		//            if (n < 1) {
-		//                n = 1;
-		//            } else if (n > selectedButton.stack.getMaxStackSize()) {
-		//                n = selectedButton.stack.getMaxStackSize();
-		//            }
-		//            textField.setText(Integer.toString(lastNumber));
-		//        });
 		textField.setFilter(str -> {
 			if (str.isEmpty()) {
 				return true;
@@ -301,6 +312,23 @@ public class CarpentryCraftingScreen extends Screen {
 			setSelectedButton(null);
 		}
 		update();
+	}
+
+	private void saveState() {
+		if (list == null)
+			return;
+		foldEntries.clear();
+		for (Entry entry : list.children()) {
+			if (entry.fold) {
+				foldEntries.add(entry.id);
+			}
+		}
+		scrollAmount = list.getScrollAmount();
+	}
+
+	@Override
+	public void removed() {
+		saveState();
 	}
 
 	@Override

@@ -39,6 +39,7 @@ public class NewModelToast implements IToast {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Visibility render(MatrixStack matrix, ToastGui toastGui, long delta) {
 		if (hasNewOutputs) {

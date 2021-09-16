@@ -119,6 +119,14 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		return this.children.size() - 1;
 	}
 
+	public void refreshHeight() {
+		maxItemPosition = 0;
+		for (E entry : children) {
+			entry.top = maxItemPosition;
+			maxItemPosition += entry.getHeight();
+		}
+	}
+
 	protected void centerScrollOn(E entry) {
 		this.setScrollAmount(this.children().indexOf(entry) * entry.getHeight() + entry.getHeight() / 2 - (this.y1 - this.y0) / 2);
 	}
@@ -363,6 +371,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		return flag;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
 		if (pressTicks > 0) {
@@ -440,6 +449,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 	protected void renderHeader(MatrixStack matrix, int p_renderHeader_1_, int p_renderHeader_2_, Tessellator p_renderHeader_3_) {
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void renderHoleBackground(int p_renderHoleBackground_1_, int p_renderHoleBackground_2_, int p_renderHoleBackground_3_, int p_renderHoleBackground_4_) {
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
@@ -453,6 +463,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		tessellator.end();
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void renderList(MatrixStack matrix, int x, int y, int mouseX, int mouseY, float pTicks) {
 		int i = this.getItemCount();
 		Tessellator tessellator = Tessellator.getInstance();
