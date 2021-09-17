@@ -32,6 +32,9 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.state.properties.BedPart;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -174,7 +177,6 @@ public final class PlacementPreview {
 			if (placeResult == null) {
 				return false;
 			}
-			BlockRenderType renderType = placeResult.getRenderShape();
 			//			if (renderType == BlockRenderType.INVISIBLE) {
 			//				return false;
 			//			}
@@ -223,55 +225,71 @@ public final class PlacementPreview {
 			if (transform.canRotate)
 				transforms.mulPose(transform.getRotation());
 			transforms.translate(-.5, -.5, -.5);
-			if (renderType == BlockRenderType.MODEL) {
-				IModelData data = EmptyModelData.INSTANCE;//ModelDataManager.getModelData(world, target);
-				//				if (data == null) {
-				//					data = EmptyModelData.INSTANCE;
-				//				}
-				BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
-				IBakedModel bakedModel;
-				if (theBlockItem == CoreModule.STUFF_ITEM) {
-					bakedModel = KaleidoClient.getModel(info, placeResult);
-				} else {
-					bakedModel = dispatcher.getBlockModelShaper().getBlockModel(placeResult);
-				}
-				long i = placeResult.getSeed(target);
-				boolean preDisableCTM = false;
-				if (KaleidoClient.ctm) {
-					preDisableCTM = Configurations.disableCTM;
-					Configurations.disableCTM = true;
-				}
-				dispatcher.getModelRenderer().renderModel(world, bakedModel, placeResult, target, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(placeResult, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
-				if (KaleidoClient.ctm) {
-					Configurations.disableCTM = preDisableCTM;
-				}
-			}
-			/* Assume renderType is not null.
-             *
-             * Yes, we use a fake tile entity to workaround this. All exceptions are
-             * discared. It is ugly, yes, but it partially solve the problem.
-             */
-			if (placeResult.hasTileEntity()) {
-				TileEntity tile = placeResult.createTileEntity(world);
-				@SuppressWarnings("rawtypes")
-				TileEntityRenderer renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
-				tile.setLevelAndPosition(world, target);
-				tile.blockState = placeResult;
-				if (tile instanceof BannerTileEntity && placeResult.getBlock() instanceof AbstractBannerBlock) {
-					((BannerTileEntity) tile).fromItem(held, ((AbstractBannerBlock) placeResult.getBlock()).getColor());
-				}
-				if (renderer != null) {
-					try {
-						// 0x00F0_00F0 means "full sky light and full block light".
-						// Reference: LightTexture.packLight (func_228451_a_)
-						renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
-					} catch (Exception ignored) {
-					}
-				}
+			renderBlock(transforms, world, placeResult, target, held, info);
+			if (placeResult.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && placeResult.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+				transforms.translate(0, 1, 0);
+				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), target.above(), held, info);
+			} else if (placeResult.hasProperty(BlockStateProperties.BED_PART) && placeResult.hasProperty(HorizontalBlock.FACING)) {
+				Direction facing = placeResult.getValue(HorizontalBlock.FACING);
+				transforms.translate(facing.getStepX(), 0, facing.getStepZ());
+				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.BED_PART, BedPart.HEAD), target.relative(facing), held, info);
 			}
 			transforms.popPose();
 			renderBuffer.endBatch();
 		}
 		return true;
+	}
+
+	private static void renderBlock(MatrixStack transforms, World world, BlockState state, BlockPos pos, ItemStack stack, ModelInfo info) {
+		BlockRenderType renderType = state.getRenderShape();
+		if (renderType == BlockRenderType.MODEL) {
+			IModelData data = EmptyModelData.INSTANCE;//ModelDataManager.getModelData(world, target);
+			//				if (data == null) {
+			//					data = EmptyModelData.INSTANCE;
+			//				}
+			BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+			IBakedModel bakedModel;
+			if (stack.getItem() == CoreModule.STUFF_ITEM) {
+				bakedModel = KaleidoClient.getModel(info, state);
+			} else {
+				bakedModel = dispatcher.getBlockModelShaper().getBlockModel(state);
+			}
+			long i = state.getSeed(pos);
+			boolean preDisableCTM = false;
+			if (KaleidoClient.ctm) {
+				preDisableCTM = Configurations.disableCTM;
+				Configurations.disableCTM = true;
+			}
+			transforms.pushPose();
+			dispatcher.getModelRenderer().renderModel(world, bakedModel, state, pos, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(state, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
+			transforms.popPose();
+			if (KaleidoClient.ctm) {
+				Configurations.disableCTM = preDisableCTM;
+			}
+		}
+		/* Assume renderType is not null.
+         *
+         * Yes, we use a fake tile entity to workaround this. All exceptions are
+         * discared. It is ugly, yes, but it partially solve the problem.
+         */
+		if (state.hasTileEntity()) {
+			TileEntity tile = state.createTileEntity(world);
+			@SuppressWarnings("rawtypes")
+			TileEntityRenderer renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
+			tile.setLevelAndPosition(world, pos);
+			tile.blockState = state;
+			if (tile instanceof BannerTileEntity && state.getBlock() instanceof AbstractBannerBlock) {
+				((BannerTileEntity) tile).fromItem(stack, ((AbstractBannerBlock) state.getBlock()).getColor());
+			}
+			if (renderer != null) {
+				try {
+					// 0x00F0_00F0 means "full sky light and full block light".
+					// Reference: LightTexture.packLight (func_228451_a_)
+					renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
+				} catch (Exception ignored) {
+				}
+			}
+		}
+
 	}
 }
