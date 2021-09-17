@@ -125,6 +125,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 			entry.top = maxItemPosition;
 			maxItemPosition += entry.getHeight();
 		}
+		setScrollAmount(scrollAmount);
 	}
 
 	protected void centerScrollOn(E entry) {

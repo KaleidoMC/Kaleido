@@ -1,0 +1,11 @@
+{
+  "loader": "forge:obj",
+  "model": "kaleido_test:models/kaleido/mt_arch_single.obj",
+  "flip-v": true,
+  "textures": {
+    "particle": "minecraft:block/dirt"
+  },
+  "detectCullableFaces": false,
+  "diffuseLighting": true,
+  "ambientToFullbright": false
+}

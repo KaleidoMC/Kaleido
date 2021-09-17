@@ -111,14 +111,14 @@ public class CarpentryCraftingScreen extends Screen {
 		}
 
 		@Override
-		public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-			if (p_mouseClicked_3_ - top < 35) {
+		public boolean mouseClicked(double mouseX, double mouseY, int p_mouseClicked_5_) {
+			if (mouseY - (top - parent.list.getScrollAmount()) < 35) {
 				setFold(!fold);
 				parent.list.refreshHeight();
 				return true;
 			}
 			for (IGuiEventListener iguieventlistener : children()) {
-				if (iguieventlistener.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_)) {
+				if (iguieventlistener.mouseClicked(mouseX, mouseY, p_mouseClicked_5_)) {
 					setFocused(iguieventlistener);
 					if (p_mouseClicked_5_ == 0) {
 						setDragging(true);

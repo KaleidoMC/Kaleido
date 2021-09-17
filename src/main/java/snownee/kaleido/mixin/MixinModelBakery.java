@@ -29,6 +29,8 @@ public abstract class MixinModelBakery {
 	private void kaleido_OnProcessLoading(IProfiler p_i226056_3_, int p_i226056_4_, CallbackInfo ci) {
 		KaleidoClient.registerModels($ -> {
 			IUnbakedModel unbakedModel = getModel($);
+			if (unbakedModel == null)
+				return;
 			if (unbakedModel instanceof BlockModel) {
 				Hooks.forceTransforms(l -> getModel(l), (BlockModel) unbakedModel);
 			}
