@@ -32,6 +32,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -57,7 +58,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	private boolean locked = true;
 	public int price = 1;
 	public boolean reward;
-	private String descriptionId;
+	private TranslationTextComponent description;
 	public boolean expired;
 	public OffsetType offset = OffsetType.NONE;
 	public boolean noCollision;
@@ -72,16 +73,17 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
 	}
 
-	public String getDescriptionId() {
-		if (descriptionId == null) {
-			descriptionId = Util.makeDescriptionId("kaleido.decor", id);
+	public TranslationTextComponent getDescription() {
+		if (description == null) {
+			String descriptionId = Util.makeDescriptionId("kaleido.decor", id);
 			if (FMLEnvironment.dist.isClient()) {
 				if (!I18n.exists(descriptionId)) {
 					descriptionId = capitaliseAllWords(id.getPath().replace('_', ' ').trim());
 				}
 			}
+			description = new TranslationTextComponent(descriptionId);
 		}
-		return descriptionId;
+		return description;
 	}
 
 	public static String capitaliseAllWords(String str) {
@@ -201,15 +203,16 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (json.has("template"))
 			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
+		ImmutableList.Builder<Behavior> behaviors = ImmutableList.builder();
 		if (json.has("behavior")) {
-			info.behaviors = ImmutableList.of(Behavior.fromJson(json.get("behavior")));
-		} else if (json.has("behaviors")) {
-			ImmutableList.Builder<Behavior> list = ImmutableList.builder();
-			for (JsonElement e : JSONUtils.getAsJsonArray(json, "behaviors")) {
-				list.add(Behavior.fromJson(e));
-			}
-			info.behaviors = list.build();
+			behaviors.add(Behavior.fromJson(json.get("behavior")));
 		}
+		if (json.has("behaviors")) {
+			for (JsonElement e : json.getAsJsonArray("behaviors")) {
+				behaviors.add(Behavior.fromJson(e));
+			}
+		}
+		info.behaviors = behaviors.build();
 		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 		info.price = JSONUtils.getAsInt(json, "price", 1);
 		info.nbt = JsonUtils.readNBT(json, "nbt");

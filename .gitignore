@@ -25,15 +25,18 @@ eclipse
 
 /.factorypath
 /logs/
-/scripts/data/
-/scripts/models/
-/scripts/resources/
+/scripts/*/data/
+/scripts/*/models/
+/scripts/*/resources/
+/scripts/*/lang/
+/scripts/*/original_lang/
+
 /src/main/resources/assets/cocricot/
 /src/main/resources/data/cocricot/
-/scripts/models_cocricot/
 
 run/*
 !run/config
 run/config/*
 !run/config/worldedit
 kaleido-mappings.json
+/scripts/*/blockstates

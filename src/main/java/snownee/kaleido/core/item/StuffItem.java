@@ -35,7 +35,7 @@ public class StuffItem extends ModBlockItem {
 	public String getDescriptionId(ItemStack stack) {
 		ModelInfo info = KaleidoBlocks.getInfo(stack);
 		if (info != null) {
-			return info.getDescriptionId();
+			return info.getDescription().getKey();
 		}
 		return super.getDescriptionId(stack);
 	}

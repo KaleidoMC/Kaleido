@@ -27,6 +27,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.action.ActionDeserializer;
+import snownee.kaleido.core.action.CommandAction;
 import snownee.kaleido.core.action.TransformAction;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.ItemStorageBehavior;
@@ -107,6 +108,7 @@ public class CoreModule extends AbstractModule {
 		Behavior.Deserializer.registerFactory("onUseBlock", OnUseBlockBehavior::create);
 
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
+		ActionDeserializer.registerFactory("command", CommandAction::create);
 	}
 
 	@Override

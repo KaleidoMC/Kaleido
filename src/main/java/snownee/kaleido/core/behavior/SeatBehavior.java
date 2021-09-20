@@ -49,9 +49,9 @@ public class SeatBehavior implements Behavior {
 	public ActionResultType use(ActionContext context) {
 		PlayerEntity player = context.getPlayer();
 		BlockPos pos = context.getBlockPos();
-		World worldIn = context.getLevel();
 		if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
 			return ActionResultType.FAIL;
+		World worldIn = context.getLevel();
 		ItemStack stack1 = player.getMainHandItem();
 		ItemStack stack2 = player.getOffhandItem();
 		if (!stack1.isEmpty() || !stack2.isEmpty())
@@ -68,18 +68,20 @@ public class SeatBehavior implements Behavior {
 		if (!seats.isEmpty()) {
 			return ActionResultType.FAIL;
 		}
-		SeatEntity seat = new SeatEntity(worldIn, vec);
-		worldIn.addFreshEntity(seat);
-		Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, i -> {
-			if (player.isPassenger()) {
-				return true;
-			}
-			if (i > 3) {
-				player.startRiding(seat);
-				return true;
-			}
-			return false;
-		}));
+		if (!worldIn.isClientSide) {
+			SeatEntity seat = new SeatEntity(worldIn, vec);
+			worldIn.addFreshEntity(seat);
+			Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, i -> {
+				if (player.isPassenger()) {
+					return true;
+				}
+				if (i > 3) {
+					player.startRiding(seat);
+					return true;
+				}
+				return false;
+			}));
+		}
 		return ActionResultType.SUCCESS;
 
 	}

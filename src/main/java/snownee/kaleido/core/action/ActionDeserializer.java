@@ -1,12 +1,16 @@
 package snownee.kaleido.core.action;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.util.JSONUtils;
 
@@ -28,7 +32,19 @@ public enum ActionDeserializer implements Function<JsonElement, Consumer<ActionC
 				return factory.apply(object);
 			}
 		}
-		return null;
+		throw new JsonSyntaxException(Objects.toString(json));
 	}
 
+	public List<Consumer<ActionContext>> list(JsonObject json) {
+		ImmutableList.Builder<Consumer<ActionContext>> builder = ImmutableList.builder();
+		if (json.has("action")) {
+			builder.add(apply(json.get("action")));
+		}
+		if (json.has("actions")) {
+			for (JsonElement e : json.getAsJsonArray("actions")) {
+				builder.add(apply(e));
+			}
+		}
+		return builder.build();
+	}
 }

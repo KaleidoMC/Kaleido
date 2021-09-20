@@ -1,5 +1,6 @@
 package snownee.kaleido.core.behavior;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.google.gson.JsonObject;
@@ -12,13 +13,13 @@ import snownee.kaleido.core.block.entity.MasterBlockEntity;
 public class OnUseBlockBehavior implements Behavior {
 
 	public static OnUseBlockBehavior create(JsonObject obj) {
-		return new OnUseBlockBehavior(ActionDeserializer.INSTANCE.apply(obj.get("action")));
+		return new OnUseBlockBehavior(ActionDeserializer.INSTANCE.list(obj));
 	}
 
-	private final Consumer<ActionContext> action;
+	private final List<Consumer<ActionContext>> actions;
 
-	public OnUseBlockBehavior(Consumer<ActionContext> action) {
-		this.action = action;
+	public OnUseBlockBehavior(List<Consumer<ActionContext>> actions) {
+		this.actions = actions;
 	}
 
 	@Override
@@ -28,7 +29,7 @@ public class OnUseBlockBehavior implements Behavior {
 
 	@Override
 	public ActionResultType use(ActionContext context) {
-		action.accept(context);
+		actions.forEach($ -> $.accept(context));
 		return ActionResultType.SUCCESS;
 	}
 

@@ -9,7 +9,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -37,7 +36,7 @@ public class ItemStorageBehavior implements Behavior {
 		ItemStorageBehavior copy = new ItemStorageBehavior(rows);
 		copy.handler = LazyOptional.of(() -> new ItemStackHandler(rows * 9));
 		if (tile.getModelInfo() != null) {
-			copy.title = new TranslationTextComponent(tile.getModelInfo().getDescriptionId());
+			copy.title = tile.getModelInfo().getDescription();
 		}
 		return copy;
 	}

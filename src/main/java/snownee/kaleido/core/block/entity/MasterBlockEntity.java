@@ -179,7 +179,7 @@ public class MasterBlockEntity extends BaseTile {
 		if (!isValid())
 			return ActionResultType.PASS;
 		ItemStack stack = player.getItemInHand(handIn);
-		ActionContext context = new ActionContext(player, handIn, stack, hit);
+		ActionContext context = new ActionContext(player, handIn, stack, hit, modelInfo);
 		for (Behavior behavior : behaviors) {
 			ActionResultType resultType = behavior.use(context);
 			if (resultType.consumesAction()) {
