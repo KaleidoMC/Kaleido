@@ -1,6 +1,0 @@
-{
-    "parent": "cocricotmod:block/base_rod",
-    "textures": {
-        "0": "block/spruce_log"
-    }
-}

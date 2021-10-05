@@ -131,6 +131,7 @@ public final class PlacementPreview {
 		successLast = renderInternal(event);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static boolean renderInternal(RenderWorldLastEvent event) {
 		if (!KaleidoClientConfig.previewEnabled) {
 			return false;

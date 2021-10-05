@@ -89,7 +89,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 	public void add(ModelInfo info) {
 		allInfos.put(info.id, info);
-		ModelPack pack = allPacks.computeIfAbsent(info.id.getNamespace(), ModelPack::new);
+		ModelPack pack = getPack(info.id.getNamespace());
 		pack.add(info);
 	}
 
@@ -104,6 +104,9 @@ public class KaleidoDataManager extends JsonReloadListener {
 		invalidate();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			if (KaleidoCommonConfig.ignoredNamespaces.contains(entry.getKey().getNamespace())) {
+				continue;
+			}
+			if (entry.getKey().getPath().equals("pack")) {
 				continue;
 			}
 			try {
@@ -145,6 +148,10 @@ public class KaleidoDataManager extends JsonReloadListener {
 		return INSTANCE.allInfos.get(id);
 	}
 
+	public static ModelPack getPack(String namespace) {
+		return INSTANCE.allPacks.computeIfAbsent(namespace, ModelPack::new);
+	}
+
 	public static ModelGroup getGroup(ResourceLocation id) {
 		return INSTANCE.allGroups.computeIfAbsent(id, ModelGroup::new);
 	}
@@ -172,7 +179,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 			}
 			ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
 			deferredIds.put(player, realId);
-			ModelPack pack = allPacks.get(realId.getNamespace());
+			ModelPack pack = getPack(realId.getNamespace());
 			if (pack != null && pack.normalInfos.stream().allMatch($ -> $.id.equals(realId) || !$.isLockedServer(player))) {
 				pack.rewardInfos.forEach($ -> $.grant(player));
 			}
