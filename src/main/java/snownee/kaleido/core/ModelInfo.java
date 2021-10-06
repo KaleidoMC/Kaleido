@@ -78,7 +78,12 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			String descriptionId = Util.makeDescriptionId("kaleido.decor", id);
 			if (FMLEnvironment.dist.isClient()) {
 				if (!I18n.exists(descriptionId)) {
-					descriptionId = capitaliseAllWords(id.getPath().replace('_', ' ').trim());
+					String path = id.getPath();
+					int p = path.lastIndexOf('/');
+					if (p != -1) {
+						path = path.substring(p + 1);
+					}
+					descriptionId = capitaliseAllWords(path.replace('_', ' ').trim());
 				}
 			}
 			description = new TranslationTextComponent(descriptionId);
