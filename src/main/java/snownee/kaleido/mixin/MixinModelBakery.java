@@ -34,8 +34,8 @@ public abstract class MixinModelBakery {
 			if (unbakedModel instanceof BlockModel) {
 				Hooks.forceTransforms(l -> getModel(l), (BlockModel) unbakedModel);
 			}
-			this.unbakedCache.put($, unbakedModel);
-			this.topLevelModels.put($, unbakedModel);
+			unbakedCache.put($, unbakedModel);
+			topLevelModels.put($, unbakedModel);
 		});
 	}
 

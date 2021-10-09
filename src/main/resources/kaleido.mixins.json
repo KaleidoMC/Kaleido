@@ -11,6 +11,7 @@
     "MixinBlockModelRenderer",
     "MixinBlock",
     "MixinMinecraft",
+    "MixinItemRenderer",
     "MixinClientModLoader",
     "ctm.MixinCTMLogic",
     "jei.MixinItemStackListFactory",

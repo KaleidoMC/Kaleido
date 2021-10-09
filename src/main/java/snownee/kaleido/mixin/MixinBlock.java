@@ -18,8 +18,13 @@ public class MixinBlock {
 
 	@Inject(at = @At("HEAD"), method = "shouldRenderFace", cancellable = true)
 	private static void kaleido_shouldRenderFace(BlockState state, IBlockReader level, BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> ci) {
-		if (Kaleido.isKaleidoBlock(state) && Hooks.skipRender(state, level, pos, direction)) {
-			ci.setReturnValue(false);
+		if (Kaleido.isKaleidoBlock(state)) {
+			if (Hooks.skipRender(state, level, pos, direction)) {
+				ci.setReturnValue(false);
+			}
+		}
+		if (Hooks.shouldRenderFaceChiseled(state, level, pos, direction)) {
+			ci.setReturnValue(true);
 		}
 	}
 

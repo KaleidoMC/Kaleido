@@ -85,8 +85,8 @@ public class MixinBuildRender extends BaseRenderer {
 
 		// Get the coordinates from the anchor. If the anchor isn't present then build the collector.
 		List<BlockPos> coordinates = anchor.orElseGet(() -> {
-			AbstractMode mode = !this.isExchanger ? GadgetBuilding.getToolMode(heldItem).getMode() : GadgetExchanger.getToolMode(heldItem).getMode();
-			return mode.getCollection(new AbstractMode.UseContext(player.level, renderBlockState, lookingAt.getBlockPos(), heldItem, lookingAt.getDirection(), !this.isExchanger && GadgetBuilding.shouldPlaceAtop(heldItem), !this.isExchanger ? GadgetBuilding.getConnectedArea(heldItem) : GadgetExchanger.getConnectedArea(heldItem)), player);
+			AbstractMode mode = !isExchanger ? GadgetBuilding.getToolMode(heldItem).getMode() : GadgetExchanger.getToolMode(heldItem).getMode();
+			return mode.getCollection(new AbstractMode.UseContext(player.level, renderBlockState, lookingAt.getBlockPos(), heldItem, lookingAt.getDirection(), !isExchanger && GadgetBuilding.shouldPlaceAtop(heldItem), !isExchanger ? AbstractGadget.getConnectedArea(heldItem) : AbstractGadget.getConnectedArea(heldItem)), player);
 		});
 
 		// Sort them on a new line for readability
@@ -108,7 +108,7 @@ public class MixinBuildRender extends BaseRenderer {
 		for (BlockPos coordinate : coordinates) {
 			matrix.pushPose();
 			matrix.translate(coordinate.getX(), coordinate.getY(), coordinate.getZ());
-			if (this.isExchanger) {
+			if (isExchanger) {
 				matrix.translate(-0.0005f, -0.0005f, -0.0005f);
 				matrix.scale(1.001f, 1.001f, 1.001f);
 			}

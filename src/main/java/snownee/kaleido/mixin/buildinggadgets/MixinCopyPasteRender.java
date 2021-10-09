@@ -94,9 +94,9 @@ public class MixinCopyPasteRender {
 				BlockColors blockColors = Minecraft.getInstance().getBlockColors();
 				int color = blockColors.getColor(state, context.getWorld(), targetPos, 0);
 
-				float f = (float) (color >> 16 & 255) / 255.0F;
-				float f1 = (float) (color >> 8 & 255) / 255.0F;
-				float f2 = (float) (color & 255) / 255.0F;
+				float f = (color >> 16 & 255) / 255.0F;
+				float f1 = (color >> 8 & 255) / 255.0F;
+				float f2 = (color & 255) / 255.0F;
 				try {
 					if (state.getRenderShape() == BlockRenderType.MODEL) {
 						for (Direction direction : Direction.values()) {

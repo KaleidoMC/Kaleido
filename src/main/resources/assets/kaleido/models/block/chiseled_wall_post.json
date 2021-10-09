@@ -1,0 +1,5 @@
+{
+"loader": "kiwi:retexture",
+"base": "kaleido:block/wall_post",
+"inventory": false
+}

@@ -94,6 +94,8 @@ public final class KaleidoBlocks {
 	}
 
 	public static void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		if (stack.getItem() != CoreModule.STUFF_ITEM)
+			return;
 		ModelInfo info = getInfo(stack);
 		if (info == null) {
 			worldIn.destroyBlock(pos, true);
@@ -102,9 +104,6 @@ public final class KaleidoBlocks {
 		TileEntity tile = worldIn.getBlockEntity(pos);
 		if (tile instanceof MasterBlockEntity) {
 			((MasterBlockEntity) tile).setModelInfo(info);
-			if (((MasterBlockEntity) tile).getLightValue() > 0) {
-				worldIn.getLightEngine().checkBlock(pos);
-			}
 		}
 	}
 

@@ -77,6 +77,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 		@Override
 		public void onResourceManagerReload(IResourceManager resourceManager) {
+			missingno = missingno();
 		}
 
 		@Override
@@ -96,7 +97,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 				return null;
 			}
 			if (KaleidoClient.ctm && info.template != KaleidoTemplate.item) {
-				return KaleidoClient.getModel(info, info.template.states);
+				return KaleidoClient.getModel(info, info.template.metaCount);
 			} else {
 				return KaleidoClient.getModel(info, null);
 			}
@@ -105,7 +106,11 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	public static KaleidoModel INSTANCE;
 
-	private static final Lazy<IBakedModel> missingno = Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
+	private static Lazy<IBakedModel> missingno = missingno();
+
+	private static Lazy<IBakedModel> missingno() {
+		return Lazy.of(Minecraft.getInstance().getModelManager()::getMissingModel);
+	}
 
 	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
 		IBakedModel model = null;

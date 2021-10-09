@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "kaleido:chiseled_wall", "required": false }
+  ]
+}

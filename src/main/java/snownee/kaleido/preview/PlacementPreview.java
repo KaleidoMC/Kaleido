@@ -51,16 +51,20 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import snownee.kaleido.KaleidoClientConfig;
+import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kiwi.util.NBTHelper;
+import snownee.kiwi.util.NBTHelper.NBT;
 import team.chisel.ctm.Configurations;
 
 @OnlyIn(Dist.CLIENT)
@@ -137,7 +141,7 @@ public final class PlacementPreview {
 			return false;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.overlay != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS/* || mc.level.isDebug()*/) {
+		if (mc.overlay != null || mc.screen != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS/* || mc.level.isDebug()*/) {
 			return false;
 		}
 
@@ -243,17 +247,21 @@ public final class PlacementPreview {
 
 	private static void renderBlock(MatrixStack transforms, World world, BlockState state, BlockPos pos, ItemStack stack, ModelInfo info) {
 		BlockRenderType renderType = state.getRenderShape();
+		Minecraft mc = Minecraft.getInstance();
 		if (renderType == BlockRenderType.MODEL) {
-			IModelData data = EmptyModelData.INSTANCE;//ModelDataManager.getModelData(world, target);
+			IModelData data = EmptyModelData.INSTANCE;
 			//				if (data == null) {
 			//					data = EmptyModelData.INSTANCE;
 			//				}
-			BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+			BlockRendererDispatcher dispatcher = mc.getBlockRenderer();
 			IBakedModel bakedModel;
 			if (stack.getItem() == CoreModule.STUFF_ITEM) {
 				bakedModel = KaleidoClient.getModel(info, state);
 			} else {
 				bakedModel = dispatcher.getBlockModelShaper().getBlockModel(state);
+				if (NBTHelper.of(stack).hasTag("BlockEntityTag.Overrides", NBT.COMPOUND)) {
+					data = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, RetextureModel.OverrideList.overridesFromItem(stack)).build();
+				}
 			}
 			long i = state.getSeed(pos);
 			boolean preDisableCTM = false;

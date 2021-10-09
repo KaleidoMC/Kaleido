@@ -30,20 +30,20 @@ public enum KaleidoTemplate {
 
 	public final boolean solid;
 	public final Block bloc;
-	public final int states;
-	public final int defaultState;
+	public final int metaCount;
+	public final int defaultMeta;
 
-	KaleidoTemplate(Block block, boolean solid, int states, int defaultState) {
+	KaleidoTemplate(Block block, boolean solid, int metaCount, int defaultMeta) {
 		bloc = block;
 		this.solid = solid;
-		this.states = states;
-		this.defaultState = defaultState;
+		this.metaCount = metaCount;
+		this.defaultMeta = defaultMeta;
 		if (block != Blocks.AIR) {
 			CoreModule.ALL_MASTER_BLOCKS.add(block);
 		}
 	}
 
-	public int getState(@Nullable BlockState state) {
+	public int toMeta(@Nullable BlockState state) {
 		switch (this) {
 		case none:
 		case horizontal:
@@ -61,7 +61,27 @@ public enum KaleidoTemplate {
 		default:
 			break;
 		}
-		return defaultState;
+		return defaultMeta;
+	}
+
+	@Nullable
+	public BlockState fromMeta(int meta) {
+		if (meta < 0)
+			return null;
+		switch (this) {
+		case block:
+			return bloc.defaultBlockState();
+		case none:
+		case horizontal:
+			return bloc.defaultBlockState().setValue(HorizontalBlock.FACING, Direction.from2DDataValue(meta));
+		case directional:
+			return bloc.defaultBlockState().setValue(DirectionalBlock.FACING, Direction.from3DDataValue(meta));
+		case pillar:
+			return bloc.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.values()[meta % 3]);
+		default:
+			break;
+		}
+		return null;
 	}
 
 	@OnlyIn(Dist.CLIENT)

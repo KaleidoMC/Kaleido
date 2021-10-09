@@ -6,14 +6,18 @@ import java.util.function.Function;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -23,12 +27,17 @@ import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
+import snownee.kaleido.chisel.ChiselModule;
+import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.model.KaleidoModel;
 
 public final class Hooks {
+
+	public static boolean chiselEnabled;
 
 	@OnlyIn(Dist.CLIENT)
 	private static final ResourceLocation DEFAULT_PARENT = new ResourceLocation("block/block");
@@ -78,5 +87,37 @@ public final class Hooks {
 		if (blockModel.transforms == ItemCameraTransforms.NO_TRANSFORMS) {
 			blockModel.parentLocation = DEFAULT_PARENT;
 		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static boolean shouldRenderFaceChiseled(BlockState state, IBlockReader level, BlockPos pos, Direction direction) {
+		if (!chiselEnabled || !state.canOcclude()) {
+			return false;
+		}
+		pos = pos.relative(direction);
+		state = level.getBlockState(pos);
+		if (!state.hasTileEntity() || !ChiselModule.CHISELED_BLOCKS.contains(state.getBlock())) {
+			return false;
+		}
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity instanceof ChiseledBlockEntity) {
+			if (!((ChiseledBlockEntity) blockEntity).canOcclude())
+				return true;
+		}
+		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	@OnlyIn(Dist.CLIENT)
+	public static void renderChiselOverlay(ItemStack stack, int xPosition, int yPosition) {
+		ItemStack icon = ChiselItem.palette(stack).icon();
+		if (icon.isEmpty())
+			return;
+		Minecraft mc = Minecraft.getInstance();
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(xPosition + 7, yPosition + 7, 200);
+		RenderSystem.scalef(0.55F, 0.55F, 0.55F);
+		mc.getItemRenderer().renderGuiItem(icon, 0, 0);
+		RenderSystem.popMatrix();
 	}
 }

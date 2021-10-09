@@ -15,5 +15,17 @@
 "tip.kaleido.quickSelect": "Press %s on item to quick-select",
 
 "kaleido.toast.title": "New Decors Unlocked!",
-"kaleido.toast.description": "Check woodworking bench"
+"kaleido.toast.description": "Check woodworking bench",
+
+"item.kaleido.chisel": "Chisel",
+
+"block.kaleido.chiseled": "%s - %s",
+"block.kaleido.chiseled_stairs": "Chiseled Stairs",
+"block.kaleido.chiseled_slab": "Chiseled Slab",
+"block.kaleido.chiseled_vslab": "Chiseled Vertical Slab",
+"block.kaleido.chiseled_carpet": "Chiseled Carpet",
+"block.kaleido.chiseled_layers": "Chiseled Layers",
+"block.kaleido.chiseled_wall": "Chiseled Wall",
+"block.kaleido.chiseled_fence": "Chiseled Fence",
+"block.kaleido.chiseled_fence_gate": "Chiseled Fence Gate"
 }

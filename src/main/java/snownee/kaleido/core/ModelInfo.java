@@ -284,4 +284,16 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return shapes.outOfBlock;
 	}
 
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ModelInfo))
+			return false;
+		return id.equals(((ModelInfo) obj).id);
+	}
+
 }

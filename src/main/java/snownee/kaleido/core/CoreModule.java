@@ -2,12 +2,10 @@ package snownee.kaleido.core;
 
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -26,6 +24,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.chisel.network.CSetPalettePacket;
 import snownee.kaleido.core.action.ActionDeserializer;
 import snownee.kaleido.core.action.CommandAction;
 import snownee.kaleido.core.action.TransformAction;
@@ -40,6 +39,7 @@ import snownee.kaleido.core.block.KDirectionalBlock;
 import snownee.kaleido.core.block.KHorizontalBlock;
 import snownee.kaleido.core.block.KRotatedPillarBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.item.LuckyBoxItem;
 import snownee.kaleido.core.item.StuffItem;
@@ -47,12 +47,16 @@ import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
+import snownee.kaleido.core.supplier.BlockStateModelSupplier;
+import snownee.kaleido.core.supplier.KaleidoModelSupplier;
+import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.Name;
 import snownee.kiwi.NoItem;
+import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.network.NetworkChannel;
 
 @KiwiModule
@@ -96,8 +100,10 @@ public class CoreModule extends AbstractModule {
 	protected void clientInit(FMLClientSetupEvent event) {
 		RenderingRegistry.registerEntityRenderingHandler(SEAT, EmptyEntityRenderer::new);
 
-		Set<RenderType> set = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
-		RenderTypeLookup.setRenderLayer(STUFF, set::contains);
+		RenderTypeLookup.setRenderLayer(STUFF, KaleidoClient.blockRenderTypes::contains);
+
+		KaleidoClient.init();
+		ModBlockItem.INSTANT_UPDATE_TILES.add(MASTER);
 	}
 
 	@Override
@@ -109,6 +115,9 @@ public class CoreModule extends AbstractModule {
 
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
 		ActionDeserializer.registerFactory("command", CommandAction::create);
+
+		ModelSupplier.FACTORIES.put(BlockStateModelSupplier.TYPE, BlockStateModelSupplier::load);
+		ModelSupplier.FACTORIES.put(KaleidoModelSupplier.TYPE, KaleidoModelSupplier::load);
 	}
 
 	@Override
@@ -118,6 +127,7 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(SSyncShapesPacket.class, new SSyncShapesPacket.Handler(KaleidoDataManager.INSTANCE.shapeCache));
 
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
+		NetworkChannel.register(CSetPalettePacket.class, new CSetPalettePacket.Handler());
 	}
 
 	@SubscribeEvent

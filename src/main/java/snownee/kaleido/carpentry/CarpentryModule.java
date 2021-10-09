@@ -41,19 +41,8 @@ import snownee.kiwi.util.NBTHelper.NBT;
 @KiwiModule.Subscriber
 @KiwiModule("carpentry")
 @KiwiModule.Group("decorations")
+@KiwiModule.Optional
 public class CarpentryModule extends AbstractModule {
-
-	//    private static final MethodHandle POPULATE_TRADE_DATA;
-	//
-	//    static {
-	//        MethodHandle m = null;
-	//        try {
-	//            m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(VillagerEntity.class, "func_213712_ef"));
-	//        } catch (Exception e) {
-	//            throw new RuntimeException("Report this to author", e);
-	//        }
-	//        POPULATE_TRADE_DATA = m;
-	//    }
 
 	public static final Item CLOTH = new ModItem(itemProp());
 

@@ -29,6 +29,8 @@ import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.supplier.KaleidoModelSupplier;
+import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
@@ -89,7 +91,14 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	private void loadInternal(CompoundNBT data) {
-		modelId = Util.RL(data.getString("Model"));
+		if (data.contains("Overrides")) {
+			ModelSupplier supplier = ModelSupplier.fromNBT(data.getCompound("Overrides").getCompound("0"));
+			if (supplier instanceof KaleidoModelSupplier) {
+				modelId = ((KaleidoModelSupplier) supplier).getModelInfo().id;
+			}
+		} else {
+			modelId = Util.RL(data.getString("Model"));
+		}
 		if (modelId != null) {
 			ModelInfo info = KaleidoDataManager.get(modelId);
 			if (info != null) {
@@ -140,9 +149,14 @@ public class MasterBlockEntity extends BaseTile {
 			}
 			behaviors = list.build();
 		}
-		if (level != null && level.isClientSide) {
-			modelData.setData(MODEL, modelInfo);
-			requestModelDataUpdate();
+		if (level != null) {
+			if (getLightValue() > 0) {
+				level.getLightEngine().checkBlock(worldPosition);
+			}
+			if (level.isClientSide) {
+				modelData.setData(MODEL, modelInfo);
+				requestModelDataUpdate();
+			}
 		}
 	}
 

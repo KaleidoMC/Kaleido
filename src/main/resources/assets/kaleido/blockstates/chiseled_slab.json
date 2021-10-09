@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "kaleido:block/chiseled_slab"
+    },
+    "type=double": {
+      "model": "block/air"
+    },
+    "type=top": {
+      "model": "kaleido:block/chiseled_slab_top"
+    }
+  }
+}

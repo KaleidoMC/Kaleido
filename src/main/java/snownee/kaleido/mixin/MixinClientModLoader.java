@@ -16,6 +16,7 @@ import snownee.kaleido.resources.JarPackFinder;
 @Mixin(value = ClientModLoader.class, remap = false)
 public class MixinClientModLoader {
 
+	//TODO: 1.17: AddPackFindersEvent
 	@Inject(at = @At("HEAD"), method = "begin")
 	private static void kaleido_begin(final Minecraft minecraft, final ResourcePackList defaultResourcePacks, final IReloadableResourceManager mcResourceManager, DownloadingPackFinder metadataSerializer, CallbackInfo ci) {
 		defaultResourcePacks.addPackFinder(new JarPackFinder(minecraft.getResourcePackDirectory(), IPackNameDecorator.DEFAULT));
