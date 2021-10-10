@@ -27,6 +27,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.item.ChiselItem;
@@ -40,7 +41,13 @@ public final class Hooks {
 	public static boolean chiselEnabled;
 
 	@OnlyIn(Dist.CLIENT)
-	private static final ResourceLocation DEFAULT_PARENT = new ResourceLocation("block/block");
+	private static ResourceLocation DEFAULT_PARENT;
+
+	static {
+		if (FMLEnvironment.dist.isClient()) {
+			DEFAULT_PARENT = new ResourceLocation("block/block");
+		}
+	}
 
 	@OnlyIn(Dist.CLIENT)
 	public static IBakedModel replaceKaleidoModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData) {

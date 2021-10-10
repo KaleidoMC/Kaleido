@@ -52,9 +52,8 @@ import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.CoreModule;
@@ -68,7 +67,6 @@ import snownee.kiwi.util.NBTHelper.NBT;
 import team.chisel.ctm.Configurations;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(Dist.CLIENT)
 public final class PlacementPreview {
 
 	private static class GhostRenderType extends RenderType {
@@ -130,7 +128,6 @@ public final class PlacementPreview {
 
 	private static boolean successLast;
 
-	@SubscribeEvent
 	public static void render(RenderWorldLastEvent event) {
 		successLast = renderInternal(event);
 	}
@@ -261,7 +258,7 @@ public final class PlacementPreview {
 				bakedModel = KaleidoClient.getModel(info, state);
 			} else {
 				bakedModel = dispatcher.getBlockModelShaper().getBlockModel(state);
-				if (NBTHelper.of(stack).hasTag("BlockEntityTag.Overrides", NBT.COMPOUND)) {
+				if (Hooks.chiselEnabled && NBTHelper.of(stack).hasTag("BlockEntityTag.Overrides", NBT.COMPOUND)) {
 					data = new ModelDataMap.Builder().withInitial(RetextureModel.TEXTURES, RetextureModel.OverrideList.overridesFromItem(stack)).build();
 				}
 			}
