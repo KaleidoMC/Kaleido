@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.RenderMaterial;
@@ -52,5 +53,7 @@ public interface ModelSupplier {
 	void place(World level, BlockPos pos);
 
 	BlockState getBlockState();
+
+	SoundType getSoundType();
 
 }

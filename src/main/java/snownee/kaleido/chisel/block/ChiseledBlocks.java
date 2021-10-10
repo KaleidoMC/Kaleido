@@ -1,12 +1,15 @@
 package snownee.kaleido.chisel.block;
 
 import java.util.List;
+import java.util.Objects;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -14,9 +17,11 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kiwi.util.NBTHelper;
 
@@ -68,4 +73,20 @@ public final class ChiseledBlocks {
 		}
 	}
 
+	public static SoundType getSoundType(IWorldReader level, BlockPos pos) {
+		ModelSupplier supplier = null;
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity instanceof ChiseledBlockEntity)
+			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
+		return supplier == null ? SoundType.STONE : supplier.getSoundType();
+	}
+
+	public static ModelSupplier getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (!(blockEntity instanceof ChiseledBlockEntity))
+			return null;
+		ModelSupplier supplier0 = ((ChiseledBlockEntity) blockEntity).getTexture();
+		ModelSupplier supplier1 = RetextureModel.OverrideList.overridesFromItem(stack).get("0");
+		return Objects.equals(supplier0, supplier1) ? supplier0 : null;
+	}
 }

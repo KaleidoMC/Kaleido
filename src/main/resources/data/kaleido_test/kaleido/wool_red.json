@@ -1,4 +1,5 @@
 {
-"template": "block",
-"group": "kaleido_test:wool"
+"_template": "block",
+"group": "kaleido_test:wool",
+"shape": "box(0, 0, 8, 16, 16, 16)"
 }

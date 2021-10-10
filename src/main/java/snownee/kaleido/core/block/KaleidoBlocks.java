@@ -6,6 +6,7 @@ import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +26,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.core.CoreModule;
@@ -160,5 +162,10 @@ public final class KaleidoBlocks {
 		while (items.size() % 9 != 0) {
 			items.add(ItemStack.EMPTY);
 		}
+	}
+
+	public static SoundType getSoundType(IWorldReader world, BlockPos pos) {
+		ModelInfo info = getInfo(world, pos);
+		return info == null ? SoundType.WOOD : info.soundType.soundType;
 	}
 }

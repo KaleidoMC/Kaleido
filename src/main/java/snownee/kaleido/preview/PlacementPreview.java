@@ -146,6 +146,8 @@ public final class PlacementPreview {
 		}
 
 		ClientPlayerEntity player = mc.player;
+		if (mc.gameMode.getPlayerMode().isBlockPlacingRestricted())
+			return false;
 		ItemStack held = player.getMainHandItem();
 		if (!(held.getItem() instanceof BlockItem)) {
 			held = player.getOffhandItem();

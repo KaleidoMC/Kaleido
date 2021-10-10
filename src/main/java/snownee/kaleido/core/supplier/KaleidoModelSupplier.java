@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -46,6 +47,7 @@ public class KaleidoModelSupplier implements ModelSupplier {
 
 	private KaleidoModelSupplier(Int2ObjectMap.Entry<ModelInfo> entry) {
 		this.entry = entry;
+		modelInfo = entry.getValue();
 	}
 
 	@Override
@@ -141,6 +143,11 @@ public class KaleidoModelSupplier implements ModelSupplier {
 		return getModelInfo().template.fromMeta(entry.getIntKey());
 	}
 
+	@Override
+	public SoundType getSoundType() {
+		return SoundType.STONE;
+	}
+
 	public ModelInfo getModelInfo() {
 		if (modelInfo.expired) {
 			ModelInfo info = KaleidoDataManager.get(entry.getValue().id);
@@ -154,4 +161,5 @@ public class KaleidoModelSupplier implements ModelSupplier {
 	public static void reload() {
 		MAP.clear();
 	}
+
 }

@@ -197,6 +197,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	private void invalidate() {
+		shapeCache.getMap().clear();
 		ModelInfo.cache.invalidateAll();
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();

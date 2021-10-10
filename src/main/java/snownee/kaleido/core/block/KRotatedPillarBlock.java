@@ -2,6 +2,8 @@ package snownee.kaleido.core.block;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RotatedPillarBlock;
+import net.minecraft.block.SoundType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
@@ -16,6 +18,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
@@ -68,5 +71,10 @@ public class KRotatedPillarBlock extends RotatedPillarBlock {
 	@Override
 	public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
 		KaleidoBlocks.fillItemCategory(group, items);
+	}
+
+	@Override
+	public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, Entity entity) {
+		return KaleidoBlocks.getSoundType(world, pos);
 	}
 }

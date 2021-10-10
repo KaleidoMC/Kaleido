@@ -27,6 +27,7 @@ import snownee.kaleido.Hooks;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.block.ChiseledFenceBlock;
 import snownee.kaleido.chisel.block.ChiseledFenceGateBlock;
+import snownee.kaleido.chisel.block.ChiseledLayersBlock;
 import snownee.kaleido.chisel.block.ChiseledSlabBlock;
 import snownee.kaleido.chisel.block.ChiseledStairsBlock;
 import snownee.kaleido.chisel.block.ChiseledVSlabBlock;
@@ -62,6 +63,8 @@ public class ChiselModule extends AbstractModule {
 	public static final ChiseledSlabBlock CHISELED_SLAB = chisel(new ChiseledSlabBlock());
 
 	public static final ChiseledVSlabBlock CHISELED_VSLAB = chisel(new ChiseledVSlabBlock());
+
+	public static final ChiseledLayersBlock CHISELED_LAYERS = chisel(new ChiseledLayersBlock());
 
 	public static final TileEntityType<ChiseledBlockEntity> CHISELED = new TileEntityType.Builder<>(ChiseledBlockEntity::new, CHISELED_BLOCKS).build(null);
 

@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -140,6 +141,11 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	@Override
 	public BlockState getBlockState() {
 		return state;
+	}
+
+	@Override
+	public SoundType getSoundType() {
+		return state.getSoundType();
 	}
 
 	public static void reload() {

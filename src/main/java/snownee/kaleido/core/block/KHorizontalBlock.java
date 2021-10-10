@@ -3,6 +3,8 @@ package snownee.kaleido.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.SoundType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
@@ -21,6 +23,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -128,5 +131,10 @@ public class KHorizontalBlock extends HorizontalBlock {
 				return VoxelShapes.empty();
 		}
 		return super.getVisualShape(state, level, pos, context);
+	}
+
+	@Override
+	public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, Entity entity) {
+		return KaleidoBlocks.getSoundType(world, pos);
 	}
 }

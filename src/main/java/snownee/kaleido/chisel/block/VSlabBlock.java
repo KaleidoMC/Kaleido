@@ -12,7 +12,6 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -28,9 +27,9 @@ public class VSlabBlock extends HorizontalBlock implements IWaterLoggable {
 
 	static {
 		SHAPES[0] = box(0, 0, 8, 16, 16, 16);
-		SHAPES[1] = VoxelUtil.rotate(SHAPES[0], Direction.WEST);
-		SHAPES[2] = VoxelUtil.rotate(SHAPES[0], Direction.NORTH);
-		SHAPES[3] = VoxelUtil.rotate(SHAPES[0], Direction.EAST);
+		SHAPES[1] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.EAST);
+		SHAPES[2] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.SOUTH);
+		SHAPES[3] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.WEST);
 	}
 
 	public VSlabBlock(Properties properties) {
@@ -46,7 +45,7 @@ public class VSlabBlock extends HorizontalBlock implements IWaterLoggable {
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context) {
 		Direction direction = context.getClickedFace().getOpposite();
-		if (direction.getAxis() == Axis.Y) {
+		if (direction.getAxis().isVertical()) {
 			direction = context.getHorizontalDirection();
 		}
 		return defaultBlockState().setValue(FACING, direction);

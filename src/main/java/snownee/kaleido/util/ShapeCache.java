@@ -23,12 +23,9 @@ public class ShapeCache {
 		this.hashFunction = hashFunction;
 		empty = put(newHasher().hash(), VoxelShapes.empty());
 		Hasher hasher = newHasher();
-		hasher.putDouble(0);
-		hasher.putDouble(0);
-		hasher.putDouble(0);
-		hasher.putDouble(1);
-		hasher.putDouble(1);
-		hasher.putDouble(1);
+		double[] shape = new double[] { 0, 0, 0, 1, 1, 1 };
+		for (double d : shape)
+			hasher.putDouble(d);
 		block = put(hasher.hash(), VoxelShapes.block());
 	}
 
@@ -67,7 +64,7 @@ public class ShapeCache {
 
 		private Instance(HashCode hashCode, VoxelShape shape) {
 			this.hashCode = hashCode;
-			shapes[0] = shape;
+			shapes[Direction.NORTH.get2DDataValue()] = shape;
 			if (shape.max(Axis.X) > 0.75 || shape.max(Axis.Z) > 0.75 || shape.min(Axis.X) > 0.25 || shape.min(Axis.Z) > 0.25) {
 				outOfBlock = true;
 			}
@@ -76,7 +73,7 @@ public class ShapeCache {
 		public VoxelShape get(Direction direction) {
 			int i = direction.get2DDataValue();
 			if (shapes[i] == null) {
-				shapes[i] = VoxelUtil.rotate(shapes[0], direction);
+				shapes[i] = VoxelUtil.rotateHorizontal(shapes[Direction.NORTH.get2DDataValue()], direction);
 			}
 			return shapes[i];
 		}

@@ -44,6 +44,7 @@ import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
+import snownee.kaleido.core.util.SoundTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kiwi.Kiwi;
@@ -65,6 +66,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean glass;
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
+	public SoundTypeEnum soundType = SoundTypeEnum.wood;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
@@ -161,6 +163,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player) {
 		buf.writeResourceLocation(id);
 		buf.writeEnum(template);
+		buf.writeEnum(soundType);
 		buf.writeBoolean(isLockedServer(player));
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
@@ -182,6 +185,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
 		info.template = buf.readEnum(KaleidoTemplate.class);
+		info.soundType = buf.readEnum(SoundTypeEnum.class);
 		info.setLocked(buf.readBoolean());
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
@@ -208,6 +212,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (json.has("template"))
 			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
+		if (json.has("sound"))
+			info.soundType = SoundTypeEnum.valueOf(JSONUtils.getAsString(json, "sound"));
 		ImmutableList.Builder<Behavior> behaviors = ImmutableList.builder();
 		if (json.has("behavior")) {
 			behaviors.add(Behavior.fromJson(json.get("behavior")));

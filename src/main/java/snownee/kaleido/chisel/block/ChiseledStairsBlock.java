@@ -5,8 +5,10 @@ import java.util.List;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -17,6 +19,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -53,6 +56,11 @@ public class ChiseledStairsBlock extends StairsBlock {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, IBlockReader level, List<ITextComponent> components, ITooltipFlag flag) {
 		ChiseledBlocks.appendHoverText(stack, level, components, flag);
+	}
+
+	@Override
+	public SoundType getSoundType(BlockState state, IWorldReader level, BlockPos pos, Entity entity) {
+		return ChiseledBlocks.getSoundType(level, pos);
 	}
 
 }

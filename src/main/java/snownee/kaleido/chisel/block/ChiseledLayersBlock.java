@@ -6,7 +6,6 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.WallBlock;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,12 +23,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.ChiselModule;
+import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kiwi.block.ModBlock;
 
-public class ChiseledWallBlock extends WallBlock {
+public class ChiseledLayersBlock extends LayersBlock {
 
-	public ChiseledWallBlock() {
-		super(AbstractBlock.Properties.copy(Blocks.COBBLESTONE_WALL));
+	public ChiseledLayersBlock() {
+		super(AbstractBlock.Properties.copy(Blocks.STONE_SLAB));
 	}
 
 	@Override
@@ -49,7 +49,11 @@ public class ChiseledWallBlock extends WallBlock {
 
 	@Override
 	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-		return ModBlock.pickBlock(state, target, world, pos, player);
+		ItemStack stack = ModBlock.pickBlock(state, target, world, pos, player);
+		int i = state.getValue(LAYERS);
+		if (i > 1)
+			stack.getOrCreateTag().putInt("Layers", i);
+		return stack;
 	}
 
 	@Override
@@ -63,4 +67,19 @@ public class ChiseledWallBlock extends WallBlock {
 		return ChiseledBlocks.getSoundType(level, pos);
 	}
 
+	@Override
+	public boolean matchesItem(World level, BlockPos pos, ItemStack stack) {
+		return ChiseledBlocks.getSupplierIfSame(level, pos, stack) != null;
+	}
+
+	@Override
+	public BlockState getFullState(BlockState blockstate, World level, BlockPos pos) {
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (!(blockEntity instanceof ChiseledBlockEntity))
+			return null;
+		ModelSupplier supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
+		if (supplier == null)
+			return null;
+		return supplier.getBlockState();
+	}
 }
