@@ -1,7 +1,8 @@
 package snownee.kaleido.preview;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 
@@ -10,10 +11,10 @@ import snownee.kiwi.KiwiModule;
 @KiwiModule.Optional
 public final class PreviewModule extends AbstractModule {
 
-	public PreviewModule() {
-		if (FMLEnvironment.dist.isClient()) {
-			MinecraftForge.EVENT_BUS.addListener(PlacementPreview::render);
-		}
+	@Override
+	protected void clientInit(FMLClientSetupEvent event) {
+		MinecraftForge.EVENT_BUS.register(PlacementPreview.class);
+		ClientRegistry.registerKeyBinding(PlacementPreview.toggle);
 	}
 
 }

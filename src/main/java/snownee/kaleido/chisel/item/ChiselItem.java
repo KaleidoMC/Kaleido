@@ -9,6 +9,8 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext.FluidMode;
@@ -61,6 +63,8 @@ public class ChiselItem extends ModItem {
 			ChiselPalette palette = palette(stack);
 			if (palette == ChiselPalette.NONE) {
 				palette = ChiselPalette.byBlock(state).next();
+				if (palette != ChiselPalette.NONE)
+					player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
 			}
 			ModelSupplier supplier;
 			BlockItemUseContext context = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, hitResult);
@@ -73,8 +77,9 @@ public class ChiselItem extends ModItem {
 			} else {
 				supplier = ModelSupplier.fromBlock(state, level, pos);
 			}
-			if (supplier != null)
+			if (supplier != null) {
 				palette.place(supplier, level, pos, context);
+			}
 		}
 		return false;
 	}
@@ -94,6 +99,13 @@ public class ChiselItem extends ModItem {
 		BlockPos pos = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
 		BlockState state = mc.level.getBlockState(pos);
 		ChiselPalette palette = ChiselPalette.pick(state);
+		ChiselPalette palette1 = palette(stack);
+		if (palette == palette1)
+			return;
+		if (palette != ChiselPalette.NONE) {
+			mc.player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
+			mc.level.playSound(mc.player, mc.player.getX(), mc.player.getY() + 0.5, mc.player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((mc.level.random.nextFloat() - mc.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+		}
 		stack.getOrCreateTag().putString("Palette", palette.name);
 		new CSetPalettePacket(event.getHand(), palette).send();
 	}

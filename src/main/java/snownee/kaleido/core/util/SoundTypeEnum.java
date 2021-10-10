@@ -21,7 +21,7 @@ public enum SoundTypeEnum {
 
 	public final SoundType soundType;
 
-	private SoundTypeEnum(SoundType soundType) {
+	SoundTypeEnum(SoundType soundType) {
 		this.soundType = soundType;
 	}
 }

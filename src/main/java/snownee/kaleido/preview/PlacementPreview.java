@@ -26,6 +26,8 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
@@ -45,11 +47,15 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
+import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import snownee.kaleido.Hooks;
 import snownee.kaleido.KaleidoClientConfig;
@@ -66,6 +72,22 @@ import team.chisel.ctm.Configurations;
 
 @OnlyIn(Dist.CLIENT)
 public final class PlacementPreview {
+
+	static final KeyBinding toggle = new KeyBinding("key.kaleido.togglePreview", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrCreate(333), "Kaleido");
+
+	@SubscribeEvent
+	public static void onKeyPressed(KeyInputEvent event) {
+		if (event.getAction() != 1)
+			return;
+
+		if (toggle.isDown()) {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.screen != null) {
+				return;
+			}
+			KaleidoClientConfig.previewEnabled = !KaleidoClientConfig.previewEnabled;
+		}
+	}
 
 	private static class GhostRenderType extends RenderType {
 		private static Map<RenderType, RenderType> remappedTypes = new IdentityHashMap<>();
@@ -115,6 +137,7 @@ public final class PlacementPreview {
 
 	private static boolean successLast;
 
+	@SubscribeEvent
 	public static void render(RenderWorldLastEvent event) {
 		successLast = renderInternal(event);
 	}

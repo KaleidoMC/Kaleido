@@ -78,7 +78,7 @@ public class LayersBlock extends DirectionalBlock {
 		int i = state.getValue(LAYERS);
 		if (i == 8 && getFullState(state, level, pos) == null)
 			return false;
-		if (stack.getItem() != this.asItem() || !matchesItem(context.getLevel(), context.getClickedPos(), stack))
+		if (stack.getItem() != asItem() || !matchesItem(context.getLevel(), context.getClickedPos(), stack))
 			return false;
 		if (context.replacingClickedOnBlock()) {
 			return context.getClickedFace() == state.getValue(FACING);

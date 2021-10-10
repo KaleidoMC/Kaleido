@@ -27,7 +27,7 @@ public class ChiselPalette {
 	private static ChiselPalette last;
 
 	public final String name;
-	private final Block chiseledBlock;
+	public final Block chiseledBlock;
 	private final Predicate<BlockState> pickPred;
 	private ItemStack icon;
 	private ChiselPalette next;
@@ -55,6 +55,7 @@ public class ChiselPalette {
 	}
 
 	public void place(ModelSupplier supplier, World level, BlockPos pos, BlockItemUseContext context) {
+		level.destroyBlock(pos, false);
 		if (this == NONE) {
 			supplier.place(level, pos);
 			return;

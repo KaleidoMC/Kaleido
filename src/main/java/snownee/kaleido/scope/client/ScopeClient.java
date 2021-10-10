@@ -20,7 +20,7 @@ import snownee.kaleido.scope.network.CCreateScopePacket;
 @EventBusSubscriber(modid = Kaleido.MODID, value = Dist.CLIENT)
 public class ScopeClient {
 
-	private static final KeyBinding scope = new KeyBinding("key.kaleido.scope", KeyConflictContext.IN_GAME, KeyModifier.CONTROL, InputMappings.Type.KEYSYM.getOrCreate(83), "Kaleido");
+	private static final KeyBinding scope = new KeyBinding("key.kaleido.scope", KeyConflictContext.IN_GAME, KeyModifier.CONTROL, InputMappings.Type.KEYSYM.getOrCreate(70), "Kaleido");
 
 	public static void init() {
 		ClientRegistry.registerKeyBinding(scope);
