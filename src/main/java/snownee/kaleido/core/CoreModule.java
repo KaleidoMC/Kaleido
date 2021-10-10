@@ -51,6 +51,7 @@ import snownee.kaleido.core.supplier.BlockStateModelSupplier;
 import snownee.kaleido.core.supplier.KaleidoModelSupplier;
 import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -116,8 +117,8 @@ public class CoreModule extends AbstractModule {
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
 		ActionDeserializer.registerFactory("command", CommandAction::create);
 
-		ModelSupplier.FACTORIES.put(BlockStateModelSupplier.TYPE, BlockStateModelSupplier::load);
-		ModelSupplier.FACTORIES.put(KaleidoModelSupplier.TYPE, KaleidoModelSupplier::load);
+		ModelSupplier.registerFactory(BlockStateModelSupplier.Factory.INSTANCE);
+		ModelSupplier.registerFactory(KaleidoModelSupplier.Factory.INSTANCE);
 	}
 
 	@Override
@@ -128,6 +129,7 @@ public class CoreModule extends AbstractModule {
 
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
 		NetworkChannel.register(CSetPalettePacket.class, new CSetPalettePacket.Handler());
+		NetworkChannel.register(CCreateScopePacket.class, new CCreateScopePacket.Handler());
 	}
 
 	@SubscribeEvent

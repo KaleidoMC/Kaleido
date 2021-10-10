@@ -143,7 +143,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 				if (v == null)
 					return;
 				CompoundNBT compound = new CompoundNBT();
-				compound.putString("Type", v.getType());
+				compound.putString("Type", v.getFactory().getId());
 				v.save(compound);
 				tag.setTag("Overrides." + k, compound);
 			});

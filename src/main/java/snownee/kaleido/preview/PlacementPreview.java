@@ -1,7 +1,5 @@
 package snownee.kaleido.preview;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -95,21 +93,10 @@ public final class PlacementPreview {
 		}
 	}
 
-	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
 	private static ItemStack lastStack = ItemStack.EMPTY;
 	private static IRenderTypeBuffer.Impl renderBuffer;
 
 	private static PreviewTransform transform = new PreviewTransform();
-
-	static {
-		MethodHandle m = null;
-		try {
-			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "func_195945_b", BlockItemUseContext.class));
-		} catch (Exception e) {
-			throw new RuntimeException("Report this to author", e);
-		}
-		GET_STATE_FOR_PLACEMENT = m;
-	}
 
 	private static IRenderTypeBuffer.Impl initRenderBuffer(IRenderTypeBuffer.Impl original) {
 		BufferBuilder fallback = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228457_a_");
@@ -173,17 +160,10 @@ public final class PlacementPreview {
 			if (context == null) {
 				return false;
 			}
-			BlockState placeResult = null;
-			try {
-				placeResult = (BlockState) GET_STATE_FOR_PLACEMENT.invokeExact(theBlockItem, context);
-			} catch (Throwable e) {
-			}
+			BlockState placeResult = Hooks.getStateForPlacement(theBlockItem, context);
 			if (placeResult == null) {
 				return false;
 			}
-			//			if (renderType == BlockRenderType.INVISIBLE) {
-			//				return false;
-			//			}
 
 			BlockPos target = context.getClickedPos();
 			World world = context.getLevel();

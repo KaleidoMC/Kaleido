@@ -24,10 +24,6 @@ import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.network.CSetPalettePacket;
-import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
-import snownee.kaleido.core.supplier.BlockStateModelSupplier;
-import snownee.kaleido.core.supplier.KaleidoModelSupplier;
 import snownee.kaleido.core.supplier.ModelSupplier;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
@@ -75,12 +71,7 @@ public class ChiselItem extends ModItem {
 					return false;
 				supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 			} else {
-				ModelInfo info = KaleidoBlocks.getInfo(level, pos);
-				if (info == null) {
-					supplier = BlockStateModelSupplier.of(state);
-				} else {
-					supplier = KaleidoModelSupplier.of(info, info.template.toMeta(state));
-				}
+				supplier = ModelSupplier.fromBlock(state, level, pos);
 			}
 			if (supplier != null)
 				palette.place(supplier, level, pos, context);

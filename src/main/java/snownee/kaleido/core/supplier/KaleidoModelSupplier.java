@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -21,6 +23,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -28,11 +31,51 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kiwi.util.Util;
 
 public class KaleidoModelSupplier implements ModelSupplier {
+
+	public enum Factory implements ModelSupplier.Factory<KaleidoModelSupplier> {
+		INSTANCE;
+
+		@Override
+		public KaleidoModelSupplier fromNBT(CompoundNBT tag) {
+			ResourceLocation id = Util.RL(tag.getString("Id"));
+			ModelInfo info = KaleidoDataManager.get(id);
+			if (info == null)
+				return null;
+			return of(info, tag.getInt("State"));
+		}
+
+		@Override
+		public KaleidoModelSupplier fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
+			if (info == null)
+				return null;
+			return of(info, info.template.toMeta(state));
+		}
+
+		@Override
+		public KaleidoModelSupplier fromItem(ItemStack stack, BlockItemUseContext context) {
+			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			if (info == null)
+				return null;
+			BlockState state = info.template.bloc.getStateForPlacement(context);
+			if (state == null) {
+				return null;
+			}
+			return of(info, info.template.toMeta(state));
+		}
+
+		@Override
+		public String getId() {
+			return TYPE;
+		}
+
+	}
 
 	public static final String TYPE = "Kaleido";
 	public static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoModelSupplier> MAP = Maps.newHashMap();
@@ -51,8 +94,8 @@ public class KaleidoModelSupplier implements ModelSupplier {
 	}
 
 	@Override
-	public String getType() {
-		return TYPE;
+	public ModelSupplier.Factory<?> getFactory() {
+		return Factory.INSTANCE;
 	}
 
 	@Override
@@ -100,14 +143,6 @@ public class KaleidoModelSupplier implements ModelSupplier {
 	public void save(CompoundNBT tag) {
 		tag.putString("Id", getModelInfo().id.toString());
 		tag.putInt("State", entry.getIntKey());
-	}
-
-	public static KaleidoModelSupplier load(CompoundNBT tag) {
-		ResourceLocation id = Util.RL(tag.getString("Id"));
-		ModelInfo info = KaleidoDataManager.get(id);
-		if (info == null)
-			return null;
-		return of(info, tag.getInt("State"));
 	}
 
 	@Override

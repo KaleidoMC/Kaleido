@@ -1,8 +1,12 @@
 package snownee.kaleido;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -16,6 +20,8 @@ import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -27,6 +33,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
@@ -43,9 +50,28 @@ public final class Hooks {
 	@OnlyIn(Dist.CLIENT)
 	private static ResourceLocation DEFAULT_PARENT;
 
+	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
+
 	static {
 		if (FMLEnvironment.dist.isClient()) {
 			DEFAULT_PARENT = new ResourceLocation("block/block");
+		}
+
+		MethodHandle m = null;
+		try {
+			m = MethodHandles.lookup().unreflect(ObfuscationReflectionHelper.findMethod(BlockItem.class, "func_195945_b", BlockItemUseContext.class));
+		} catch (Exception e) {
+			throw new RuntimeException("Report this to author", e);
+		}
+		GET_STATE_FOR_PLACEMENT = m;
+	}
+
+	@Nullable
+	public static BlockState getStateForPlacement(BlockItem blockItem, BlockItemUseContext context) {
+		try {
+			return (BlockState) GET_STATE_FOR_PLACEMENT.invokeExact(blockItem, context);
+		} catch (Throwable e) {
+			return null;
 		}
 	}
 

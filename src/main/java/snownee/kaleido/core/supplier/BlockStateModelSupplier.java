@@ -16,6 +16,9 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -24,13 +27,56 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import snownee.kaleido.Hooks;
 
 public class BlockStateModelSupplier implements ModelSupplier {
+
+	public enum Factory implements ModelSupplier.Factory<BlockStateModelSupplier> {
+		INSTANCE;
+
+		@SuppressWarnings("deprecation")
+		@Override
+		public BlockStateModelSupplier fromNBT(CompoundNBT tag) {
+			BlockState state = NBTUtil.readBlockState(tag.getCompound(TYPE));
+			if (state.isAir())
+				return null;
+			return of(state);
+		}
+
+		@Override
+		public BlockStateModelSupplier fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+			return of(state);
+		}
+
+		@Override
+		public BlockStateModelSupplier fromItem(ItemStack stack, BlockItemUseContext context) {
+			if (!(stack.getItem() instanceof BlockItem)) {
+				return null;
+			}
+			BlockItem blockItem = (BlockItem) stack.getItem();
+			context = blockItem.updatePlacementContext(context);
+			if (context == null) {
+				return null;
+			}
+			BlockState state = Hooks.getStateForPlacement(blockItem, context);
+			if (state == null) {
+				return null;
+			}
+			return of(state);
+		}
+
+		@Override
+		public String getId() {
+			return TYPE;
+		}
+
+	}
 
 	public static final String TYPE = "Block";
 	private static final Map<BlockState, BlockStateModelSupplier> MAP = Maps.newIdentityHashMap();
@@ -51,8 +97,8 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	}
 
 	@Override
-	public String getType() {
-		return TYPE;
+	public ModelSupplier.Factory<?> getFactory() {
+		return Factory.INSTANCE;
 	}
 
 	@Override
@@ -104,14 +150,6 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	@Override
 	public void save(CompoundNBT tag) {
 		tag.put(TYPE, NBTUtil.writeBlockState(state));
-	}
-
-	@SuppressWarnings("deprecation")
-	public static BlockStateModelSupplier load(CompoundNBT tag) {
-		BlockState state = NBTUtil.readBlockState(tag.getCompound(TYPE));
-		if (state.isAir())
-			return null;
-		return of(state);
 	}
 
 	@Override
