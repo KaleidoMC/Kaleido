@@ -33,6 +33,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Hooks;
 
 public class BlockStateModelSupplier implements ModelSupplier {
@@ -90,10 +91,13 @@ public class BlockStateModelSupplier implements ModelSupplier {
 
 	public final BlockState state;
 	@OnlyIn(Dist.CLIENT)
-	private final RenderMaterial[] materials = new RenderMaterial[7];
+	private RenderMaterial[] materials;
 
 	private BlockStateModelSupplier(BlockState state) {
 		this.state = state;
+		if (FMLEnvironment.dist.isClient()) {
+			materials = new RenderMaterial[7];
+		}
 	}
 
 	@Override
