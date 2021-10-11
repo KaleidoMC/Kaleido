@@ -25,8 +25,8 @@ import net.minecraftforge.fml.ModList;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.compat.ctm.CTMCompat;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.supplier.SimpleBlockDefinition;
-import snownee.kaleido.core.supplier.KaleidoBlockDefinition;
+import snownee.kaleido.core.definition.KaleidoBlockDefinition;
+import snownee.kaleido.core.definition.SimpleBlockDefinition;
 import snownee.kaleido.core.util.KaleidoTemplate;
 
 @SuppressWarnings("deprecation")

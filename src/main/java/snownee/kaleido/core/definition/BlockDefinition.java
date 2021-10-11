@@ -1,4 +1,4 @@
-package snownee.kaleido.core.supplier;
+package snownee.kaleido.core.definition;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -24,6 +25,8 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
 
 public interface BlockDefinition {
 
@@ -46,9 +49,9 @@ public interface BlockDefinition {
 		return factory.fromNBT(tag);
 	}
 
-	static BlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+	static BlockDefinition fromBlock(BlockState state, TileEntity blockEntity, IWorldReader level, BlockPos pos) {
 		for (Factory<?> factory : FACTORIES) {
-			BlockDefinition supplier = factory.fromBlock(state, level, pos);
+			BlockDefinition supplier = factory.fromBlock(state, blockEntity, level, pos);
 			if (supplier != null) {
 				return supplier;
 			}
@@ -57,10 +60,12 @@ public interface BlockDefinition {
 	}
 
 	static BlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
-		for (Factory<?> factory : FACTORIES) {
-			BlockDefinition supplier = factory.fromItem(stack, context);
-			if (supplier != null) {
-				return supplier;
+		if (!stack.isEmpty()) {
+			for (Factory<?> factory : FACTORIES) {
+				BlockDefinition supplier = factory.fromItem(stack, context);
+				if (supplier != null) {
+					return supplier;
+				}
 			}
 		}
 		return null;
@@ -70,6 +75,11 @@ public interface BlockDefinition {
 
 	@OnlyIn(Dist.CLIENT)
 	IBakedModel model();
+
+	@OnlyIn(Dist.CLIENT)
+	default IModelData modelData() {
+		return EmptyModelData.INSTANCE;
+	}
 
 	@OnlyIn(Dist.CLIENT)
 	RenderMaterial renderMaterial(Direction direction);
@@ -98,7 +108,7 @@ public interface BlockDefinition {
 		String getId();
 
 		@Nullable
-		T fromBlock(BlockState state, IWorldReader level, BlockPos pos);
+		T fromBlock(BlockState state, TileEntity blockEntity, IWorldReader level, BlockPos pos);
 
 		@Nullable
 		T fromItem(ItemStack stack, BlockItemUseContext context);

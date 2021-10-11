@@ -41,15 +41,16 @@ import snownee.kaleido.core.block.KRotatedPillarBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.core.definition.DynamicBlockDefinition;
+import snownee.kaleido.core.definition.KaleidoBlockDefinition;
+import snownee.kaleido.core.definition.SimpleBlockDefinition;
 import snownee.kaleido.core.item.LuckyBoxItem;
 import snownee.kaleido.core.item.StuffItem;
 import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
-import snownee.kaleido.core.supplier.SimpleBlockDefinition;
-import snownee.kaleido.core.supplier.KaleidoBlockDefinition;
-import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
@@ -118,6 +119,7 @@ public class CoreModule extends AbstractModule {
 		ActionDeserializer.registerFactory("command", CommandAction::create);
 
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
+		BlockDefinition.registerFactory(DynamicBlockDefinition.Factory.INSTANCE);
 		BlockDefinition.registerFactory(KaleidoBlockDefinition.Factory.INSTANCE);
 	}
 

@@ -26,7 +26,7 @@ import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.network.CSetPalettePacket;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 
@@ -69,13 +69,13 @@ public class ChiselItem extends ModItem {
 			BlockDefinition supplier;
 			BlockItemUseContext context = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, hitResult);
 			context.replaceClicked = true;
+			TileEntity blockEntity = level.getBlockEntity(pos);
 			if (isChiseled) {
-				TileEntity blockEntity = level.getBlockEntity(pos);
 				if (!(blockEntity instanceof ChiseledBlockEntity))
 					return false;
 				supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 			} else {
-				supplier = BlockDefinition.fromBlock(state, level, pos);
+				supplier = BlockDefinition.fromBlock(state, blockEntity, level, pos);
 			}
 			if (supplier != null) {
 				palette.place(supplier, level, pos, context);

@@ -1,4 +1,4 @@
-package snownee.kaleido.core.supplier;
+package snownee.kaleido.core.definition;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +33,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Hooks;
 
@@ -51,25 +51,14 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		}
 
 		@Override
-		public SimpleBlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+		public SimpleBlockDefinition fromBlock(BlockState state, TileEntity blockEntity, IWorldReader level, BlockPos pos) {
 			return of(state);
 		}
 
 		@Override
 		public SimpleBlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
-			if (!(stack.getItem() instanceof BlockItem)) {
-				return null;
-			}
-			BlockItem blockItem = (BlockItem) stack.getItem();
-			context = blockItem.updatePlacementContext(context);
-			if (context == null) {
-				return null;
-			}
-			BlockState state = Hooks.getStateForPlacement(blockItem, context);
-			if (state == null) {
-				return null;
-			}
-			return of(state);
+			BlockState state = getStateForPlacement(stack, context);
+			return state == null ? null : of(state);
 		}
 
 		@Override
@@ -77,6 +66,18 @@ public class SimpleBlockDefinition implements BlockDefinition {
 			return TYPE;
 		}
 
+	}
+
+	public static BlockState getStateForPlacement(ItemStack stack, BlockItemUseContext context) {
+		if (!(stack.getItem() instanceof BlockItem)) {
+			return null;
+		}
+		BlockItem blockItem = (BlockItem) stack.getItem();
+		context = blockItem.updatePlacementContext(context);
+		if (context == null) {
+			return null;
+		}
+		return Hooks.getStateForPlacement(blockItem, context);
 	}
 
 	public static final String TYPE = "Block";
@@ -93,7 +94,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	@OnlyIn(Dist.CLIENT)
 	private RenderMaterial[] materials;
 
-	private SimpleBlockDefinition(BlockState state) {
+	protected SimpleBlockDefinition(BlockState state) {
 		this.state = state;
 		if (FMLEnvironment.dist.isClient()) {
 			materials = new RenderMaterial[7];
@@ -119,15 +120,15 @@ public class SimpleBlockDefinition implements BlockDefinition {
 			IBakedModel model = model();
 			Random random = new Random();
 			random.setSeed(42L);
-			ResourceLocation particleIcon = model.getParticleTexture(EmptyModelData.INSTANCE).getName();
+			ResourceLocation particleIcon = model.getParticleTexture(modelData()).getName();
 			ResourceLocation sprite = particleIcon;
 			if (state.getBlock() == Blocks.GRASS_BLOCK) {
 				direction = Direction.UP;
 			}
 			if (direction != null) {
-				List<BakedQuad> quads = model.getQuads(state, direction, random, EmptyModelData.INSTANCE);
+				List<BakedQuad> quads = model.getQuads(state, direction, random, modelData());
 				if (quads.isEmpty())
-					quads = model.getQuads(state, null, random, EmptyModelData.INSTANCE);
+					quads = model.getQuads(state, null, random, modelData());
 				for (BakedQuad quad : quads) {
 					sprite = quad.getSprite().getName();
 					if (sprite.equals(particleIcon)) {

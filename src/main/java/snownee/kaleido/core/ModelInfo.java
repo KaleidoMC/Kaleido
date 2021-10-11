@@ -36,12 +36,15 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.util.JsonUtils;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
@@ -273,6 +276,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			if (e.renderType.get().get() == layer)
 				return true;
 		return false;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public IModelData createModelData() {
+		return new ModelDataMap.Builder().withInitial(MasterBlockEntity.MODEL, this).build();
 	}
 
 	public static final Cache<GlobalPos, ModelInfo> cache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();

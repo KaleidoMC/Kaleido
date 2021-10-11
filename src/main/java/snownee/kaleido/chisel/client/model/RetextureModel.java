@@ -60,7 +60,7 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kaleido.chisel.block.RetextureBlockEntity;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)

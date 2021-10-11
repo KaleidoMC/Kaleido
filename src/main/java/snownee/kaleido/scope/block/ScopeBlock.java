@@ -1,9 +1,12 @@
 package snownee.kaleido.scope.block;
 
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -11,13 +14,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kiwi.block.ModBlock;
 
 public class ScopeBlock extends ModBlock {
 
 	public ScopeBlock() {
-		super(AbstractBlock.Properties.of(Material.STONE));
+		super(AbstractBlock.Properties.of(Material.STONE).noCollission());
 	}
 
 	@Override
@@ -32,8 +36,25 @@ public class ScopeBlock extends ModBlock {
 
 	@Override
 	public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
-		// TODO Auto-generated method stub
-		return ActionResultType.SUCCESS;
+		ItemStack stack = player.getItemInHand(hand);
+		BlockItemUseContext context = new BlockItemUseContext(player, hand, stack, hitResult);
+		BlockDefinition definition = BlockDefinition.fromItem(stack, context);
+		if (definition == null) {
+			return ActionResultType.PASS;
+		}
+		if (!level.isClientSide) {
+			TileEntity blockEntity = level.getBlockEntity(pos);
+			if (blockEntity instanceof ScopeBlockEntity) {
+				((ScopeBlockEntity) blockEntity).addStack(definition);
+			}
+		}
+		return ActionResultType.sidedSuccess(level.isClientSide);
+	}
+
+	@Deprecated
+	@Override
+	public BlockRenderType getRenderShape(BlockState p_149645_1_) {
+		return BlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
 
 }

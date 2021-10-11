@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kiwi.block.ModBlock;
 
 public class ChiseledLayersBlock extends LayersBlock {

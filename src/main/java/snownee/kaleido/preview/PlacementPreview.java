@@ -10,7 +10,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
@@ -32,10 +31,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BedPart;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.DoubleBlockHalf;
-import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -44,6 +43,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -66,6 +66,7 @@ import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.util.SimulationBlockReader;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 import team.chisel.ctm.Configurations;
@@ -118,7 +119,12 @@ public final class PlacementPreview {
 	private static ItemStack lastStack = ItemStack.EMPTY;
 	private static IRenderTypeBuffer.Impl renderBuffer;
 
-	private static PreviewTransform transform = new PreviewTransform();
+	private static final PreviewTransform transform = new PreviewTransform();
+	private static final SimulationBlockReader blockReader = new SimulationBlockReader();
+
+	static {
+		blockReader.useSelfLight(true);
+	}
 
 	private static IRenderTypeBuffer.Impl initRenderBuffer(IRenderTypeBuffer.Impl original) {
 		BufferBuilder fallback = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228457_a_");
@@ -250,6 +256,39 @@ public final class PlacementPreview {
 	private static void renderBlock(MatrixStack transforms, World world, BlockState state, BlockPos pos, ItemStack stack, ModelInfo info) {
 		BlockRenderType renderType = state.getRenderShape();
 		Minecraft mc = Minecraft.getInstance();
+
+		/* Assume renderType is not null.
+         *
+         * Yes, we use a fake tile entity to workaround this. All exceptions are
+         * discared. It is ugly, yes, but it partially solve the problem.
+         */
+		TileEntity tile = null;
+		if (state.hasTileEntity()) {
+			tile = state.createTileEntity(world);
+			@SuppressWarnings("rawtypes")
+			TileEntityRenderer renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
+			tile.setLevelAndPosition(world, pos);
+			tile.blockState = state;
+			//			if (tile instanceof BannerTileEntity && state.getBlock() instanceof AbstractBannerBlock) {
+			//				((BannerTileEntity) tile).fromItem(stack, ((AbstractBannerBlock) state.getBlock()).getColor());
+			//			} 
+			if (stack.hasTag()) {
+				CompoundNBT tileData = stack.getTagElement("BlockEntityTag");
+				if (tileData != null) {
+					tile.load(state, tileData);
+					tile.setPosition(pos);
+				}
+			}
+			if (renderer != null) {
+				try {
+					// 0x00F0_00F0 means "full sky light and full block light".
+					// Reference: LightTexture.packLight (func_228451_a_)
+					renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
+				} catch (Exception ignored) {
+				}
+			}
+		}
+
 		if (renderType == BlockRenderType.MODEL) {
 			IModelData data = EmptyModelData.INSTANCE;
 			//				if (data == null) {
@@ -272,33 +311,19 @@ public final class PlacementPreview {
 				Configurations.disableCTM = true;
 			}
 			transforms.pushPose();
-			dispatcher.getModelRenderer().renderModel(world, bakedModel, state, pos, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(state, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
+			IBlockDisplayReader displayReader;
+			if (tile == null) {
+				displayReader = world;
+			} else {
+				blockReader.setLevel(world);
+				blockReader.setPos(tile.getBlockPos());
+				blockReader.setBlockEntity(tile);
+				displayReader = blockReader;
+			}
+			dispatcher.getModelRenderer().renderModel(displayReader, bakedModel, state, pos, transforms, renderBuffer.getBuffer(RenderTypeLookup.getRenderType(state, false)), false, new Random(), i, OverlayTexture.NO_OVERLAY, data);
 			transforms.popPose();
 			if (KaleidoClient.ctm) {
 				Configurations.disableCTM = preDisableCTM;
-			}
-		}
-		/* Assume renderType is not null.
-         *
-         * Yes, we use a fake tile entity to workaround this. All exceptions are
-         * discared. It is ugly, yes, but it partially solve the problem.
-         */
-		if (state.hasTileEntity()) {
-			TileEntity tile = state.createTileEntity(world);
-			@SuppressWarnings("rawtypes")
-			TileEntityRenderer renderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
-			tile.setLevelAndPosition(world, pos);
-			tile.blockState = state;
-			if (tile instanceof BannerTileEntity && state.getBlock() instanceof AbstractBannerBlock) {
-				((BannerTileEntity) tile).fromItem(stack, ((AbstractBannerBlock) state.getBlock()).getColor());
-			}
-			if (renderer != null) {
-				try {
-					// 0x00F0_00F0 means "full sky light and full block light".
-					// Reference: LightTexture.packLight (func_228451_a_)
-					renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
-				} catch (Exception ignored) {
-				}
 			}
 		}
 

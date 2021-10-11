@@ -12,6 +12,7 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
@@ -19,8 +20,8 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import snownee.kaleido.chisel.client.model.RetextureModel;
-import snownee.kaleido.core.supplier.SimpleBlockDefinition;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.core.definition.SimpleBlockDefinition;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
@@ -157,7 +158,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public int getColor(int index) {
+	public int getColor(IBlockDisplayReader level, int index) {
 		return RetextureModel.getColor(textures, blockState, level, worldPosition, index);
 	}
 }

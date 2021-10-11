@@ -14,9 +14,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.CoreModule;
@@ -45,13 +46,14 @@ public class KaleidoTileData implements ITileEntityData {
 		return info;
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public IModelData getModelData() {
 		if (modelData != null)
 			return modelData;
 		ModelInfo info = getInfo();
 		if (info == null)
 			return modelData = EmptyModelData.INSTANCE;
-		return modelData = new ModelDataMap.Builder().withInitial(MasterBlockEntity.MODEL, info).build();
+		return modelData = info.createModelData();
 	}
 
 	@Override

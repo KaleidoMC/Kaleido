@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 import snownee.kaleido.chisel.block.LayersBlock;
 import snownee.kaleido.chisel.block.RetextureBlockEntity;
 import snownee.kaleido.chisel.block.VSlabBlock;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
 
 public class ChiselPalette {
 	private static final Map<String, ChiselPalette> byName = Maps.newHashMap();

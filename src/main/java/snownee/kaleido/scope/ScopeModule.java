@@ -2,11 +2,13 @@ package snownee.kaleido.scope;
 
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.scope.block.ScopeBlock;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.scope.client.ScopeClient;
+import snownee.kaleido.scope.client.ScopeRenderer;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
@@ -25,5 +27,7 @@ public class ScopeModule extends AbstractModule {
 		ScopeClient.init();
 		ModBlockItem.INSTANT_UPDATE_TILES.add(TILE);
 		RenderTypeLookup.setRenderLayer(SCOPE, KaleidoClient.blockRenderTypes::contains);
+
+		ClientRegistry.bindTileEntityRenderer(TILE, ScopeRenderer::new);
 	}
 }

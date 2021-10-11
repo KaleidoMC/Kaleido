@@ -3,8 +3,8 @@ package snownee.kaleido.chisel.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.core.supplier.SimpleBlockDefinition;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.core.definition.SimpleBlockDefinition;
 
 public class ChiseledBlockEntity extends RetextureBlockEntity {
 

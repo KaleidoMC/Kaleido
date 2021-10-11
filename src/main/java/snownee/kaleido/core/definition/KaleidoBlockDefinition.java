@@ -1,4 +1,4 @@
-package snownee.kaleido.core.supplier;
+package snownee.kaleido.core.definition;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +29,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
@@ -51,8 +52,11 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 		}
 
 		@Override
-		public KaleidoBlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
-			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
+		public KaleidoBlockDefinition fromBlock(BlockState state, TileEntity blockEntity, IWorldReader level, BlockPos pos) {
+			ModelInfo info = null;
+			if (blockEntity instanceof MasterBlockEntity) {
+				info = ((MasterBlockEntity) blockEntity).getModelInfo();
+			}
 			if (info == null)
 				return null;
 			return of(info, info.template.toMeta(state));
@@ -87,6 +91,8 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 
 	private final Int2ObjectMap.Entry<ModelInfo> entry;
 	private ModelInfo modelInfo;
+	@OnlyIn(Dist.CLIENT)
+	private IModelData modelData;
 
 	private KaleidoBlockDefinition(Int2ObjectMap.Entry<ModelInfo> entry) {
 		this.entry = entry;
@@ -102,6 +108,15 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	@OnlyIn(Dist.CLIENT)
 	public IBakedModel model() {
 		return KaleidoClient.getModel(getModelInfo(), entry.getIntKey());
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public IModelData modelData() {
+		if (modelData == null) {
+			modelData = getModelInfo().createModelData();
+		}
+		return modelData;
 	}
 
 	@Override

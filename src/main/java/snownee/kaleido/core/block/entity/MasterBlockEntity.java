@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -29,8 +28,8 @@ import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
-import snownee.kaleido.core.supplier.KaleidoBlockDefinition;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.core.definition.KaleidoBlockDefinition;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
@@ -40,7 +39,7 @@ public class MasterBlockEntity extends BaseTile {
 	public static final ModelProperty<ModelInfo> MODEL = new ModelProperty<>();
 
 	public ImmutableList<Behavior> behaviors = ImmutableList.of();
-	private IModelData modelData = FMLEnvironment.dist.isClient() ? new ModelDataMap.Builder().build() : EmptyModelData.INSTANCE;
+	private IModelData modelData = FMLEnvironment.dist.isClient() ? EmptyModelData.INSTANCE : EmptyModelData.INSTANCE;
 
 	private ResourceLocation modelId;
 	private ModelInfo modelInfo;
@@ -154,7 +153,10 @@ public class MasterBlockEntity extends BaseTile {
 				level.getLightEngine().checkBlock(worldPosition);
 			}
 			if (level.isClientSide) {
-				modelData.setData(MODEL, modelInfo);
+				if (modelData == EmptyModelData.INSTANCE)
+					modelData = modelInfo.createModelData();
+				else
+					modelData.setData(MODEL, modelInfo);
 				requestModelDataUpdate();
 			}
 		}

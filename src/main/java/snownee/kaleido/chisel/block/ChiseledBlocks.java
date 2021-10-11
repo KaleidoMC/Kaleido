@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.client.model.RetextureModel;
-import snownee.kaleido.core.supplier.BlockDefinition;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
 public final class ChiseledBlocks {
