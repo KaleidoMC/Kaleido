@@ -29,8 +29,8 @@ import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
-import snownee.kaleido.core.supplier.KaleidoModelSupplier;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.KaleidoBlockDefinition;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
@@ -92,9 +92,9 @@ public class MasterBlockEntity extends BaseTile {
 
 	private void loadInternal(CompoundNBT data) {
 		if (data.contains("Overrides")) {
-			ModelSupplier supplier = ModelSupplier.fromNBT(data.getCompound("Overrides").getCompound("0"));
-			if (supplier instanceof KaleidoModelSupplier) {
-				modelId = ((KaleidoModelSupplier) supplier).getModelInfo().id;
+			BlockDefinition supplier = BlockDefinition.fromNBT(data.getCompound("Overrides").getCompound("0"));
+			if (supplier instanceof KaleidoBlockDefinition) {
+				modelId = ((KaleidoBlockDefinition) supplier).getModelInfo().id;
 			}
 		} else {
 			modelId = Util.RL(data.getString("Model"));

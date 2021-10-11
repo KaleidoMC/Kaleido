@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.client.model.RetextureModel;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
 public final class ChiseledBlocks {
@@ -64,7 +64,7 @@ public final class ChiseledBlocks {
 		NBTHelper data = NBTHelper.of(stack);
 		CompoundNBT tag = data.getTag("BlockEntityTag.Overrides.0");
 		if (tag != null) {
-			ModelSupplier supplier = ModelSupplier.fromNBT(tag);
+			BlockDefinition supplier = BlockDefinition.fromNBT(tag);
 			if (supplier != null) {
 				ITextComponent component = components.get(0);
 				component = new TranslationTextComponent("block.kaleido.chiseled", component, supplier.getDescription());
@@ -74,19 +74,19 @@ public final class ChiseledBlocks {
 	}
 
 	public static SoundType getSoundType(IWorldReader level, BlockPos pos) {
-		ModelSupplier supplier = null;
+		BlockDefinition supplier = null;
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity instanceof ChiseledBlockEntity)
 			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 		return supplier == null ? SoundType.STONE : supplier.getSoundType();
 	}
 
-	public static ModelSupplier getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
+	public static BlockDefinition getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (!(blockEntity instanceof ChiseledBlockEntity))
 			return null;
-		ModelSupplier supplier0 = ((ChiseledBlockEntity) blockEntity).getTexture();
-		ModelSupplier supplier1 = RetextureModel.OverrideList.overridesFromItem(stack).get("0");
+		BlockDefinition supplier0 = ((ChiseledBlockEntity) blockEntity).getTexture();
+		BlockDefinition supplier1 = RetextureModel.OverrideList.overridesFromItem(stack).get("0");
 		return Objects.equals(supplier0, supplier1) ? supplier0 : null;
 	}
 }

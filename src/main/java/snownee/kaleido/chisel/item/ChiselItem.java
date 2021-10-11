@@ -26,7 +26,7 @@ import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.network.CSetPalettePacket;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 
@@ -66,7 +66,7 @@ public class ChiselItem extends ModItem {
 				if (palette != ChiselPalette.NONE)
 					player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
 			}
-			ModelSupplier supplier;
+			BlockDefinition supplier;
 			BlockItemUseContext context = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, hitResult);
 			context.replaceClicked = true;
 			if (isChiseled) {
@@ -75,7 +75,7 @@ public class ChiselItem extends ModItem {
 					return false;
 				supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 			} else {
-				supplier = ModelSupplier.fromBlock(state, level, pos);
+				supplier = BlockDefinition.fromBlock(state, level, pos);
 			}
 			if (supplier != null) {
 				palette.place(supplier, level, pos, context);

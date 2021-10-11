@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 import snownee.kaleido.chisel.block.LayersBlock;
 import snownee.kaleido.chisel.block.RetextureBlockEntity;
 import snownee.kaleido.chisel.block.VSlabBlock;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 
 public class ChiselPalette {
 	private static final Map<String, ChiselPalette> byName = Maps.newHashMap();
@@ -54,7 +54,7 @@ public class ChiselPalette {
 		return icon;
 	}
 
-	public void place(ModelSupplier supplier, World level, BlockPos pos, BlockItemUseContext context) {
+	public void place(BlockDefinition supplier, World level, BlockPos pos, BlockItemUseContext context) {
 		level.destroyBlock(pos, false);
 		if (this == NONE) {
 			supplier.place(level, pos);

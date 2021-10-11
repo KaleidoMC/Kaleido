@@ -36,7 +36,7 @@ import snownee.kaleido.chisel.block.RetextureBlockEntity;
 import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
@@ -108,7 +108,7 @@ public class ChiselModule extends AbstractModule {
 				if (!(held.getItem() instanceof BlockItem)) {
 					held = player.getOffhandItem();
 				}
-				Map<String, ModelSupplier> textures = RetextureModel.OverrideList.overridesFromItem(held);
+				Map<String, BlockDefinition> textures = RetextureModel.OverrideList.overridesFromItem(held);
 				return RetextureModel.getColor(textures, state, level, pos, i);
 			}
 			return -1;
@@ -120,7 +120,7 @@ public class ChiselModule extends AbstractModule {
 	public void itemColors(ColorHandlerEvent.Item event) {
 		ItemColors itemColors = event.getItemColors();
 		itemColors.register((stack, i) -> {
-			Map<String, ModelSupplier> textures = RetextureModel.OverrideList.overridesFromItem(stack);
+			Map<String, BlockDefinition> textures = RetextureModel.OverrideList.overridesFromItem(stack);
 			return RetextureModel.getColor(textures, null, Minecraft.getInstance().level, null, i);
 		}, CHISELED_BLOCKS.toArray(new Block[0]));
 	}

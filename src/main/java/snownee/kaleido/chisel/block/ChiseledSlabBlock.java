@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.block.ModBlock;
 
 public class ChiseledSlabBlock extends SlabBlock {
@@ -78,7 +78,7 @@ public class ChiseledSlabBlock extends SlabBlock {
 		World level = context.getLevel();
 		BlockState blockstate = level.getBlockState(blockpos);
 		if (blockstate.is(this)) {
-			ModelSupplier supplier = ChiseledBlocks.getSupplierIfSame(level, blockpos, context.getItemInHand());
+			BlockDefinition supplier = ChiseledBlocks.getSupplierIfSame(level, blockpos, context.getItemInHand());
 			if (supplier == null)
 				return null;
 			return supplier.getBlockState();

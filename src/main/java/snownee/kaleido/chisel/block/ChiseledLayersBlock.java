@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.block.ModBlock;
 
 public class ChiseledLayersBlock extends LayersBlock {
@@ -77,7 +77,7 @@ public class ChiseledLayersBlock extends LayersBlock {
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (!(blockEntity instanceof ChiseledBlockEntity))
 			return null;
-		ModelSupplier supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
+		BlockDefinition supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 		if (supplier == null)
 			return null;
 		return supplier.getBlockState();

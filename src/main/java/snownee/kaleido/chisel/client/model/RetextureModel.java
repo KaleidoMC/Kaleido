@@ -60,21 +60,21 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.kaleido.chisel.block.RetextureBlockEntity;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class RetextureModel implements IDynamicBakedModel {
-	public static ModelProperty<Map<String, ModelSupplier>> TEXTURES = new ModelProperty<>();
+	public static ModelProperty<Map<String, BlockDefinition>> TEXTURES = new ModelProperty<>();
 	public static Map<IBakedModel, RetextureModel> CACHES = Maps.newHashMap();
 
 	public static class ModelConfiguration implements IModelConfiguration {
 
 		private final IModelConfiguration baseConfiguration;
-		private final Map<String, ModelSupplier> overrides;
+		private final Map<String, BlockDefinition> overrides;
 
-		public ModelConfiguration(IModelConfiguration baseConfiguration, Map<String, ModelSupplier> overrides) {
+		public ModelConfiguration(IModelConfiguration baseConfiguration, Map<String, BlockDefinition> overrides) {
 			this.baseConfiguration = baseConfiguration;
 			this.overrides = overrides;
 		}
@@ -101,13 +101,13 @@ public class RetextureModel implements IDynamicBakedModel {
 				int i = ref.lastIndexOf('_');
 				if (i != -1) {
 					String ref0 = ref.substring(0, i);
-					ModelSupplier supplier = overrides.get(ref0);
+					BlockDefinition supplier = overrides.get(ref0);
 					if (supplier != null) {
 						Direction direction = Direction.byName(ref.substring(i + 1));
 						return supplier.renderMaterial(direction);
 					}
 				}
-				ModelSupplier supplier = overrides.get(ref);
+				BlockDefinition supplier = overrides.get(ref);
 				if (supplier != null) {
 					return supplier.renderMaterial(null);
 				}
@@ -223,7 +223,7 @@ public class RetextureModel implements IDynamicBakedModel {
 	@Override
 	public TextureAtlasSprite getParticleTexture(IModelData data) {
 		if (data.getData(TEXTURES) != null) {
-			ModelSupplier supplier = data.getData(TEXTURES).get(particleKey);
+			BlockDefinition supplier = data.getData(TEXTURES).get(particleKey);
 			if (supplier != null) {
 				RenderMaterial material = supplier.renderMaterial(null);
 				TextureAtlasSprite particle = ModelLoader.defaultTextureGetter().apply(material);
@@ -252,13 +252,13 @@ public class RetextureModel implements IDynamicBakedModel {
 
 	@Override
 	public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData) {
-		Map<String, ModelSupplier> overrides = extraData.getData(TEXTURES);
+		Map<String, BlockDefinition> overrides = extraData.getData(TEXTURES);
 		if (overrides == null)
 			overrides = Collections.EMPTY_MAP;
 		RenderType layer = MinecraftForgeClient.getRenderLayer();
 		boolean noSupplier = true;
 		if (layer != null) {
-			for (ModelSupplier supplier : overrides.values()) {
+			for (BlockDefinition supplier : overrides.values()) {
 				if (supplier != null) {
 					noSupplier = false;
 					if (supplier.canRenderInLayer(layer)) {
@@ -275,7 +275,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		return Collections.EMPTY_LIST;
 	}
 
-	public IBakedModel getModel(Map<String, ModelSupplier> overrides) {
+	public IBakedModel getModel(Map<String, BlockDefinition> overrides) {
 		String key = generateKey(overrides);
 		try {
 			return baked.get(key, () -> {
@@ -288,7 +288,7 @@ public class RetextureModel implements IDynamicBakedModel {
 		return Minecraft.getInstance().getModelManager().getMissingModel();
 	}
 
-	private static String generateKey(Map<String, ModelSupplier> overrides) {
+	private static String generateKey(Map<String, BlockDefinition> overrides) {
 		if (overrides == null) {
 			return "";
 		} else {
@@ -318,12 +318,12 @@ public class RetextureModel implements IDynamicBakedModel {
 			return model;
 		}
 
-		public static Map<String, ModelSupplier> overridesFromItem(ItemStack stack) {
+		public static Map<String, BlockDefinition> overridesFromItem(ItemStack stack) {
 			CompoundNBT data = NBTHelper.of(stack).getTag("BlockEntityTag.Overrides");
 			if (data == null)
 				data = new CompoundNBT();
 			Set<String> keySet = data.getAllKeys();
-			Map<String, ModelSupplier> overrides = Maps.newHashMapWithExpectedSize(keySet.size());
+			Map<String, BlockDefinition> overrides = Maps.newHashMapWithExpectedSize(keySet.size());
 			keySet.forEach(k -> overrides.put(k, null));
 			RetextureBlockEntity.readTextures(overrides, data, Predicates.alwaysTrue());
 			return overrides;
@@ -340,8 +340,8 @@ public class RetextureModel implements IDynamicBakedModel {
 		return baseConfiguration.isSideLit();
 	}
 
-	public static int getColor(Map<String, ModelSupplier> textures, BlockState state, IBlockDisplayReader level, BlockPos pos, int index) {
-		ModelSupplier supplier = textures.get(Integer.toString(index));
+	public static int getColor(Map<String, BlockDefinition> textures, BlockState state, IBlockDisplayReader level, BlockPos pos, int index) {
+		BlockDefinition supplier = textures.get(Integer.toString(index));
 		if (supplier != null)
 			return supplier.getColor(state, level, pos, index);
 		return -1;

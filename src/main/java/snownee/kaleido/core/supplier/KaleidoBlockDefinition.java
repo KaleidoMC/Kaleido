@@ -36,13 +36,13 @@ import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kiwi.util.Util;
 
-public class KaleidoModelSupplier implements ModelSupplier {
+public class KaleidoBlockDefinition implements BlockDefinition {
 
-	public enum Factory implements ModelSupplier.Factory<KaleidoModelSupplier> {
+	public enum Factory implements BlockDefinition.Factory<KaleidoBlockDefinition> {
 		INSTANCE;
 
 		@Override
-		public KaleidoModelSupplier fromNBT(CompoundNBT tag) {
+		public KaleidoBlockDefinition fromNBT(CompoundNBT tag) {
 			ResourceLocation id = Util.RL(tag.getString("Id"));
 			ModelInfo info = KaleidoDataManager.get(id);
 			if (info == null)
@@ -51,7 +51,7 @@ public class KaleidoModelSupplier implements ModelSupplier {
 		}
 
 		@Override
-		public KaleidoModelSupplier fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+		public KaleidoBlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
 			ModelInfo info = KaleidoBlocks.getInfo(level, pos);
 			if (info == null)
 				return null;
@@ -59,7 +59,7 @@ public class KaleidoModelSupplier implements ModelSupplier {
 		}
 
 		@Override
-		public KaleidoModelSupplier fromItem(ItemStack stack, BlockItemUseContext context) {
+		public KaleidoBlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
 			ModelInfo info = KaleidoBlocks.getInfo(stack);
 			if (info == null)
 				return null;
@@ -78,23 +78,23 @@ public class KaleidoModelSupplier implements ModelSupplier {
 	}
 
 	public static final String TYPE = "Kaleido";
-	public static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoModelSupplier> MAP = Maps.newHashMap();
+	public static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoBlockDefinition> MAP = Maps.newHashMap();
 
-	public static KaleidoModelSupplier of(ModelInfo info, int state) {
+	public static KaleidoBlockDefinition of(ModelInfo info, int state) {
 		Int2ObjectMap.Entry<ModelInfo> entry = new AbstractInt2ObjectMap.BasicEntry<>(state, info);
-		return MAP.computeIfAbsent(entry, KaleidoModelSupplier::new);
+		return MAP.computeIfAbsent(entry, KaleidoBlockDefinition::new);
 	}
 
 	private final Int2ObjectMap.Entry<ModelInfo> entry;
 	private ModelInfo modelInfo;
 
-	private KaleidoModelSupplier(Int2ObjectMap.Entry<ModelInfo> entry) {
+	private KaleidoBlockDefinition(Int2ObjectMap.Entry<ModelInfo> entry) {
 		this.entry = entry;
 		modelInfo = entry.getValue();
 	}
 
 	@Override
-	public ModelSupplier.Factory<?> getFactory() {
+	public BlockDefinition.Factory<?> getFactory() {
 		return Factory.INSTANCE;
 	}
 

@@ -36,14 +36,14 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.Hooks;
 
-public class BlockStateModelSupplier implements ModelSupplier {
+public class SimpleBlockDefinition implements BlockDefinition {
 
-	public enum Factory implements ModelSupplier.Factory<BlockStateModelSupplier> {
+	public enum Factory implements BlockDefinition.Factory<SimpleBlockDefinition> {
 		INSTANCE;
 
 		@SuppressWarnings("deprecation")
 		@Override
-		public BlockStateModelSupplier fromNBT(CompoundNBT tag) {
+		public SimpleBlockDefinition fromNBT(CompoundNBT tag) {
 			BlockState state = NBTUtil.readBlockState(tag.getCompound(TYPE));
 			if (state.isAir())
 				return null;
@@ -51,12 +51,12 @@ public class BlockStateModelSupplier implements ModelSupplier {
 		}
 
 		@Override
-		public BlockStateModelSupplier fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+		public SimpleBlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
 			return of(state);
 		}
 
 		@Override
-		public BlockStateModelSupplier fromItem(ItemStack stack, BlockItemUseContext context) {
+		public SimpleBlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
 			if (!(stack.getItem() instanceof BlockItem)) {
 				return null;
 			}
@@ -80,20 +80,20 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	}
 
 	public static final String TYPE = "Block";
-	private static final Map<BlockState, BlockStateModelSupplier> MAP = Maps.newIdentityHashMap();
+	private static final Map<BlockState, SimpleBlockDefinition> MAP = Maps.newIdentityHashMap();
 
-	public static BlockStateModelSupplier of(BlockState state) {
+	public static SimpleBlockDefinition of(BlockState state) {
 		if (state.getBlock() == Blocks.GRASS_BLOCK) {
 			state = state.setValue(BlockStateProperties.SNOWY, false);
 		}
-		return MAP.computeIfAbsent(state, BlockStateModelSupplier::new);
+		return MAP.computeIfAbsent(state, SimpleBlockDefinition::new);
 	}
 
 	public final BlockState state;
 	@OnlyIn(Dist.CLIENT)
 	private RenderMaterial[] materials;
 
-	private BlockStateModelSupplier(BlockState state) {
+	private SimpleBlockDefinition(BlockState state) {
 		this.state = state;
 		if (FMLEnvironment.dist.isClient()) {
 			materials = new RenderMaterial[7];
@@ -101,7 +101,7 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	}
 
 	@Override
-	public ModelSupplier.Factory<?> getFactory() {
+	public BlockDefinition.Factory<?> getFactory() {
 		return Factory.INSTANCE;
 	}
 
@@ -191,7 +191,7 @@ public class BlockStateModelSupplier implements ModelSupplier {
 	}
 
 	public static void reload() {
-		for (BlockStateModelSupplier supplier : MAP.values()) {
+		for (SimpleBlockDefinition supplier : MAP.values()) {
 			Arrays.fill(supplier.materials, null);
 		}
 	}

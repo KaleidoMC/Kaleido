@@ -19,15 +19,15 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import snownee.kaleido.chisel.client.model.RetextureModel;
-import snownee.kaleido.core.supplier.BlockStateModelSupplier;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.SimpleBlockDefinition;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 
 public abstract class RetextureBlockEntity extends BaseTile {
 	@Nullable
-	protected Map<String, ModelSupplier> textures;
+	protected Map<String, BlockDefinition> textures;
 	protected IModelData modelData = EmptyModelData.INSTANCE;
 
 	public RetextureBlockEntity(TileEntityType<?> tileEntityTypeIn, String... textureKeys) {
@@ -49,27 +49,27 @@ public abstract class RetextureBlockEntity extends BaseTile {
 		textures.put(key, path);
 	}
 
-	public void setTexture(String key, ModelSupplier modelSupplier) {
+	public void setTexture(String key, BlockDefinition modelSupplier) {
 		if (modelSupplier != null && !isValidTexture(modelSupplier))
 			return;
 		setTexture(textures, key, modelSupplier);
 	}
 
-	public boolean isValidTexture(ModelSupplier modelSupplier) {
+	public boolean isValidTexture(BlockDefinition modelSupplier) {
 		return true;
 	}
 
-	public static void setTexture(Map<String, ModelSupplier> textures, String key, ModelSupplier modelSupplier) {
+	public static void setTexture(Map<String, BlockDefinition> textures, String key, BlockDefinition modelSupplier) {
 		if (textures == null || !textures.containsKey(key)) {
 			return;
 		}
 		textures.put(key, modelSupplier);
 	}
 
-	public static void setTexture(Map<String, ModelSupplier> textures, String key, Item item) {
+	public static void setTexture(Map<String, BlockDefinition> textures, String key, Item item) {
 		Block block = Block.byItem(item);
 		if (block != null) {
-			setTexture(textures, key, BlockStateModelSupplier.of(block.defaultBlockState()));
+			setTexture(textures, key, SimpleBlockDefinition.of(block.defaultBlockState()));
 		}
 	}
 
@@ -109,7 +109,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 		}
 	}
 
-	public static boolean readTextures(Map<String, ModelSupplier> textures, CompoundNBT data, Predicate<ModelSupplier> validator) {
+	public static boolean readTextures(Map<String, BlockDefinition> textures, CompoundNBT data, Predicate<BlockDefinition> validator) {
 		if (textures == null) {
 			return false;
 		}
@@ -119,7 +119,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 			CompoundNBT v = helper.getTag(k);
 			if (v == null)
 				continue;
-			ModelSupplier supplier = ModelSupplier.fromNBT(v);
+			BlockDefinition supplier = BlockDefinition.fromNBT(v);
 			if (supplier != null && !validator.test(supplier))
 				continue;
 			if (!Objects.equals(textures.get(k), supplier)) {
@@ -136,7 +136,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 		return data;
 	}
 
-	public static CompoundNBT writeTextures(Map<String, ModelSupplier> textures, CompoundNBT data) {
+	public static CompoundNBT writeTextures(Map<String, BlockDefinition> textures, CompoundNBT data) {
 		if (textures != null) {
 			NBTHelper tag = NBTHelper.of(data);
 			textures.forEach((k, v) -> {

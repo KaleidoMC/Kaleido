@@ -25,30 +25,30 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public interface ModelSupplier {
+public interface BlockDefinition {
 
 	Map<String, Factory<?>> MAP = Maps.newConcurrentMap();
 	List<Factory<?>> FACTORIES = Lists.newLinkedList();
 
 	static void registerFactory(Factory<?> factory) {
 		MAP.put(factory.getId(), factory);
-		if (factory.getId().equals(BlockStateModelSupplier.TYPE)) {
+		if (factory.getId().equals(SimpleBlockDefinition.TYPE)) {
 			FACTORIES.add(factory);
 		} else {
 			FACTORIES.add(0, factory);
 		}
 	}
 
-	static ModelSupplier fromNBT(CompoundNBT tag) {
+	static BlockDefinition fromNBT(CompoundNBT tag) {
 		Factory<?> factory = MAP.get(tag.getString("Type"));
 		if (factory == null)
 			return null;
 		return factory.fromNBT(tag);
 	}
 
-	static ModelSupplier fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
+	static BlockDefinition fromBlock(BlockState state, IWorldReader level, BlockPos pos) {
 		for (Factory<?> factory : FACTORIES) {
-			ModelSupplier supplier = factory.fromBlock(state, level, pos);
+			BlockDefinition supplier = factory.fromBlock(state, level, pos);
 			if (supplier != null) {
 				return supplier;
 			}
@@ -56,9 +56,9 @@ public interface ModelSupplier {
 		return null;
 	}
 
-	static ModelSupplier fromItem(ItemStack stack, BlockItemUseContext context) {
+	static BlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
 		for (Factory<?> factory : FACTORIES) {
-			ModelSupplier supplier = factory.fromItem(stack, context);
+			BlockDefinition supplier = factory.fromItem(stack, context);
 			if (supplier != null) {
 				return supplier;
 			}
@@ -92,7 +92,7 @@ public interface ModelSupplier {
 
 	SoundType getSoundType();
 
-	interface Factory<T extends ModelSupplier> {
+	interface Factory<T extends BlockDefinition> {
 		T fromNBT(CompoundNBT tag);
 
 		String getId();

@@ -47,9 +47,9 @@ import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
-import snownee.kaleido.core.supplier.BlockStateModelSupplier;
-import snownee.kaleido.core.supplier.KaleidoModelSupplier;
-import snownee.kaleido.core.supplier.ModelSupplier;
+import snownee.kaleido.core.supplier.SimpleBlockDefinition;
+import snownee.kaleido.core.supplier.KaleidoBlockDefinition;
+import snownee.kaleido.core.supplier.BlockDefinition;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
@@ -117,8 +117,8 @@ public class CoreModule extends AbstractModule {
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
 		ActionDeserializer.registerFactory("command", CommandAction::create);
 
-		ModelSupplier.registerFactory(BlockStateModelSupplier.Factory.INSTANCE);
-		ModelSupplier.registerFactory(KaleidoModelSupplier.Factory.INSTANCE);
+		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
+		BlockDefinition.registerFactory(KaleidoBlockDefinition.Factory.INSTANCE);
 	}
 
 	@Override
