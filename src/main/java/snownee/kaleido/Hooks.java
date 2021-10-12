@@ -2,6 +2,7 @@ package snownee.kaleido;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -16,6 +17,8 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockModelRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
@@ -32,6 +35,7 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -40,21 +44,28 @@ import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
-import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.model.KaleidoModel;
+import snownee.kaleido.core.util.SimulationBlockReader;
+import snownee.kaleido.scope.ScopeStack;
+import snownee.kaleido.scope.client.model.ScopeModel;
 
 public final class Hooks {
 
 	public static boolean chiselEnabled;
+	public static boolean scopeEnabled;
 
 	@OnlyIn(Dist.CLIENT)
 	private static ResourceLocation DEFAULT_PARENT;
+
+	@OnlyIn(Dist.CLIENT)
+	private static SimulationBlockReader blockReader;
 
 	private static final MethodHandle GET_STATE_FOR_PLACEMENT;
 
 	static {
 		if (FMLEnvironment.dist.isClient()) {
 			DEFAULT_PARENT = new ResourceLocation("block/block");
+			blockReader = new SimulationBlockReader();
 		}
 
 		MethodHandle m = null;
@@ -77,12 +88,27 @@ public final class Hooks {
 
 	@OnlyIn(Dist.CLIENT)
 	public static IBakedModel replaceKaleidoModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData) {
-		ModelInfo info = modelData.getData(MasterBlockEntity.MODEL);
+		ModelInfo info = modelData.getData(KaleidoModel.MODEL);
 		if (info != null && info.offset != AbstractBlock.OffsetType.NONE) {
 			Vector3d offset = info.getOffset(posIn);
 			matrixIn.translate(offset.x, offset.y, offset.z);
 		}
 		return KaleidoModel.getModel(info, stateIn);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static void renderScopeModel(IBlockDisplayReader worldIn, IBakedModel modelIn, BlockState stateIn, BlockPos posIn, MatrixStack matrixIn, IVertexBuilder buffer, boolean checkSides, Random randomIn, long rand, int combinedOverlayIn, IModelData modelData) {
+		List<ScopeStack> stacks = modelData.getData(ScopeModel.STACKS);
+		if (stacks == null || stacks.isEmpty())
+			return;
+		BlockModelRenderer.clearCache();
+		RenderType layer = MinecraftForgeClient.getRenderLayer();
+		blockReader.setLevel(worldIn);
+		for (ScopeStack stack : stacks) {
+			if (layer == null || stack.blockDefinition.canRenderInLayer(layer))
+				stack.render(matrixIn, buffer, blockReader, posIn, combinedOverlayIn, randomIn, rand, checkSides);
+		}
+		BlockModelRenderer.enableCaching();
 	}
 
 	@OnlyIn(Dist.CLIENT)

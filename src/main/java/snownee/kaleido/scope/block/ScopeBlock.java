@@ -1,7 +1,6 @@
 package snownee.kaleido.scope.block;
 
 import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
@@ -49,12 +48,6 @@ public class ScopeBlock extends ModBlock {
 			}
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
-	}
-
-	@Deprecated
-	@Override
-	public BlockRenderType getRenderShape(BlockState p_149645_1_) {
-		return BlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
 
 }

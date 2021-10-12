@@ -1,4 +1,4 @@
-package snownee.kaleido.core.client.model;
+package snownee.kaleido.scope.client.model;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -42,21 +43,19 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
-import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
-import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.scope.ScopeStack;
 
 @OnlyIn(Dist.CLIENT)
-public class KaleidoModel implements IDynamicBakedModel {
-	public static final ModelProperty<ModelInfo> MODEL = new ModelProperty<>();
+public class ScopeModel implements IDynamicBakedModel {
+	public static ModelProperty<List<ScopeStack>> STACKS = new ModelProperty<>();
 
 	public static class Geometry implements IModelGeometry<Geometry> {
 
 		@Override
 		public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
 			if (INSTANCE == null) {
-				INSTANCE = new KaleidoModel();
+				INSTANCE = new ScopeModel();
 			}
 			return INSTANCE;
 		}
@@ -93,19 +92,11 @@ public class KaleidoModel implements IDynamicBakedModel {
 		@Nullable
 		@Override
 		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
-			if (info == null || Minecraft.getInstance().overlay != null) {
-				return null;
-			}
-			if (KaleidoClient.ctm && info.template != KaleidoTemplate.item) {
-				return KaleidoClient.getModel(info, info.template.metaCount);
-			} else {
-				return KaleidoClient.getModel(info, null);
-			}
+			return null;
 		}
 	}
 
-	public static KaleidoModel INSTANCE;
+	public static ScopeModel INSTANCE;
 
 	private static Lazy<IBakedModel> missingno = missingno();
 
@@ -114,18 +105,6 @@ public class KaleidoModel implements IDynamicBakedModel {
 	}
 
 	private final Lazy<ItemOverrideList> overrides = Lazy.of(OverrideList::new);
-
-	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
-		IBakedModel model = null;
-		if (info != null) {
-			RenderType layer = MinecraftForgeClient.getRenderLayer();
-			if (layer == null || info.canRenderInLayer(layer)) {
-				model = KaleidoClient.getModel(info, state);
-			} else
-				return null;
-		}
-		return model != null ? model : missingno.get();
-	}
 
 	@Override
 	public ItemOverrideList getOverrides() {
@@ -140,15 +119,28 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture(IModelData extraData) {
-		return getModel(extraData.getData(MODEL), null).getParticleTexture(extraData);
+		List<ScopeStack> stacks = extraData.getData(STACKS);
+		if (stacks == null || stacks.isEmpty()) {
+			return getParticleIcon();
+		}
+		BlockDefinition blockDefinition = stacks.get(0).blockDefinition;
+		return blockDefinition.model().getParticleTexture(blockDefinition.modelData());
 	}
 
 	@Override
 	public List<BakedQuad> getQuads(@Nullable BlockState state, Direction side, Random rand, IModelData extraData) {
-		if (state == null) {
-			return missingno.get().getQuads(null, side, rand, extraData);
+		List<ScopeStack> stacks = extraData.getData(STACKS);
+		if (stacks == null || stacks.isEmpty()) {
+			return missingno.get().getQuads(state, side, rand, extraData);
 		}
-		return getModel(extraData.getData(MODEL), state).getQuads(state, side, rand, extraData);
+		RenderType layer = MinecraftForgeClient.getRenderLayer();
+		List<BakedQuad> quads = Lists.newArrayListWithExpectedSize(stacks.size());
+		for (ScopeStack stack : stacks) {
+			BlockDefinition definition = stack.blockDefinition;
+			if (layer == null || definition.canRenderInLayer(layer))
+				quads.addAll(definition.model().getQuads(state, side, rand, definition.modelData()));
+		}
+		return quads;
 	}
 
 	@Override

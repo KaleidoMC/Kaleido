@@ -19,6 +19,7 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.Hooks;
 import snownee.kaleido.core.client.model.KaleidoModel;
+import snownee.kaleido.scope.client.model.ScopeModel;
 
 @Mixin(BlockModelRenderer.class)
 public abstract class MixinBlockModelRenderer {
@@ -31,6 +32,9 @@ public abstract class MixinBlockModelRenderer {
 				ci.setReturnValue(true);
 			else
 				ci.setReturnValue(renderModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData));
+		} else if (Hooks.scopeEnabled && modelIn == ScopeModel.INSTANCE) {
+			Hooks.renderScopeModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData);
+			ci.setReturnValue(true);
 		}
 	}
 

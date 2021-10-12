@@ -38,7 +38,7 @@ public class ScopeClient {
 			}
 			BlockState state = mc.level.getBlockState(((BlockRayTraceResult) mc.hitResult).getBlockPos());
 			if (state.is(ScopeModule.SCOPE)) {
-
+				new CCreateScopePacket().send();
 			} else {
 				new CCreateScopePacket().send();
 			}

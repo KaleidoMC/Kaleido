@@ -12,7 +12,7 @@ import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.client.model.KaleidoModel;
 import team.chisel.ctm.client.util.CTMLogic;
 
 public final class Hooks {
@@ -29,7 +29,7 @@ public final class Hooks {
 		if (Kaleido.isKaleidoBlock(state)) {
 			IModelData data = ModelDataManager.getModelData(level, pos);
 			if (data != null) {
-				ModelInfo info = data.getData(MasterBlockEntity.MODEL);
+				ModelInfo info = data.getData(KaleidoModel.MODEL);
 				if (info != null) {
 					return info.id;
 				}

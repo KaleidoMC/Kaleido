@@ -67,6 +67,7 @@ import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.SimulationBlockReader;
+import snownee.kaleido.scope.ScopeModule;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 import team.chisel.ctm.Configurations;
@@ -148,7 +149,6 @@ public final class PlacementPreview {
 		successLast = renderInternal(event);
 	}
 
-	@SuppressWarnings("deprecation")
 	private static boolean renderInternal(RenderWorldLastEvent event) {
 		if (!KaleidoClientConfig.previewEnabled) {
 			return false;
@@ -194,11 +194,16 @@ public final class PlacementPreview {
 				return false;
 			}
 
-			BlockPos target = context.getClickedPos();
 			World world = context.getLevel();
-			if (!world.getBlockState(target).isAir()) {
+			BlockPos target = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
+			if (Hooks.scopeEnabled && world.getBlockState(target).is(ScopeModule.SCOPE)) {
 				return false;
 			}
+
+			target = context.getClickedPos();
+			//			if (!world.getBlockState(target).isAir()) {
+			//				return false;
+			//			}
 
 			Direction direction = null;
 			if (placeResult.hasProperty(HorizontalBlock.FACING)) {

@@ -23,11 +23,11 @@ public class ScopeRenderer extends TileEntityRenderer<ScopeBlockEntity> {
 	}
 
 	@Override
-	public void render(ScopeBlockEntity entity, float p_225616_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225616_5_, int p_225616_6_) {
+	public void render(ScopeBlockEntity entity, float pPartialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int pCombinedLight, int pCombinedOverlay) {
 		blockReader.setLevel(Minecraft.getInstance().level);
 		BlockModelRenderer.clearCache();
 		for (ScopeStack stack : entity.stacks) {
-			stack.render(matrixStack, buffer, blockReader, entity.getBlockPos());
+			stack.render(matrixStack, buffer, blockReader, entity.getBlockPos(), pCombinedOverlay, entity.hasLevel());
 		}
 		BlockModelRenderer.enableCaching();
 	}

@@ -7,12 +7,9 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -102,15 +99,15 @@ public class ChiselModule extends AbstractModule {
 			if (blockEntity instanceof RetextureBlockEntity) {
 				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
 			}
-//			ClientPlayerEntity player = Minecraft.getInstance().player;
-//			if (player != null) {
-//				ItemStack held = player.getMainHandItem();
-//				if (!(held.getItem() instanceof BlockItem)) {
-//					held = player.getOffhandItem();
-//				}
-//				Map<String, BlockDefinition> textures = RetextureModel.OverrideList.overridesFromItem(held);
-//				return RetextureModel.getColor(textures, state, level, pos, i);
-//			}
+			//			ClientPlayerEntity player = Minecraft.getInstance().player;
+			//			if (player != null) {
+			//				ItemStack held = player.getMainHandItem();
+			//				if (!(held.getItem() instanceof BlockItem)) {
+			//					held = player.getOffhandItem();
+			//				}
+			//				Map<String, BlockDefinition> textures = RetextureModel.OverrideList.overridesFromItem(held);
+			//				return RetextureModel.getColor(textures, state, level, pos, i);
+			//			}
 			return -1;
 		}, CHISELED_BLOCKS.toArray(new Block[0]));
 	}

@@ -8,18 +8,25 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelDataMap;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.ScopeStack;
+import snownee.kaleido.scope.client.model.ScopeModel;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 
 public class ScopeBlockEntity extends BaseTile {
 
 	public List<ScopeStack> stacks = Lists.newArrayList();
+	private IModelData modelData = EmptyModelData.INSTANCE;
 
 	public ScopeBlockEntity() {
 		super(ScopeModule.TILE);
+		persistData = true;
 	}
 
 	@Override
@@ -30,6 +37,8 @@ public class ScopeBlockEntity extends BaseTile {
 			if (stack != null)
 				stacks.add(stack);
 		}
+		if (hasLevel() && level.isClientSide)
+			refresh();
 	}
 
 	@Override
@@ -61,6 +70,23 @@ public class ScopeBlockEntity extends BaseTile {
 		stacks.add(stack);
 		refresh();
 		return stack;
+	}
+
+	@Override
+	public IModelData getModelData() {
+		if (modelData == EmptyModelData.INSTANCE && EffectiveSide.get().isClient()) {
+			modelData = new ModelDataMap.Builder().withInitial(ScopeModel.STACKS, stacks).build();
+		}
+		return modelData;
+	}
+
+	@Override
+	public void refresh() {
+		if (level != null) {
+			requestModelDataUpdate();
+			BlockState state = getBlockState();
+			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512);
+		}
 	}
 
 }

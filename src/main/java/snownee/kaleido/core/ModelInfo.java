@@ -44,7 +44,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.block.KaleidoBlocks;
-import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
@@ -280,7 +280,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	@OnlyIn(Dist.CLIENT)
 	public IModelData createModelData() {
-		return new ModelDataMap.Builder().withInitial(MasterBlockEntity.MODEL, this).build();
+		return new ModelDataMap.Builder().withInitial(KaleidoModel.MODEL, this).build();
 	}
 
 	public static final Cache<GlobalPos, ModelInfo> cache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
