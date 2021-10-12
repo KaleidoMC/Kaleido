@@ -42,6 +42,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.compat.worldedit.WorldEditModule;
@@ -51,7 +52,6 @@ import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kaleido.util.ShapeSerializer;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.Util;
 
 public class KaleidoDataManager extends JsonReloadListener {
@@ -141,7 +141,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//        }
 
 		if (ModList.get().isLoaded("worldedit"))
-			WorldEditModule.generateMappings(Kiwi.getServer());
+			WorldEditModule.generateMappings(ServerLifecycleHooks.getCurrentServer());
 	}
 
 	public static ModelInfo get(ResourceLocation id) {

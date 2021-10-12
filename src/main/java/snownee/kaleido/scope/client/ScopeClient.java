@@ -4,6 +4,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,6 +17,8 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.scope.ScopeModule;
+import snownee.kaleido.scope.block.ScopeBlockEntity;
+import snownee.kaleido.scope.client.gui.ScopeScreen;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 
 @EventBusSubscriber(modid = Kaleido.MODID, value = Dist.CLIENT)
@@ -36,9 +40,13 @@ public class ScopeClient {
 			if (mc.screen != null && mc.gameMode.getPlayerMode().isBlockPlacingRestricted() || mc.hitResult == null || mc.hitResult.getType() != Type.BLOCK) {
 				return;
 			}
-			BlockState state = mc.level.getBlockState(((BlockRayTraceResult) mc.hitResult).getBlockPos());
+			BlockPos pos = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
+			BlockState state = mc.level.getBlockState(pos);
 			if (state.is(ScopeModule.SCOPE)) {
-				new CCreateScopePacket().send();
+				TileEntity blockEntity = mc.level.getBlockEntity(pos);
+				if (blockEntity instanceof ScopeBlockEntity) {
+					mc.setScreen(new ScopeScreen((ScopeBlockEntity) blockEntity));
+				}
 			} else {
 				new CCreateScopePacket().send();
 			}

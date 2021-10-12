@@ -64,9 +64,9 @@ public class ScopeStack {
 
 		// fix z-fighting
 		int i = hashCode();
-		double ox = (((i & 15L) / 15.0D) - 0.5) * 0.001;
-		double oy = (((i >> 4 & 15L) / 15.0D) - 0.5) * 0.001;
-		double oz = (((i >> 8 & 15L) / 15.0D) - 0.5) * 0.001;
+		double ox = (((i & 15L) / 15.0D) - 0.5) * 0.002;
+		double oy = (((i >> 4 & 15L) / 15.0D) - 0.5) * 0.002;
+		double oz = (((i >> 8 & 15L) / 15.0D) - 0.5) * 0.002;
 
 		matrixIn.pushPose();
 		if (bRotate || bScale) {

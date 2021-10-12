@@ -82,11 +82,19 @@ public class ScopeBlockEntity extends BaseTile {
 
 	@Override
 	public void refresh() {
-		if (level != null) {
-			requestModelDataUpdate();
-			BlockState state = getBlockState();
-			level.markAndNotifyBlock(worldPosition, level.getChunkAt(worldPosition), state, state, 11, 512);
+		super.refresh();
+	}
+
+	@Override
+	public void requestModelDataUpdate() {
+		super.requestModelDataUpdate();
+		if (!remove && level != null && level.isClientSide) {
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
 		}
+	}
+
+	public BlockDefinition getBlockDefinition() {
+		return stacks.isEmpty() ? null : stacks.get(0).blockDefinition;
 	}
 
 }

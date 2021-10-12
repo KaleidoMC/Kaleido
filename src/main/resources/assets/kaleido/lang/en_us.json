@@ -26,5 +26,8 @@
 "block.kaleido.chiseled_layers": "Chiseled Layers",
 "block.kaleido.chiseled_wall": "Chiseled Wall",
 "block.kaleido.chiseled_fence": "Chiseled Fence",
-"block.kaleido.chiseled_fence_gate": "Chiseled Fence Gate"
+"block.kaleido.chiseled_fence_gate": "Chiseled Fence Gate",
+
+"block.kaleido.scope": "Stored Multipart",
+"gui.kaleido.scope": "Editing Multipart
 }

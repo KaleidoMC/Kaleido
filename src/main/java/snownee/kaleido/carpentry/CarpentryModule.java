@@ -27,11 +27,11 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import snownee.kaleido.carpentry.block.WoodworkingBenchBlock;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kiwi.AbstractModule;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
 import snownee.kiwi.item.ModItem;
@@ -58,7 +58,7 @@ public class CarpentryModule extends AbstractModule {
 	@SubscribeEvent
 	public void addVillagerTrades(VillagerTradesEvent event) {
 		if (event.getType() == COLLECTOR) {
-			Supplier<LootTable> lootTableSupplier = () -> Kiwi.getServer().getLootTables().get(RL("gameplay/collector"));
+			Supplier<LootTable> lootTableSupplier = () -> ServerLifecycleHooks.getCurrentServer().getLootTables().get(RL("gameplay/collector"));
 			trade = new CollectorTrade(lootTableSupplier);
 			// event.getTrades().put(1, ImmutableList.of(trade, trade));
 			// event.getTrades().put(1, ImmutableList.of(new BasicTrade(1, new ItemStack(Items.DIAMOND), 10, 1)));

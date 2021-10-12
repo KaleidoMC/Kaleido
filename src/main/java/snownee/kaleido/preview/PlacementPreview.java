@@ -149,6 +149,7 @@ public final class PlacementPreview {
 		successLast = renderInternal(event);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static boolean renderInternal(RenderWorldLastEvent event) {
 		if (!KaleidoClientConfig.previewEnabled) {
 			return false;
@@ -186,7 +187,7 @@ public final class PlacementPreview {
 				}
 			}
 			BlockItemUseContext context = theBlockItem.updatePlacementContext(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, (BlockRayTraceResult) mc.hitResult)));
-			if (context == null) {
+			if (context == null || !context.canPlace()) {
 				return false;
 			}
 			BlockState placeResult = Hooks.getStateForPlacement(theBlockItem, context);
@@ -201,12 +202,12 @@ public final class PlacementPreview {
 			}
 
 			target = context.getClickedPos();
-			//			if (!world.getBlockState(target).isAir()) {
-			//				return false;
-			//			}
+			boolean replace = !world.getBlockState(target).isAir();
 
 			Direction direction = null;
-			if (placeResult.hasProperty(HorizontalBlock.FACING)) {
+			if (replace) {
+				transform.canRotate = false;
+			} else if (placeResult.hasProperty(HorizontalBlock.FACING)) {
 				direction = placeResult.getValue(HorizontalBlock.FACING);
 				placeResult = placeResult.setValue(HorizontalBlock.FACING, Direction.NORTH);
 			} else if (placeResult.hasProperty(DirectionalBlock.FACING) && placeResult.getValue(DirectionalBlock.FACING).get2DDataValue() != -1) {
@@ -224,6 +225,8 @@ public final class PlacementPreview {
 
 			if (lastStack != held) {
 				lastStack = held;
+				transform.pos(target);
+			} else if (replace) {
 				transform.pos(target);
 			}
 			if (renderBuffer == null) {

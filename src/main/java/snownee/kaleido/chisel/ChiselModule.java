@@ -99,15 +99,6 @@ public class ChiselModule extends AbstractModule {
 			if (blockEntity instanceof RetextureBlockEntity) {
 				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
 			}
-			//			ClientPlayerEntity player = Minecraft.getInstance().player;
-			//			if (player != null) {
-			//				ItemStack held = player.getMainHandItem();
-			//				if (!(held.getItem() instanceof BlockItem)) {
-			//					held = player.getOffhandItem();
-			//				}
-			//				Map<String, BlockDefinition> textures = RetextureModel.OverrideList.overridesFromItem(held);
-			//				return RetextureModel.getColor(textures, state, level, pos, i);
-			//			}
 			return -1;
 		}, CHISELED_BLOCKS.toArray(new Block[0]));
 	}

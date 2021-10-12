@@ -40,6 +40,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.util.JsonUtils;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
@@ -50,7 +51,6 @@ import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.ShapeCache;
-import snownee.kiwi.Kiwi;
 import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo implements Comparable<ModelInfo> {
@@ -116,7 +116,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public boolean grant(ServerPlayerEntity player) {
-		Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
+		Advancement advancement = ServerLifecycleHooks.getCurrentServer().getAdvancements().getAdvancement(getAdvancementId());
 		if (advancement != null) {
 			PlayerAdvancements playerAdvancements = player.getAdvancements();
 			AdvancementProgress progress = playerAdvancements.getOrStartProgress(advancement);
@@ -129,7 +129,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public boolean isAdvancementDone(ServerPlayerEntity player) {
-		Advancement advancement = Kiwi.getServer().getAdvancements().getAdvancement(getAdvancementId());
+		Advancement advancement = ServerLifecycleHooks.getCurrentServer().getAdvancements().getAdvancement(getAdvancementId());
 		return player.getAdvancements().getOrStartProgress(advancement).isDone(); //FIXME do not start progress
 	}
 
@@ -139,7 +139,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public boolean isLockedServer(ServerPlayerEntity player) {
-		if (Kiwi.getServer().isSingleplayerOwner(player.getGameProfile())) {
+		if (ServerLifecycleHooks.getCurrentServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
 			return !KaleidoCommonConfig.autoUnlock && !isAdvancementDone(player);

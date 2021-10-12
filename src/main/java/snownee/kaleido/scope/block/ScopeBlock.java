@@ -2,7 +2,9 @@ package snownee.kaleido.scope.block;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
@@ -12,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
@@ -20,7 +23,7 @@ import snownee.kiwi.block.ModBlock;
 public class ScopeBlock extends ModBlock {
 
 	public ScopeBlock() {
-		super(AbstractBlock.Properties.of(Material.STONE).noCollission());
+		super(AbstractBlock.Properties.of(Material.BUILDABLE_GLASS).noCollission());
 	}
 
 	@Override
@@ -36,6 +39,9 @@ public class ScopeBlock extends ModBlock {
 	@Override
 	public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
 		ItemStack stack = player.getItemInHand(hand);
+		if (stack.getItem() == ScopeModule.SCOPE.asItem()) {
+			return ActionResultType.PASS;
+		}
 		BlockItemUseContext context = new BlockItemUseContext(player, hand, stack, hitResult);
 		BlockDefinition definition = BlockDefinition.fromItem(stack, context);
 		if (definition == null) {
@@ -48,6 +54,18 @@ public class ScopeBlock extends ModBlock {
 			}
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
+	}
+
+	@Override
+	public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, Entity entity) {
+		TileEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof ScopeBlockEntity) {
+			BlockDefinition definition = ((ScopeBlockEntity) blockEntity).getBlockDefinition();
+			if (definition != null) {
+				return definition.getSoundType();
+			}
+		}
+		return super.getSoundType(state, world, pos, entity);
 	}
 
 }
