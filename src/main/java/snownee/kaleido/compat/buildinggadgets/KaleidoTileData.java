@@ -1,14 +1,18 @@
 package snownee.kaleido.compat.buildinggadgets;
 
+import javax.annotation.Nullable;
+
 import com.direwolf20.buildinggadgets.common.tainted.building.tilesupport.ITileDataFactory;
 import com.direwolf20.buildinggadgets.common.tainted.building.tilesupport.ITileDataSerializer;
 import com.direwolf20.buildinggadgets.common.tainted.building.tilesupport.ITileEntityData;
+import com.direwolf20.buildinggadgets.common.tainted.building.tilesupport.TileSupport;
 import com.direwolf20.buildinggadgets.common.tainted.building.view.BuildContext;
 import com.direwolf20.buildinggadgets.common.tainted.inventory.materials.MaterialList;
 import com.direwolf20.buildinggadgets.common.tainted.inventory.materials.objects.UniqueItem;
 import com.direwolf20.buildinggadgets.common.tainted.inventory.materials.objects.UniqueItem.ComparisonMode;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -16,44 +20,27 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kaleido.Kaleido;
-import snownee.kaleido.core.CoreModule;
-import snownee.kaleido.core.KaleidoDataManager;
-import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kiwi.util.NBTHelper;
+import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.core.definition.DynamicBlockDefinition;
+import snownee.kaleido.scope.block.ScopeBlockEntity;
 
 public class KaleidoTileData implements ITileEntityData {
 
 	public static final ResourceLocation ID = new ResourceLocation(Kaleido.MODID, "main");
-	private final ResourceLocation id;
-	private ModelInfo info;
-	private IModelData modelData;
+	private BlockDefinition blockDefinition;
 
-	public KaleidoTileData(ResourceLocation id) {
-		this.id = id;
-	}
-
-	public ModelInfo getInfo() {
-		if (info == null || info.expired) {
-			info = KaleidoDataManager.get(id);
-			modelData = null;
-		}
-		return info;
+	public KaleidoTileData(BlockDefinition blockDefinition) {
+		this.blockDefinition = blockDefinition;
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	public IModelData getModelData() {
-		if (modelData != null)
-			return modelData;
-		ModelInfo info = getInfo();
-		if (info == null)
-			return modelData = EmptyModelData.INSTANCE;
-		return modelData = info.createModelData();
+		return blockDefinition.modelData();
 	}
 
 	@Override
@@ -63,25 +50,16 @@ public class KaleidoTileData implements ITileEntityData {
 
 	@Override
 	public boolean placeIn(BuildContext ctx, BlockState state, BlockPos pos) {
-		ModelInfo info = getInfo();
-		if (info == null)
-			return false;
-		ctx.getWorld().setBlock(pos, state, 0);
-		TileEntity te = ctx.getWorld().getBlockEntity(pos);
-		if (!(te instanceof MasterBlockEntity))
-			return false;
-		((MasterBlockEntity) te).setModelInfo(info);
+		blockDefinition.place(ctx.getServerWorld(), pos);
 		return true;
 	}
 
 	@Override
-	public MaterialList getRequiredItems(BuildContext ctx, BlockState state, RayTraceResult hit, BlockPos pos) {
-		ModelInfo info = getInfo();
-		if (info == null)
+	public MaterialList getRequiredItems(BuildContext ctx, BlockState state, @Nullable RayTraceResult hit, @Nullable BlockPos pos) {
+		ItemStack stack = blockDefinition.createItem(hit, ctx.getWorld(), pos, ctx.getPlayer());
+		if (stack.isEmpty())
 			return MaterialList.empty();
-		NBTHelper data = NBTHelper.create();
-		data.setString(KaleidoBlocks.NBT_ID, id.toString());
-		UniqueItem item = new UniqueItem(CoreModule.STUFF_ITEM, data.get(), ComparisonMode.SUB_TAG_MATCH);
+		UniqueItem item = new UniqueItem(stack.getItem(), stack.getTag(), blockDefinition.getClass() == DynamicBlockDefinition.class ? ComparisonMode.EXACT_MATCH : ComparisonMode.SUB_TAG_MATCH);
 		return MaterialList.of(item);
 	}
 
@@ -89,13 +67,18 @@ public class KaleidoTileData implements ITileEntityData {
 
 		@Override
 		public ITileEntityData deserialize(CompoundNBT tagCompound, boolean persisted) {
-			return new KaleidoTileData(new ResourceLocation(tagCompound.getString("Model")));
+			BlockDefinition definition = BlockDefinition.fromNBT(tagCompound.getCompound("Def"));
+			return definition == null ? TileSupport.dummyTileEntityData() : new KaleidoTileData(definition);
 		}
 
 		@Override
 		public CompoundNBT serialize(ITileEntityData data, boolean persisted) {
 			CompoundNBT tag = new CompoundNBT();
-			tag.putString("Model", ((KaleidoTileData) data).id.toString());
+			CompoundNBT def = new CompoundNBT();
+			BlockDefinition definition = ((KaleidoTileData) data).blockDefinition;
+			definition.save(def);
+			def.putString("Type", definition.getFactory().getId());
+			tag.put("Def", def);
 			return tag;
 		}
 
@@ -105,10 +88,12 @@ public class KaleidoTileData implements ITileEntityData {
 
 		@Override
 		public ITileEntityData createDataFor(TileEntity blockEntity) {
-			if (blockEntity instanceof MasterBlockEntity) {
-				ModelInfo info = ((MasterBlockEntity) blockEntity).getModelInfo();
-				if (info != null) {
-					return new KaleidoTileData(info.id);
+			if (!blockEntity.hasLevel())
+				return null;
+			if (blockEntity instanceof MasterBlockEntity || blockEntity instanceof ChiseledBlockEntity || blockEntity instanceof ScopeBlockEntity) {
+				BlockDefinition blockDefinition = BlockDefinition.fromBlock(blockEntity.getBlockState(), blockEntity, blockEntity.getLevel(), blockEntity.getBlockPos());
+				if (blockDefinition != null) {
+					return new KaleidoTileData(blockDefinition);
 				}
 			}
 			return null;

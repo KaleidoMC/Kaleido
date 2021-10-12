@@ -95,9 +95,11 @@ public class ChiselModule extends AbstractModule {
 	public void blockColors(ColorHandlerEvent.Block event) {
 		BlockColors blockColors = event.getBlockColors();
 		blockColors.register((state, level, pos, i) -> {
-			TileEntity blockEntity = level.getBlockEntity(pos);
-			if (blockEntity instanceof RetextureBlockEntity) {
-				return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+			if (level != null && pos != null) {
+				TileEntity blockEntity = level.getBlockEntity(pos);
+				if (blockEntity instanceof RetextureBlockEntity) {
+					return ((RetextureBlockEntity) blockEntity).getColor(level, i);
+				}
 			}
 			return -1;
 		}, CHISELED_BLOCKS.toArray(new Block[0]));

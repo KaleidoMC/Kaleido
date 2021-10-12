@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -21,8 +22,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -30,11 +33,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
+import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
 
 public class KaleidoBlockDefinition implements BlockDefinition {
@@ -186,6 +191,13 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 				((MasterBlockEntity) blockEntity).setModelInfo(getModelInfo());
 			}
 		}
+	}
+
+	@Override
+	public ItemStack createItem(RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF_ITEM));
+		data.setString(KaleidoBlocks.NBT_ID, getModelInfo().id.toString());
+		return data.getItem();
 	}
 
 	@Override

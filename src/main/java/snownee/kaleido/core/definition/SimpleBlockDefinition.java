@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
@@ -26,8 +27,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -179,6 +182,11 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		if (state.hasProperty(BlockStateProperties.LIT))
 			state = state.setValue(BlockStateProperties.LIT, false);
 		level.setBlockAndUpdate(pos, state);
+	}
+
+	@Override
+	public ItemStack createItem(RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return getBlockState().getPickBlock(target, world, pos, player);
 	}
 
 	@Override
