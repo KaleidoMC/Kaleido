@@ -82,7 +82,11 @@ public class ScopeBlockEntity extends BaseTile {
 
 	@Override
 	public void refresh() {
-		super.refresh();
+		if (level != null && level.isClientSide) {
+			requestModelDataUpdate();
+		} else {
+			super.refresh();
+		}
 	}
 
 	@Override

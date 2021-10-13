@@ -45,9 +45,9 @@ import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.client.model.KaleidoModel;
-import snownee.kaleido.core.util.SimulationBlockReader;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.client.model.ScopeModel;
+import snownee.kaleido.util.SimulationBlockReader;
 
 public final class Hooks {
 

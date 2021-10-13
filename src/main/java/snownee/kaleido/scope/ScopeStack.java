@@ -23,7 +23,7 @@ import net.minecraftforge.client.ForgeHooksClient;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.DynamicBlockDefinition;
-import snownee.kaleido.core.util.SimulationBlockReader;
+import snownee.kaleido.util.SimulationBlockReader;
 
 public class ScopeStack {
 

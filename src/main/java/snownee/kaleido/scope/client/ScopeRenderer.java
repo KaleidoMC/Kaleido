@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kaleido.core.util.SimulationBlockReader;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
+import snownee.kaleido.util.SimulationBlockReader;
 
 @OnlyIn(Dist.CLIENT)
 public class ScopeRenderer extends TileEntityRenderer<ScopeBlockEntity> {

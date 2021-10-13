@@ -24,7 +24,7 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 
 	public static final String TYPE = "Dynamic";
 
-	public static enum Factory implements BlockDefinition.Factory<DynamicBlockDefinition> {
+	public enum Factory implements BlockDefinition.Factory<DynamicBlockDefinition> {
 		INSTANCE;
 
 		@SuppressWarnings("deprecation")

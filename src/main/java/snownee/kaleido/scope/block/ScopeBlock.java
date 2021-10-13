@@ -4,6 +4,7 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
@@ -18,6 +19,7 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
+import snownee.kaleido.scope.client.gui.ScopeScreen;
 import snownee.kiwi.block.ModBlock;
 
 public class ScopeBlock extends ModBlock {
@@ -38,7 +40,17 @@ public class ScopeBlock extends ModBlock {
 
 	@Override
 	public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (!(blockEntity instanceof ScopeBlockEntity)) {
+			return ActionResultType.FAIL;
+		}
 		ItemStack stack = player.getItemInHand(hand);
+		if (stack.isEmpty() && player.getOffhandItem().isEmpty()) {
+			if (level.isClientSide) {
+				Minecraft.getInstance().setScreen(new ScopeScreen((ScopeBlockEntity) blockEntity));
+			}
+			return ActionResultType.SUCCESS;
+		}
 		if (stack.getItem() == ScopeModule.SCOPE.asItem()) {
 			return ActionResultType.PASS;
 		}
@@ -48,10 +60,7 @@ public class ScopeBlock extends ModBlock {
 			return ActionResultType.PASS;
 		}
 		if (!level.isClientSide) {
-			TileEntity blockEntity = level.getBlockEntity(pos);
-			if (blockEntity instanceof ScopeBlockEntity) {
-				((ScopeBlockEntity) blockEntity).addStack(definition);
-			}
+			((ScopeBlockEntity) blockEntity).addStack(definition);
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
 	}

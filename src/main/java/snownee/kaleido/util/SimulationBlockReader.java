@@ -1,4 +1,4 @@
-package snownee.kaleido.core.util;
+package snownee.kaleido.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

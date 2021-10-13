@@ -1,14 +1,8 @@
 package snownee.kaleido.preview;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Random;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -17,9 +11,7 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -56,7 +48,6 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import snownee.kaleido.Hooks;
 import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.chisel.client.model.RetextureModel;
@@ -66,8 +57,9 @@ import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
-import snownee.kaleido.core.util.SimulationBlockReader;
 import snownee.kaleido.scope.ScopeModule;
+import snownee.kaleido.util.GhostRenderType;
+import snownee.kaleido.util.SimulationBlockReader;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.NBTHelper.NBT;
 import team.chisel.ctm.Configurations;
@@ -91,55 +83,13 @@ public final class PlacementPreview {
 		}
 	}
 
-	private static class GhostRenderType extends RenderType {
-		private static Map<RenderType, RenderType> remappedTypes = new IdentityHashMap<>();
-
-		public static RenderType remap(RenderType type) {
-			return type instanceof GhostRenderType ? type : remappedTypes.computeIfAbsent(type, GhostRenderType::new);
-		}
-
-		GhostRenderType(RenderType original) {
-			super(original.toString() + "_place_preview", original.format(), original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
-				original.setupRenderState();
-				RenderSystem.disableDepthTest();
-				RenderSystem.enableBlend();
-				RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-				float alpha = KaleidoClientConfig.previewAlpha + MathHelper.sin(Animation.getWorldTime(Minecraft.getInstance().level) * 4) * 0.05F;
-				alpha = MathHelper.clamp(alpha, 0, 1);
-				RenderSystem.blendColor(1F, 1F, 1F, alpha);
-			}, () -> {
-				RenderSystem.blendColor(1F, 1F, 1F, 1F);
-				RenderSystem.defaultBlendFunc();
-				RenderSystem.disableBlend();
-				RenderSystem.enableDepthTest();
-				original.clearRenderState();
-			});
-		}
-	}
-
 	private static ItemStack lastStack = ItemStack.EMPTY;
-	private static IRenderTypeBuffer.Impl renderBuffer;
 
 	private static final PreviewTransform transform = new PreviewTransform();
 	private static final SimulationBlockReader blockReader = new SimulationBlockReader();
 
 	static {
 		blockReader.useSelfLight(true);
-	}
-
-	private static IRenderTypeBuffer.Impl initRenderBuffer(IRenderTypeBuffer.Impl original) {
-		BufferBuilder fallback = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228457_a_");
-		Map<RenderType, BufferBuilder> layerBuffers = ObfuscationReflectionHelper.getPrivateValue(IRenderTypeBuffer.Impl.class, original, "field_228458_b_");
-		Map<RenderType, BufferBuilder> remapped = new HashMap<>();
-		for (Map.Entry<RenderType, BufferBuilder> e : layerBuffers.entrySet()) {
-			remapped.put(GhostRenderType.remap(e.getKey()), e.getValue());
-		}
-		return new IRenderTypeBuffer.Impl(fallback, remapped) {
-			@Override
-			public IVertexBuilder getBuffer(RenderType type) {
-				return super.getBuffer(GhostRenderType.remap(type));
-			}
-		};
 	}
 
 	private static boolean successLast;
@@ -229,9 +179,7 @@ public final class PlacementPreview {
 			} else if (replace) {
 				transform.pos(target);
 			}
-			if (renderBuffer == null) {
-				renderBuffer = initRenderBuffer(mc.renderBuffers().bufferSource());
-			}
+			GhostRenderType.Buffer renderBuffer = GhostRenderType.defaultBuffer();
 			MatrixStack transforms = event.getMatrixStack();
 			Vector3d projVec = mc.getEntityRenderDispatcher().camera.getPosition();
 			transforms.translate(-projVec.x, -projVec.y, -projVec.z);
@@ -246,14 +194,16 @@ public final class PlacementPreview {
 			if (transform.canRotate)
 				transforms.mulPose(transform.getRotation());
 			transforms.translate(-.5, -.5, -.5);
-			renderBlock(transforms, world, placeResult, target, held, info);
+			float alpha = KaleidoClientConfig.previewAlpha + MathHelper.sin(Animation.getWorldTime(Minecraft.getInstance().level) * 4) * 0.05F;
+			renderBuffer.setAlpha(alpha);
+			renderBlock(transforms, world, placeResult, target, held, info, renderBuffer);
 			if (placeResult.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && placeResult.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
 				transforms.translate(0, 1, 0);
-				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), target.above(), held, info);
+				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), target.above(), held, info, renderBuffer);
 			} else if (placeResult.hasProperty(BlockStateProperties.BED_PART) && placeResult.hasProperty(HorizontalBlock.FACING)) {
 				Direction facing = placeResult.getValue(HorizontalBlock.FACING);
 				transforms.translate(facing.getStepX(), 0, facing.getStepZ());
-				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.BED_PART, BedPart.HEAD), target.relative(facing), held, info);
+				renderBlock(transforms, world, placeResult.setValue(BlockStateProperties.BED_PART, BedPart.HEAD), target.relative(facing), held, info, renderBuffer);
 			}
 			transforms.popPose();
 			renderBuffer.endBatch();
@@ -261,7 +211,7 @@ public final class PlacementPreview {
 		return true;
 	}
 
-	private static void renderBlock(MatrixStack transforms, World world, BlockState state, BlockPos pos, ItemStack stack, ModelInfo info) {
+	private static void renderBlock(MatrixStack transforms, World world, BlockState state, BlockPos pos, ItemStack stack, ModelInfo info, IRenderTypeBuffer renderBuffer) {
 		BlockRenderType renderType = state.getRenderShape();
 		Minecraft mc = Minecraft.getInstance();
 
@@ -279,7 +229,7 @@ public final class PlacementPreview {
 			tile.blockState = state;
 			//			if (tile instanceof BannerTileEntity && state.getBlock() instanceof AbstractBannerBlock) {
 			//				((BannerTileEntity) tile).fromItem(stack, ((AbstractBannerBlock) state.getBlock()).getColor());
-			//			} 
+			//			}
 			if (stack.hasTag()) {
 				CompoundNBT tileData = stack.getTagElement("BlockEntityTag");
 				if (tileData != null) {

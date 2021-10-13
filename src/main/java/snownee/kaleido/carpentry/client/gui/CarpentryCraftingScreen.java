@@ -35,8 +35,6 @@ import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent.BackgroundDrawnEvent;
-import net.minecraftforge.common.MinecraftForge;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.carpentry.CarpentryModule;
@@ -44,6 +42,7 @@ import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
+import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.util.KaleidoUtil;
 
@@ -186,8 +185,6 @@ public class CarpentryCraftingScreen extends Screen {
 	private static double scrollAmount;
 	private static final Random RANDOM = new Random();
 	private Button addBtn;
-	private float alpha;
-	private boolean closing;
 	private int coins;
 	private ItemStack coinStack;
 	private Button confirmBtn;
@@ -199,6 +196,7 @@ public class CarpentryCraftingScreen extends Screen {
 	private TextFieldWidget textField;
 	private int timer;
 	private float ticks;
+	private final DarkBackground background = new DarkBackground();
 
 	private java.util.List<ITextProperties> tip;
 
@@ -346,22 +344,19 @@ public class CarpentryCraftingScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		closing = true;
+		background.closing = true;
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
 	public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
-		alpha += closing ? -pTicks * .4f : pTicks * .2f;
-		if (closing && alpha <= 0) {
+		ticks += pTicks;
+		this.renderBackground(matrix);
+		if (background.isClosed()) {
 			Minecraft.getInstance().setScreen(null);
 			list = null;
 			return;
 		}
-		alpha = MathHelper.clamp(alpha, 0, 1);
-
-		this.renderBackground(matrix);
-		ticks += pTicks;
 		float top = MathHelper.clamp(ticks / 8, 0, 1);
 		if (top > 0 && top < 1) {
 			top = (float) (Math.pow(2, -10 * top)) * MathHelper.sin((top * 6 - 0.75f) * 2.1f) + 1;
@@ -374,7 +369,7 @@ public class CarpentryCraftingScreen extends Screen {
 		String numText = Integer.toString(coins);
 		font.drawShadow(matrix, numText, width - 25 - font.width(numText), top * 20 - 11, 0xFFFFFFFF);
 
-		if (alpha < 0.5f) {
+		if (background.alpha < 0.5f) {
 			return;
 		}
 		for (Widget widget : buttons) {
@@ -414,12 +409,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 	@Override
 	public void renderBackground(MatrixStack matrix, int p_renderBackground_1_) {
-		int textColor1 = (int) (alpha * 0xA0) << 24;
-		int textColor2 = (int) (alpha * 0x70) << 24;
-		this.fillGradient(matrix, 0, 0, width, (int) (height * 0.125), textColor1, textColor2);
-		this.fillGradient(matrix, 0, (int) (height * 0.125), width, (int) (height * 0.875), textColor2, textColor2);
-		this.fillGradient(matrix, 0, (int) (height * 0.875), width, height, textColor2, textColor1);
-		MinecraftForge.EVENT_BUS.post(new BackgroundDrawnEvent(this, matrix));
+		background.renderBackground(this, matrix, minecraft.getDeltaFrameTime());
 	}
 
 	public void setSelectedButton(StackButton selectedButton) {
@@ -451,7 +441,7 @@ public class CarpentryCraftingScreen extends Screen {
 	@Override
 	public void tick() {
 		--cooldown;
-		if (!closing && ++timer == 20) {
+		if (!background.closing && ++timer == 20) {
 			timer = 0;
 			update();
 		}

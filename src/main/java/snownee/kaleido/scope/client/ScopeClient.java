@@ -10,8 +10,11 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -28,6 +31,7 @@ public class ScopeClient {
 
 	public static void init() {
 		ClientRegistry.registerKeyBinding(scope);
+		MinecraftForge.EVENT_BUS.addListener(ScopeClient::renderOverlay);
 	}
 
 	@SubscribeEvent
@@ -50,6 +54,13 @@ public class ScopeClient {
 			} else {
 				new CCreateScopePacket().send();
 			}
+		}
+	}
+
+	private static void renderOverlay(RenderGameOverlayEvent event) {
+		Minecraft mc = Minecraft.getInstance();
+		if (event.getType() == ElementType.CROSSHAIRS && mc.screen != null && mc.screen.getClass() == ScopeScreen.class) {
+			event.setCanceled(true);
 		}
 	}
 

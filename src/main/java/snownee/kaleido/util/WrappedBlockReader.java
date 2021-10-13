@@ -1,4 +1,4 @@
-package snownee.kaleido.core.util;
+package snownee.kaleido.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
@@ -16,7 +16,7 @@ public abstract class WrappedBlockReader implements IBlockDisplayReader {
 	protected IBlockDisplayReader delegate;
 
 	public void setLevel(IBlockDisplayReader level) {
-		this.delegate = level;
+		delegate = level;
 	}
 
 	@Override
