@@ -63,4 +63,11 @@ public class ChiseledStairsBlock extends StairsBlock {
 		return ChiseledBlocks.getSoundType(level, pos);
 	}
 
+	@Override
+	public void onRemove(BlockState pState, World pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+		if (pState.hasTileEntity() && (!pState.is(pNewState.getBlock()) || !pNewState.hasTileEntity())) {
+			pLevel.removeBlockEntity(pPos);
+		}
+	}
+
 }

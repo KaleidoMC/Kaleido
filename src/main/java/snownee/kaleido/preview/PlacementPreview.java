@@ -196,6 +196,7 @@ public final class PlacementPreview {
 			transforms.translate(-.5, -.5, -.5);
 			float alpha = KaleidoClientConfig.previewAlpha + MathHelper.sin(Animation.getWorldTime(Minecraft.getInstance().level) * 4) * 0.05F;
 			renderBuffer.setAlpha(alpha);
+			GhostRenderType.disableDepthTest = true;
 			renderBlock(transforms, world, placeResult, target, held, info, renderBuffer);
 			if (placeResult.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && placeResult.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
 				transforms.translate(0, 1, 0);
@@ -207,6 +208,7 @@ public final class PlacementPreview {
 			}
 			transforms.popPose();
 			renderBuffer.endBatch();
+			GhostRenderType.disableDepthTest = false;
 		}
 		return true;
 	}

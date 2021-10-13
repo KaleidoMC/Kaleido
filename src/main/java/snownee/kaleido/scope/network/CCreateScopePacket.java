@@ -14,6 +14,7 @@ import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.network.ClientPacket;
 
 public class CCreateScopePacket extends ClientPacket {
@@ -39,6 +40,9 @@ public class CCreateScopePacket extends ClientPacket {
 					BlockPos pos = ((BlockRayTraceResult) hitResult).getBlockPos();
 					BlockState state = player.level.getBlockState(pos);
 					if (state.is(ScopeModule.SCOPE)) {
+						return;
+					}
+					if (!KaleidoUtil.canPlayerBreak(player, state, pos)) {
 						return;
 					}
 					TileEntity blockEntity0 = player.level.getBlockEntity(pos);

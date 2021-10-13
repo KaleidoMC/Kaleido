@@ -31,7 +31,7 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 		@Override
 		public DynamicBlockDefinition fromNBT(CompoundNBT tag) {
 			BlockState state = NBTUtil.readBlockState(tag.getCompound(SimpleBlockDefinition.TYPE));
-			if (state.isAir())
+			if (state.isAir() || !state.hasTileEntity())
 				return null;
 			CompoundNBT tileData = tag.getCompound("TileData");
 			TileEntity blockEntity = TileEntity.loadStatic(state, tileData);

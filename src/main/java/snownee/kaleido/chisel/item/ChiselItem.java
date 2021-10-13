@@ -27,6 +27,7 @@ import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.network.CSetPalettePacket;
 import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 
@@ -46,6 +47,9 @@ public class ChiselItem extends ModItem {
 
 	@Override
 	public boolean canAttackBlock(BlockState state, World level, BlockPos pos, PlayerEntity player) {
+		if (!KaleidoUtil.canPlayerBreak(player, state, pos)) {
+			return false;
+		}
 		boolean isChiseled = ChiselModule.CHISELED_BLOCKS.contains(state.getBlock());
 		if (!isChiseled) {
 			if (Kaleido.isKaleidoBlock(state) && !Block.isShapeFullBlock(state.getCollisionShape(level, pos))) {

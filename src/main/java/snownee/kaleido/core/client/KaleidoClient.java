@@ -37,6 +37,8 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 	public static final boolean ctm = ModList.get().isLoaded("ctm");
 	public static final Set<RenderType> blockRenderTypes = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
 
+	public static int bgColor = 0xAA212429;
+
 	public static void init() {
 		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new KaleidoClient());
 	}

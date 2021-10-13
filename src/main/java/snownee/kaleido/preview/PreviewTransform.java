@@ -4,55 +4,51 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import snownee.kaleido.util.SmoothChasingAngle;
-import snownee.kaleido.util.SmoothChasingValue;
+import snownee.kaleido.util.SmoothChasingVector;
 
 public class PreviewTransform {
 
 	public boolean canRotate;
 	private final SmoothChasingAngle rotation;
-	private final SmoothChasingValue x, y, z;
+	private final SmoothChasingVector position;
 
 	public PreviewTransform() {
-		x = new SmoothChasingValue();
-		y = new SmoothChasingValue();
-		z = new SmoothChasingValue();
+		position = new SmoothChasingVector();
 		rotation = new SmoothChasingAngle();
 	}
 
 	public float getX() {
-		return x.value;
+		return position.x.value;
 	}
 
 	public float getY() {
-		return y.value;
+		return position.y.value;
 	}
 
 	public float getZ() {
-		return z.value;
+		return position.z.value;
 	}
 
 	public boolean isMoving() {
-		return x.isMoving() || y.isMoving() || z.isMoving() || rotation.isMoving();
+		return position.isMoving() || rotation.isMoving();
 	}
 
 	public PreviewTransform pos(BlockPos pos) {
-		x.set(pos.getX());
-		y.set(pos.getY());
-		z.set(pos.getZ());
+		position.x.set(pos.getX());
+		position.y.set(pos.getY());
+		position.z.set(pos.getZ());
 		return this;
 	}
 
 	public PreviewTransform target(BlockPos pos) {
-		x.target(pos.getX());
-		y.target(pos.getY());
-		z.target(pos.getZ());
+		position.x.target(pos.getX());
+		position.y.target(pos.getY());
+		position.z.target(pos.getZ());
 		return this;
 	}
 
 	public void tick(float pTicks) {
-		x.tick(pTicks);
-		y.tick(pTicks);
-		z.tick(pTicks);
+		position.tick(pTicks);
 		rotation.tick(pTicks);
 	}
 

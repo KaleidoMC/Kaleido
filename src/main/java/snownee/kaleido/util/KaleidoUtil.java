@@ -4,11 +4,15 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.Iterables;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 import snownee.kaleido.core.CoreModule;
 
@@ -112,5 +116,19 @@ public class KaleidoUtil {
 				return lastNumericCompare;
 		else
 			return aLength - bLength;
+	}
+
+	public static boolean canPlayerBreak(PlayerEntity player, BlockState state, BlockPos pos) {
+		if (!player.mayBuild() || !player.level.mayInteract(player, pos)) {
+			return false;
+		}
+		if (!player.isCreative() && state.getDestroyProgress(player, player.level, pos) <= 0) {
+			return false;
+		}
+		BreakEvent event = new BreakEvent(player.level, pos, state, player);
+		if (MinecraftForge.EVENT_BUS.post(event)) {
+			return false;
+		}
+		return true;
 	}
 }

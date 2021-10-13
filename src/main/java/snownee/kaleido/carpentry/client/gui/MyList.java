@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import snownee.kaleido.carpentry.client.gui.MyList.MyEntry;
+import snownee.kaleido.core.client.KaleidoClient;
 
 public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRenderable {
 	public abstract static class MyEntry<E extends MyEntry<E>> implements IGuiEventListener {
@@ -386,7 +387,7 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		matrix.pushPose();
 		//matrix.translate(0, 10, 0);
-		AbstractGui.fill(matrix, x0 - 2, 0, x1 + 2, y1 + 3, 0xAA000000);
+		AbstractGui.fill(matrix, x0 - 2, 0, x1 + 2, y1 + 3, KaleidoClient.bgColor);
 		RenderSystem.enableScissor((int) (x0 * scale), (int) ((height - y1) * scale), (int) (width * scale), (int) ((y1 - y0) * scale));
 		int k = this.getRowLeft();
 		int l = this.y0 + getSpacer() - (int) this.getScrollAmount();

@@ -22,8 +22,8 @@ public class DarkBackground extends AbstractGui {
 			return;
 		}
 		alpha = MathHelper.clamp(alpha, 0, 1);
-		int textColor1 = (int)(alpha * 0xA0) << 24;
-		int textColor2 = (int)(alpha * 0x90) << 24;
+		int textColor1 = (int) (alpha * 0xA0) << 24;
+		int textColor2 = (int) (alpha * 0x90) << 24;
 		int width = screen.width;
 		int height = screen.height;
 		fillGradient(matrix, 0, 0, width, (int) (height * 0.125), textColor1, textColor2);

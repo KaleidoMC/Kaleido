@@ -52,6 +52,7 @@ public class ScopeStack {
 		ForgeHooksClient.setRenderLayer(null);
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public void render(MatrixStack matrixIn, IVertexBuilder buffer, SimulationBlockReader world, BlockPos posIn, int combinedOverlayIn, Random randomIn, long rand, boolean checkSides) {
 		if (modelRenderer == null) {
 			modelRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
@@ -148,7 +149,7 @@ public class ScopeStack {
 		addVec(scale, axis, f);
 	}
 
-	private void updateRotation() {
+	public void updateRotation() {
 		quaternion = new Quaternion(rotation.x(), rotation.y(), rotation.z(), true);
 	}
 

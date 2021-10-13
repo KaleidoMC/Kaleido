@@ -27,6 +27,7 @@ public class GhostRenderType extends RenderType {
 
 	private float alpha;
 	private final RenderType original;
+	public static boolean disableDepthTest; // ;w;
 
 	private GhostRenderType(RenderType original) {
 		super(original.toString() + "_kaleido_ghost", original.format(), original.mode(), original.bufferSize(), original.affectsCrumbling(), true, Runnables.doNothing(), Runnables.doNothing());
@@ -36,7 +37,8 @@ public class GhostRenderType extends RenderType {
 	@Override
 	public void setupRenderState() {
 		original.setupRenderState();
-		RenderSystem.disableDepthTest();
+		if (disableDepthTest)
+			RenderSystem.disableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
 		RenderSystem.blendColor(1F, 1F, 1F, alpha);
@@ -47,7 +49,8 @@ public class GhostRenderType extends RenderType {
 		RenderSystem.blendColor(1F, 1F, 1F, 1F);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableBlend();
-		RenderSystem.enableDepthTest();
+		if (disableDepthTest)
+			RenderSystem.enableDepthTest();
 		original.clearRenderState();
 	}
 
@@ -61,8 +64,9 @@ public class GhostRenderType extends RenderType {
 			super(builder, fixedBuffers);
 		}
 
-		public void setAlpha(float alpha) {
+		public Buffer setAlpha(float alpha) {
 			this.alpha = alpha;
+			return this;
 		}
 
 		@Override

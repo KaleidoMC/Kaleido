@@ -11,6 +11,7 @@ public class SimulationBlockReader extends WrappedBlockReader {
 	private TileEntity simulatedBlockEntity;
 	private BlockPos simulatedPos;
 	private boolean useSelfLight;
+	private int globalLight = -1;
 
 	public void setBlockEntity(TileEntity blockEntity) {
 		simulatedBlockEntity = blockEntity;
@@ -34,6 +35,9 @@ public class SimulationBlockReader extends WrappedBlockReader {
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
+		if (globalLight != -1 && simulatedPos != pos) {
+			return Blocks.AIR.defaultBlockState();
+		}
 		if (useSelfLight && simulatedPos != null) {
 			if (simulatedPos.distManhattan(pos) < 3) {
 				return Blocks.AIR.defaultBlockState();
@@ -44,12 +48,19 @@ public class SimulationBlockReader extends WrappedBlockReader {
 
 	@Override
 	public int getBrightness(LightType lightType, BlockPos pos) {
+		if (globalLight != -1) {
+			return globalLight;
+		}
 		if (useSelfLight && simulatedPos != null) {
 			if (simulatedPos.distManhattan(pos) < 3) {
 				pos = simulatedPos;
 			}
 		}
 		return super.getBrightness(lightType, pos);
+	}
+
+	public void setOverrideLight(int i) {
+		globalLight = i;
 	}
 
 }
