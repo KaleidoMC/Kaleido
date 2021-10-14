@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.minecraft.client.Minecraft;
@@ -14,9 +15,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class AxisTextField extends TextFieldWidget {
+public class AxisEditBox extends TextFieldWidget {
 
 	private final BooleanSupplier snap;
 	private final float step;
@@ -25,7 +27,7 @@ public class AxisTextField extends TextFieldWidget {
 	public FloatConsumer setter;
 	private float scrolledValue;
 
-	public AxisTextField(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, BooleanSupplier snap, float step, Axis axis) {
+	public AxisEditBox(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, BooleanSupplier snap, float step, Axis axis) {
 		super(Minecraft.getInstance().font, pX, pY, pWidth, pHeight, pMessage);
 		this.snap = snap;
 		this.step = step;
@@ -41,11 +43,26 @@ public class AxisTextField extends TextFieldWidget {
 	}
 
 	public float getFloat() {
-		return Float.valueOf(getValue());
+		try {
+			return Float.valueOf(getValue());
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	@Override
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+		if (!active) {
+			return visible && pMouseX >= x && pMouseY >= y && pMouseX < x + width && pMouseY < y + height;
+		}
+		return super.mouseClicked(pMouseX, pMouseY, pButton);
 	}
 
 	@Override
 	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+		if (!active) {
+			return false;
+		}
 		scrolledValue += pDelta * step;
 		float f = getFloat();
 		float f1 = f + scrolledValue;
@@ -59,24 +76,40 @@ public class AxisTextField extends TextFieldWidget {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
-		if (!this.isVisible()) {
+		if (!isVisible()) {
 			return;
 		}
-		// draw border
-		int i = this.isFocused() ? -1 : -6250336;
-		fill(pMatrixStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, i);
-		fill(pMatrixStack, this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
+		//		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		//		RenderSystem.enableDepthTest();
 
-		int textColor = this.isEditable() ? this.textColor : this.textColorUneditable;
-		int j = this.getCursorPosition() - this.displayPos;
-		int k = this.highlightPos - this.displayPos;
-		String s = this.font.plainSubstrByWidth(this.getValue().substring(this.displayPos), this.getInnerWidth());
+		int bgColor = active ? 0x66000000 : 0x66555555;
+		float alpha = isFocused() ? this.alpha : this.alpha * 0.6F;
+		fill(pMatrixStack, x, y, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
+		if (active) {
+			int borderColor;
+			if (axis == Axis.X) {
+				borderColor = 0xFF1242;
+			} else if (axis == Axis.Y) {
+				borderColor = 0x23D400;
+			} else {
+				borderColor = 0x0894ED;
+			}
+			fill(pMatrixStack, x - 1, y, x, y + height, KaleidoUtil.applyAlpha(borderColor, alpha));
+		}
+
+		int textColor = isEditable() ? this.textColor : textColorUneditable;
+		int j = getCursorPosition() - displayPos;
+		int k = highlightPos - displayPos;
+		String s = font.plainSubstrByWidth(getValue().substring(displayPos), getInnerWidth());
 		boolean flag = j >= 0 && j <= s.length();
-		boolean flag1 = this.isFocused() && this.frame / 6 % 2 == 0 && flag;
-		int l = this.x + 4;
-		int i1 = this.y + (this.height - 8) / 2;
+		boolean flag1 = isFocused() && frame / 6 % 2 == 0 && flag;
+		int l = x + 4;
+		int i1 = y + (height - 6) / 2;
 		int j1 = l;
 		if (k > s.length()) {
 			k = s.length();
@@ -84,41 +117,53 @@ public class AxisTextField extends TextFieldWidget {
 
 		if (!s.isEmpty()) {
 			String s1 = flag ? s.substring(0, j) : s;
-			j1 = font.drawShadow(pMatrixStack, this.formatter.apply(s1, this.displayPos), (float) l, (float) i1, textColor);
+			j1 = font.drawShadow(pMatrixStack, formatter.apply(s1, displayPos), l, i1, textColor);
 		}
 
-		boolean flag2 = this.getCursorPosition() < this.getValue().length() || this.getValue().length() >= 4;
+		boolean flag2 = getCursorPosition() < getValue().length() || getValue().length() >= 4;
 		int k1 = j1;
 		if (!flag) {
-			k1 = j > 0 ? l + this.width : l;
+			k1 = j > 0 ? l + width : l;
 		} else if (flag2) {
 			k1 = j1 - 1;
 			--j1;
 		}
 
 		if (!s.isEmpty() && flag && j < s.length()) {
-			font.drawShadow(pMatrixStack, this.formatter.apply(s.substring(j), this.getCursorPosition()), (float) j1, (float) i1, textColor);
+			font.drawShadow(pMatrixStack, formatter.apply(s.substring(j), getCursorPosition()), j1, i1, textColor);
 		}
 
 		if (flag1) {
 			if (flag2) {
 				AbstractGui.fill(pMatrixStack, k1, i1 - 1, k1 + 1, i1 + 1 + 9, -3092272);
 			} else {
-				font.drawShadow(pMatrixStack, "_", (float) k1, (float) i1, textColor);
+				font.drawShadow(pMatrixStack, "_", k1, i1, textColor);
 			}
 		}
 
 		if (k != j) {
 			int l1 = l + font.width(s.substring(0, k));
-			this.renderHighlight(k1, i1 - 1, l1 - 1, i1 + 1 + 9);
+			renderHighlight(k1, i1 - 1, l1 - 1, i1 + 1 + 9);
 		}
 
 	}
-	
+
+	@Override
+	public void setFocus(boolean pIsFocused) {
+		setFocused(pIsFocused);
+	}
+
 	@Override
 	protected void setFocused(boolean pFocused) {
 		super.setFocused(pFocused);
-		if (!pFocused) {
+		onFocusedChanged(pFocused);
+	}
+
+	@Override
+	protected void onFocusedChanged(boolean pFocused) {
+		if (pFocused) {
+			frame = 0;
+		} else if (active && visible) {
 			setter.accept(getFloat());
 			setValue(getter.get());
 		}

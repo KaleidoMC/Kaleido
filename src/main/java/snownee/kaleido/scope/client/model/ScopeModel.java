@@ -134,7 +134,7 @@ public class ScopeModel implements IDynamicBakedModel {
 			return missingno.get().getQuads(state, side, rand, extraData);
 		}
 		RenderType layer = MinecraftForgeClient.getRenderLayer();
-		List<BakedQuad> quads = Lists.newArrayListWithExpectedSize(stacks.size());
+		List<BakedQuad> quads = Lists.newArrayListWithCapacity(stacks.size());
 		for (ScopeStack stack : stacks) {
 			BlockDefinition definition = stack.blockDefinition;
 			if (layer == null || definition.canRenderInLayer(layer))

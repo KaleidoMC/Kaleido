@@ -52,6 +52,7 @@ import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
@@ -132,6 +133,7 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
 		NetworkChannel.register(CSetPalettePacket.class, new CSetPalettePacket.Handler());
 		NetworkChannel.register(CCreateScopePacket.class, new CCreateScopePacket.Handler());
+		NetworkChannel.register(CConfigureScopePacket.class, new CConfigureScopePacket.Handler());
 	}
 
 	@SubscribeEvent

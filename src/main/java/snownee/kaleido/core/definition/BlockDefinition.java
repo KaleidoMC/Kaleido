@@ -85,7 +85,7 @@ public interface BlockDefinition {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	RenderMaterial renderMaterial(Direction direction);
+	RenderMaterial renderMaterial(@Nullable Direction direction);
 
 	void save(CompoundNBT tag);
 

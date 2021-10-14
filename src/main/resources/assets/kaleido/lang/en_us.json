@@ -33,5 +33,7 @@
 "gui.kaleido.snap": "Snap",
 "gui.kaleido.translation": "Position",
 "gui.kaleido.rotation": "Rotation",
-"gui.kaleido.scale": "Size"
+"gui.kaleido.scale": "Size",
+"gui.kaleido.confirm": "Confirm",
+"gui.kaleido.cancel": "Cancel"
 }

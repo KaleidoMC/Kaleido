@@ -1,15 +1,20 @@
 package snownee.kaleido.scope.client.gui;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -18,10 +23,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
+import snownee.kaleido.scope.network.CConfigureScopePacket;
+import snownee.kaleido.scope.network.CConfigureScopePacket.Data;
 import snownee.kaleido.util.GhostRenderType;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.SimulationBlockReader;
 import snownee.kaleido.util.SmoothChasingValue;
 import snownee.kaleido.util.SmoothChasingVector;
@@ -31,9 +40,11 @@ public class ScopeScreen extends Screen {
 	private static class StackInfo {
 		private final ScopeStack stack;
 		private final SmoothChasingValue alpha;
-		private final SmoothChasingVector rotation = new SmoothChasingVector(true);
+		private final SmoothChasingVector rotation = new SmoothChasingVector();
 		private final SmoothChasingVector scale = new SmoothChasingVector();
 		private final SmoothChasingVector translation = new SmoothChasingVector();
+		private boolean removed;
+		private Button button;
 
 		private StackInfo(ScopeStack stack) {
 			this.stack = stack;
@@ -53,6 +64,17 @@ public class ScopeScreen extends Screen {
 			scale.copyTo(stack.scale);
 			translation.copyTo(stack.translation);
 		}
+
+		private Data toData() {
+			Data data = new Data();
+			data.removed = removed;
+			if (!removed) {
+				data.position = translation.getTarget();
+				data.size = scale.getTarget();
+				data.rotation = rotation.getTarget();
+			}
+			return data;
+		}
 	}
 
 	private final DarkBackground background = new DarkBackground();
@@ -63,10 +85,13 @@ public class ScopeScreen extends Screen {
 	private final SmoothChasingValue rotX = new SmoothChasingValue();
 	private final SmoothChasingValue rotY = new SmoothChasingValue();
 	private final Map<ScopeStack, StackInfo> infos = Maps.newIdentityHashMap();
-	private final AxisTextField[] textFields = new AxisTextField[9];
+	private final AxisEditBox[] editBoxes = new AxisEditBox[9];
 	@Nullable
 	private StackInfo activeInfo;
 	private CheckboxButton snapCheckbox;
+	private boolean canceled;
+	private Button cancelButton;
+	private Button confirmButton;
 
 	public ScopeScreen(ScopeBlockEntity blockEntity) {
 		super(new TranslationTextComponent("gui.kaleido.scope"));
@@ -83,8 +108,18 @@ public class ScopeScreen extends Screen {
 
 	@Override
 	protected void init() {
-		int x = width - 130;
-		snapCheckbox = new CheckboxButton(x, 100, 20, 20, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
+		int i = 0;
+		for (ScopeStack stack : scope.stacks) {
+			StackInfo info = getInfo(stack);
+			Button button = new Button(0, 50 + i * 20, 90, 20, stack.blockDefinition.getDescription(), $ -> {
+				setActiveInfo(info);
+			});
+			info.button = button;
+			addButton(button);
+			++i;
+		}
+
+		snapCheckbox = new CheckboxButton(0, 10, 30, 20, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
 		});
 		addButton(snapCheckbox);
 
@@ -94,55 +129,111 @@ public class ScopeScreen extends Screen {
 
 		DecimalFormat dfCommas = new DecimalFormat("##.###");
 
-		AxisTextField textField;
+		AxisEditBox editBox;
 		for (Axis axis0 : Axis.values()) {
 			Axis axis = axis0;
 			int ord = axis.ordinal();
 			// position
-			textField = new AxisTextField(x, 20, 40, 15, translationTitle, snapCheckbox::selected, 1, axis);
-			textField.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.translation.get(ord).getTarget());
-			textField.setter = f -> {
+			editBox = new AxisEditBox(0, 0, 40, 15, translationTitle, snapCheckbox::selected, 1, axis);
+			editBox.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.translation.get(ord).getTarget());
+			editBox.setter = f -> {
 				if (activeInfo != null)
 					activeInfo.translation.get(ord).target(f);
 			};
-			textFields[ord] = textField;
+			editBoxes[ord] = editBox;
 			// scale
-			textField = new AxisTextField(x, 50, 40, 15, scaleTitle, snapCheckbox::selected, 0.1F, axis);
-			textField.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.scale.get(ord).getTarget());
-			textField.setter = f -> {
+			editBox = new AxisEditBox(0, 0, 40, 15, scaleTitle, snapCheckbox::selected, 0.1F, axis);
+			editBox.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.scale.get(ord).getTarget());
+			editBox.setter = f -> {
 				if (activeInfo != null)
 					activeInfo.scale.get(ord).target(f);
 			};
-			textFields[ord + 3] = textField;
+			editBoxes[ord + 3] = editBox;
 			// rotation
-			textField = new AxisTextField(x, 80, 40, 15, rotationTitle, snapCheckbox::selected, 22.5F, axis);
-			textField.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.rotation.get(ord).getTarget() / 180);
-			textField.setter = f -> {
+			editBox = new AxisEditBox(0, 0, 40, 15, rotationTitle, snapCheckbox::selected, 22.5F, axis);
+			editBox.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.rotation.get(ord).getTarget());
+			editBox.setter = f -> {
 				if (activeInfo != null)
 					activeInfo.rotation.get(ord).target(f);
 			};
-			textFields[ord + 6] = textField;
-			x += 42;
+			editBoxes[ord + 6] = editBox;
 		}
 		//retain focus (tab) order, add widgets at last
-		for (AxisTextField textField0 : textFields) {
-			addButton(textField0);
+		for (AxisEditBox editBox2 : editBoxes) {
+			addButton(editBox2);
 		}
-		setActiveInfo(getInfo(scope.stacks.get(0)));
+
+		cancelButton = new Button(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.cancel"), $ -> {
+			canceled = true;
+			onClose();
+		});
+		addButton(cancelButton);
+
+		confirmButton = new Button(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.confirm"), $ -> {
+			onClose();
+		});
+		addButton(confirmButton);
+	}
+
+	@Override
+	public void init(Minecraft pMinecraft, int pWidth, int pHeight) {
+		minecraft = pMinecraft;
+		itemRenderer = pMinecraft.getItemRenderer();
+		font = pMinecraft.font;
+		width = pWidth;
+		height = pHeight;
+		java.util.function.Consumer<Widget> remove = (b) -> {
+			buttons.remove(b);
+			children.remove(b);
+		};
+		if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent.Pre(this, buttons, this::addButton, remove))) {
+			buttons.clear();
+			children.clear();
+			setFocused((IGuiEventListener) null);
+			this.init();
+			resize(pMinecraft, pWidth, pHeight);
+		}
+		net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent.Post(this, buttons, this::addButton, remove));
+	}
+
+	@Override
+	public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
+		minecraft = pMinecraft;
+		itemRenderer = pMinecraft.getItemRenderer();
+		font = pMinecraft.font;
+		width = pWidth;
+		height = pHeight;
+
+		int y = 40;
+		int x = width - 127;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				AxisEditBox editBox = editBoxes[i * 3 + j];
+				editBox.x = x + j * 42;
+				editBox.y = y + i * 30;
+			}
+		}
+
+		snapCheckbox.x = x;
+		x += 25;
+		cancelButton.x = x;
+		cancelButton.y = height - 25;
+		confirmButton.x = x + 50;
+		confirmButton.y = height - 25;
 	}
 
 	@Override
 	public void tick() {
-		for (AxisTextField textField : textFields) {
-			textField.tick();
+		for (AxisEditBox editBox : editBoxes) {
+			editBox.tick();
 		}
 	}
 
 	public void setActiveInfo(StackInfo info) {
 		activeInfo = info;
-		for (AxisTextField textField : textFields) {
-			textField.setValue(textField.getter.get());
-			textField.active = info != null;
+		for (AxisEditBox editBox : editBoxes) {
+			editBox.setValue(editBox.getter.get());
+			editBox.active = info != null;
 		}
 	}
 
@@ -159,8 +250,10 @@ public class ScopeScreen extends Screen {
 		this.renderBackground(pMatrixStack);
 		if (background.isClosed()) {
 			Minecraft.getInstance().setScreen(null);
-			scope.refresh(); //TODO
 			return;
+		}
+		for (Widget widget : buttons) {
+			widget.setAlpha(background.alpha);
 		}
 		super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
 		pMatrixStack.pushPose();
@@ -173,11 +266,29 @@ public class ScopeScreen extends Screen {
 
 		GhostRenderType.Buffer buffer = GhostRenderType.defaultBuffer();
 		BlockModelRenderer.clearCache();
+		List<StackInfo> toRender = Lists.newArrayListWithCapacity(scope.stacks.size());
+		StackInfo hovered = null;
 		for (ScopeStack stack : scope.stacks) {
 			StackInfo info = getInfo(stack);
+			if (info.removed) {
+				continue;
+			}
+			if (info.button.isHovered()) {
+				hovered = info;
+			}
+			toRender.add(info);
+		}
+		for (StackInfo info : toRender) {
+			if (!background.closing) {
+				float alpha = 1;
+				if (hovered != null && hovered != info) {
+					alpha = 0.4F;
+				}
+				info.alpha.target(alpha);
+			}
 			info.tick(pPartialTicks);
 			buffer.setAlpha(info.alpha.value);
-			stack.render(pMatrixStack, buffer, blockReader, scope.getBlockPos(), OverlayTexture.NO_OVERLAY, false);
+			info.stack.render(pMatrixStack, buffer, blockReader, scope.getBlockPos(), OverlayTexture.NO_OVERLAY, false);
 		}
 		BlockModelRenderer.enableCaching();
 
@@ -199,6 +310,21 @@ public class ScopeScreen extends Screen {
 	}
 
 	@Override
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+		boolean success = false;
+		for (IGuiEventListener iguieventlistener : children()) {
+			if (iguieventlistener.mouseClicked(pMouseX, pMouseY, pButton)) {
+				setFocused(iguieventlistener);
+				if (pButton == 0) {
+					setDragging(true);
+				}
+				success = true;
+			}
+		}
+		return success;
+	}
+
+	@Override
 	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
 		if (super.mouseScrolled(pMouseX, pMouseY, pDelta))
 			return true;
@@ -210,6 +336,9 @@ public class ScopeScreen extends Screen {
 	@Override
 	public void renderBackground(MatrixStack matrix, int p_renderBackground_1_) {
 		background.renderBackground(this, matrix, minecraft.getDeltaFrameTime());
+		int bgColor = KaleidoUtil.applyAlpha(KaleidoClient.bgColor, background.alpha);
+		//fill(matrix, 0, 0, 140, height, bgColor);
+		fill(matrix, width - 130, 0, width, height, bgColor);
 	}
 
 	@Override
@@ -218,6 +347,18 @@ public class ScopeScreen extends Screen {
 		for (StackInfo info : infos.values()) {
 			info.alpha.target(0).withSpeed(0.7F);
 		}
+	}
+
+	@Override
+	public void removed() {
+		List<Data> data = Lists.newArrayList();
+		if (!canceled) {
+			for (ScopeStack stack : scope.stacks) {
+				data.add(getInfo(stack).toData());
+			}
+		}
+		new CConfigureScopePacket(scope.getBlockPos(), data).send();
+		scope.refresh(); //TODO
 	}
 
 }

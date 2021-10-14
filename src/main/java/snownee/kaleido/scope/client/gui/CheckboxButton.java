@@ -20,18 +20,20 @@ public class CheckboxButton extends Button {
 		super(pX, pY, pWidth, pHeight, pMessage, pOnPress);
 	}
 
+	@Override
 	public void onPress() {
-		this.selected = !this.selected;
+		selected = !selected;
 		super.onPress();
 	}
 
 	public boolean selected() {
-		return this.selected;
+		return selected;
 	}
 
+	@Override
 	protected int getYImage(boolean pIsHovered) {
 		int i = 1;
-		if (!this.active) {
+		if (!active) {
 			i = 0;
 		} else if (pIsHovered || selected()) {
 			i = 2;

@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -130,5 +131,13 @@ public class KaleidoUtil {
 			return false;
 		}
 		return true;
+	}
+
+	public static int applyAlpha(int color, float alpha) {
+		int prevAlphaChannel = (color >> 24) & 0xFF;
+		if (prevAlphaChannel > 0)
+			alpha *= prevAlphaChannel / 256f;
+		int alphaChannel = (int) (0xFF * MathHelper.clamp(alpha, 0, 1));
+		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 }
