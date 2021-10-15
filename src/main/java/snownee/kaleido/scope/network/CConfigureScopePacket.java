@@ -7,9 +7,13 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
+import snownee.kaleido.scope.ScopeStack;
+import snownee.kaleido.scope.block.ScopeBlockEntity;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.network.ClientPacket;
 
 public class CConfigureScopePacket extends ClientPacket {
@@ -54,6 +58,7 @@ public class CConfigureScopePacket extends ClientPacket {
 					data.size = readVec(buf);
 					data.rotation = readVec(buf);
 				}
+				datalist.add(data);
 			}
 			return new CConfigureScopePacket(pos, datalist);
 		}
@@ -76,6 +81,29 @@ public class CConfigureScopePacket extends ClientPacket {
 		public void handle(CConfigureScopePacket pkt, Supplier<Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				PlayerEntity player = ctx.get().getSender();
+				if (!pkt.pos.closerThan(player.blockPosition(), 16))
+					return;
+				TileEntity blockEntity = player.level.getBlockEntity(pkt.pos);
+				if (blockEntity instanceof ScopeBlockEntity) {
+					ScopeBlockEntity scope = (ScopeBlockEntity) blockEntity;
+					if (!pkt.data.isEmpty()) {
+						List<ScopeStack> toRemove = Lists.newArrayList();
+						int size = Math.min(pkt.data.size(), scope.stacks.size());
+						for (int i = 0; i < size; i++) {
+							Data data = pkt.data.get(i);
+							ScopeStack stack = scope.stacks.get(i);
+							if (data.removed) {
+								toRemove.add(stack);
+							} else {
+								KaleidoUtil.copyVector(data.position, stack.translation);
+								KaleidoUtil.copyVector(data.size, stack.scale);
+								KaleidoUtil.copyVector(data.rotation, stack.rotation);
+							}
+						}
+						scope.stacks.removeAll(toRemove);
+					}
+					scope.refresh();
+				}
 			});
 			ctx.get().setPacketHandled(true);
 		}

@@ -5,14 +5,16 @@ import java.util.Arrays;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.client.gui.GuiUtils;
+import snownee.kaleido.core.client.KaleidoClient;
+import snownee.kaleido.core.client.gui.KaleidoButton;
+import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class CheckboxButton extends Button {
+public class CheckboxButton extends KaleidoButton {
 
 	private boolean selected;
 
@@ -47,6 +49,13 @@ public class CheckboxButton extends Button {
 		int width = Minecraft.getInstance().getWindow().getGuiScaledWidth();
 		int height = Minecraft.getInstance().getWindow().getGuiScaledWidth();
 		GuiUtils.drawHoveringText(pPoseStack, Arrays.asList(getMessage()), pMouseX, pMouseY, width, height, -1, Minecraft.getInstance().font);
+	}
+
+	@Override
+	public void drawUnderline(MatrixStack pMatrixStack, float alpha, float pPartialTicks) {
+		if (selected()) {
+			KaleidoClient.fill(pMatrixStack, x + xOffset, y + height - 1, x + width, y + height, KaleidoUtil.applyAlpha(lineColor, alpha));
+		}
 	}
 
 }

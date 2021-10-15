@@ -11,6 +11,8 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -139,5 +141,14 @@ public class KaleidoUtil {
 			alpha *= prevAlphaChannel / 256f;
 		int alphaChannel = (int) (0xFF * MathHelper.clamp(alpha, 0, 1));
 		return (color & 0xFFFFFF) | alphaChannel << 24;
+	}
+
+	public static float getPickRange(PlayerEntity player) {
+		float attrib = (float) player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		return player.isCreative() ? attrib : attrib - 0.5F;
+	}
+
+	public static void copyVector(Vector3f from, Vector3f to) {
+		to.set(from.x(), from.y(), from.z());
 	}
 }

@@ -63,13 +63,11 @@ public final class ChiseledBlocks {
 	public static void appendHoverText(ItemStack stack, IBlockReader level, List<ITextComponent> components, ITooltipFlag flag) {
 		NBTHelper data = NBTHelper.of(stack);
 		CompoundNBT tag = data.getTag("BlockEntityTag.Overrides.0");
-		if (tag != null) {
-			BlockDefinition supplier = BlockDefinition.fromNBT(tag);
-			if (supplier != null) {
-				ITextComponent component = components.get(0);
-				component = new TranslationTextComponent("block.kaleido.chiseled", component, supplier.getDescription());
-				components.set(0, component);
-			}
+		BlockDefinition supplier = BlockDefinition.fromNBT(tag);
+		if (supplier != null) {
+			ITextComponent component = components.get(0);
+			component = new TranslationTextComponent("block.kaleido.chiseled", component, supplier.getDescription());
+			components.set(0, component);
 		}
 	}
 

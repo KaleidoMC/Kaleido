@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
@@ -25,7 +26,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
-import snownee.kaleido.chisel.network.CSetPalettePacket;
+import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.item.ModItem;
@@ -100,17 +101,26 @@ public class ChiselItem extends ModItem {
 		if (!(stack.getItem() instanceof ChiselItem))
 			return;
 		event.setCanceled(true);
-		BlockPos pos = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
-		BlockState state = mc.level.getBlockState(pos);
+		pick(mc.player, event.getHand(), stack, (BlockRayTraceResult) mc.hitResult);
+	}
+
+	public static void pick(PlayerEntity player, Hand hand, ItemStack stack, BlockRayTraceResult hitResult) {
+		BlockPos pos = hitResult.getBlockPos();
+		BlockState state = player.level.getBlockState(pos);
+		CompoundNBT tag = stack.getOrCreateTag();
+		CompoundNBT tag1 = tag.copy();
 		ChiselPalette palette = ChiselPalette.pick(state);
-		ChiselPalette palette1 = palette(stack);
-		if (palette == palette1)
-			return;
-		if (palette != ChiselPalette.NONE) {
-			mc.player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
-			mc.level.playSound(mc.player, mc.player.getX(), mc.player.getY() + 0.5, mc.player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((mc.level.random.nextFloat() - mc.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+		tag.putString("Palette", palette.name);
+		BlockDefinition definition = BlockDefinition.fromBlock(state, player.level.getBlockEntity(pos), player.level, pos);
+		if (definition != null) {
+			CompoundNBT defTag = new CompoundNBT();
+			definition.save(defTag);
+			tag.put("Def", defTag);
 		}
-		stack.getOrCreateTag().putString("Palette", palette.name);
-		new CSetPalettePacket(event.getHand(), palette).send();
+		if (player.level.isClientSide && !tag.equals(tag1)) {
+			player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
+			player.level.playSound(player, player.getX(), player.getY() + 0.5, player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+			new CChiselPickPacket(hand).send();
+		}
 	}
 }

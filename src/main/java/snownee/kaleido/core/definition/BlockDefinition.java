@@ -46,6 +46,9 @@ public interface BlockDefinition {
 	}
 
 	static BlockDefinition fromNBT(CompoundNBT tag) {
+		if (tag == null || !tag.contains("Type")) {
+			return null;
+		}
 		Factory<?> factory = MAP.get(tag.getString("Type"));
 		if (factory == null)
 			return null;

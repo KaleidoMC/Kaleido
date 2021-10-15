@@ -31,6 +31,8 @@
 "block.kaleido.scope": "Stored Multipart",
 "gui.kaleido.scope": "Edit Multipart",
 "gui.kaleido.snap": "Snap",
+"gui.kaleido.reset": "Reset",
+"gui.kaleido.hide": "Hide",
 "gui.kaleido.translation": "Position",
 "gui.kaleido.rotation": "Rotation",
 "gui.kaleido.scale": "Size",

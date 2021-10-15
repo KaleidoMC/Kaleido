@@ -23,6 +23,10 @@ public final class KaleidoCommonConfig {
 	@Range(min = 1, max = 10)
 	public static int debugWorldSpacing = 3;
 
+	@Path("scope.stackLimit")
+	@Range(min = 1)
+	public static int scopeStackLimit = 8;
+
 	public static boolean generateAdvancements() {
 		return !autoUnlock || !disableAdvancements;
 	}

@@ -3,13 +3,12 @@ package snownee.kaleido.scope.network;
 import java.util.function.Supplier;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
@@ -33,9 +32,8 @@ public class CCreateScopePacket extends ClientPacket {
 		@Override
 		public void handle(CCreateScopePacket pkt, Supplier<Context> ctx) {
 			ctx.get().enqueueWork(() -> {
-				PlayerEntity player = ctx.get().getSender();
-				double reach = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
-				RayTraceResult hitResult = player.pick(reach, 0, false);
+				ServerPlayerEntity player = ctx.get().getSender();
+				RayTraceResult hitResult = player.pick(KaleidoUtil.getPickRange(player), 0, false);
 				if (hitResult instanceof BlockRayTraceResult) {
 					BlockPos pos = ((BlockRayTraceResult) hitResult).getBlockPos();
 					BlockState state = player.level.getBlockState(pos);
@@ -49,7 +47,7 @@ public class CCreateScopePacket extends ClientPacket {
 					player.level.setBlockAndUpdate(pos, ScopeModule.SCOPE.defaultBlockState());
 					TileEntity blockEntity = player.level.getBlockEntity(pos);
 					if (blockEntity instanceof ScopeBlockEntity) {
-						((ScopeBlockEntity) blockEntity).addStack(BlockDefinition.fromBlock(state, blockEntity0, player.level, pos));
+						((ScopeBlockEntity) blockEntity).addStack(BlockDefinition.fromBlock(state, blockEntity0, player.level, pos), player);
 					}
 				}
 			});

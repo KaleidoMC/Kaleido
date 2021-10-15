@@ -24,7 +24,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import snownee.kaleido.Kaleido;
-import snownee.kaleido.chisel.network.CSetPalettePacket;
+import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.action.ActionDeserializer;
 import snownee.kaleido.core.action.CommandAction;
 import snownee.kaleido.core.action.TransformAction;
@@ -131,7 +131,7 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(SSyncShapesPacket.class, new SSyncShapesPacket.Handler(KaleidoDataManager.INSTANCE.shapeCache));
 
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
-		NetworkChannel.register(CSetPalettePacket.class, new CSetPalettePacket.Handler());
+		NetworkChannel.register(CChiselPickPacket.class, new CChiselPickPacket.Handler());
 		NetworkChannel.register(CCreateScopePacket.class, new CCreateScopePacket.Handler());
 		NetworkChannel.register(CConfigureScopePacket.class, new CConfigureScopePacket.Handler());
 	}

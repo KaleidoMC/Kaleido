@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.client.gui.ScopeScreen;
@@ -55,12 +56,17 @@ public class ScopeBlock extends ModBlock {
 			return ActionResultType.PASS;
 		}
 		BlockItemUseContext context = new BlockItemUseContext(player, hand, stack, hitResult);
-		BlockDefinition definition = BlockDefinition.fromItem(stack, context);
+		BlockDefinition definition;
+		if (stack.getItem() instanceof ChiselItem) {
+			definition = BlockDefinition.fromNBT(stack.getTagElement("Def"));
+		} else {
+			definition = BlockDefinition.fromItem(stack, context);
+		}
 		if (definition == null) {
 			return ActionResultType.PASS;
 		}
 		if (!level.isClientSide) {
-			((ScopeBlockEntity) blockEntity).addStack(definition);
+			((ScopeBlockEntity) blockEntity).addStack(definition, player);
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
 	}

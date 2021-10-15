@@ -4,7 +4,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.minecraft.client.Minecraft;
@@ -76,16 +75,11 @@ public class AxisEditBox extends TextFieldWidget {
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		if (!isVisible()) {
 			return;
 		}
-		//		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		//		RenderSystem.enableDepthTest();
 
 		int bgColor = active ? 0x66000000 : 0x66555555;
 		float alpha = isFocused() ? this.alpha : this.alpha * 0.6F;
