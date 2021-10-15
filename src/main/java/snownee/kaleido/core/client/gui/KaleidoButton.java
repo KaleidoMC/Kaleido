@@ -35,9 +35,14 @@ public class KaleidoButton extends Button {
 	}
 
 	@Override
-	public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
+	public void render(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		pos.tick(this, pPartialTicks);
 		hoverProgress.target(isHovered() ? 1 : 0).tick(pPartialTicks);
+		super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+	}
+
+	@Override
+	public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
 		FontRenderer fontrenderer = minecraft.font;
 

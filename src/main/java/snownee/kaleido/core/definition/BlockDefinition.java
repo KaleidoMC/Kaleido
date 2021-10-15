@@ -102,7 +102,7 @@ public interface BlockDefinition {
 
 	ITextComponent getDescription();
 
-	void place(World level, BlockPos pos);
+	boolean place(World level, BlockPos pos);
 
 	ItemStack createItem(RayTraceResult target, IBlockReader world, @Nullable BlockPos pos, @Nullable PlayerEntity player);
 

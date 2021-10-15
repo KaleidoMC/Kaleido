@@ -177,11 +177,11 @@ public class SimpleBlockDefinition implements BlockDefinition {
 	}
 
 	@Override
-	public void place(World level, BlockPos pos) {
+	public boolean place(World level, BlockPos pos) {
 		BlockState state = this.state;
 		if (state.hasProperty(BlockStateProperties.LIT))
 			state = state.setValue(BlockStateProperties.LIT, false);
-		level.setBlockAndUpdate(pos, state);
+		return level.setBlockAndUpdate(pos, state);
 	}
 
 	@Override

@@ -182,15 +182,17 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	}
 
 	@Override
-	public void place(World level, BlockPos pos) {
+	public boolean place(World level, BlockPos pos) {
 		BlockState state = getBlockState();
 		if (state != null) {
 			level.setBlockAndUpdate(pos, state);
 			TileEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof MasterBlockEntity) {
 				((MasterBlockEntity) blockEntity).setModelInfo(getModelInfo());
+				return true;
 			}
 		}
+		return false;
 	}
 
 	@Override

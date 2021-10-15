@@ -105,11 +105,13 @@ public class ScopeScreen extends Screen {
 	private Label positionLabel;
 	private Label sizeLabel;
 	private Label rotationLabel;
+	private int existedStacks;
 
 	public ScopeScreen(ScopeBlockEntity blockEntity) {
 		super(new TranslationTextComponent("gui.kaleido.scope"));
 		tilePos = blockEntity.getBlockPos();
 		stacks = ImmutableList.copyOf(blockEntity.stacks);
+		existedStacks = stacks.size();
 		blockReader.setOverrideLight(15);
 		blockReader.setLevel(Minecraft.getInstance().level);
 		scale.set(160).target(60).withSpeed(0.2F);
@@ -132,13 +134,14 @@ public class ScopeScreen extends Screen {
 			button.yOffset = 1;
 			info.button = button;
 			addButton(button);
-			if (i != 0) {
+			if (i != 0 || minecraft.player.isCreative()) {
 				KaleidoButton removeButton = new KaleidoButton(90, 50 + i * 20, 20, 20, xTitle, $ -> {
 					info.removed = true;
 					info.button.visible = false;
 					$.visible = false;
 					if (activeInfo == info)
 						setActiveInfo(null);
+					--existedStacks;
 					sortStackButtons();
 				});
 				removeButton.xOffset = 1;
@@ -355,9 +358,13 @@ public class ScopeScreen extends Screen {
 				hovered = info;
 			}
 			if (info.removeButton != null) {
-				info.removeButton.visible = info.button.hackyIsHovered() || info.removeButton.isHovered();
-				if (info.removeButton.isHovered()) {
-					hovered = info;
+				if (existedStacks == 1) {
+					info.removeButton.visible = false;
+				} else {
+					info.removeButton.visible = info.button.hackyIsHovered() || info.removeButton.isHovered();
+					if (info.removeButton.hackyIsHovered()) {
+						hovered = info;
+					}
 				}
 			}
 			toRender.add(info);

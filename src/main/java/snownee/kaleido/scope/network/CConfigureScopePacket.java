@@ -93,6 +93,12 @@ public class CConfigureScopePacket extends ClientPacket {
 							Data data = pkt.data.get(i);
 							ScopeStack stack = scope.stacks.get(i);
 							if (data.removed) {
+								if (i == 0 && !player.isCreative()) {
+									continue;
+								}
+								if (toRemove.size() + 1 == size) {
+									continue;
+								}
 								toRemove.add(stack);
 							} else {
 								KaleidoUtil.copyVector(data.position, stack.translation);

@@ -7,6 +7,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -81,6 +82,17 @@ public class ScopeBlock extends ModBlock {
 			}
 		}
 		return super.getSoundType(state, world, pos, entity);
+	}
+
+	@Override
+	public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
+		playerWillDestroy(world, pos, state, player);
+		TileEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof ScopeBlockEntity) {
+			ScopeBlockEntity scope = (ScopeBlockEntity) blockEntity;
+			return scope.getBlockDefinition().place(world, pos);
+		}
+		return false;
 	}
 
 }

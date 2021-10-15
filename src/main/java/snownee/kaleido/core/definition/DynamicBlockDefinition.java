@@ -106,8 +106,9 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 	}
 
 	@Override
-	public void place(World level, BlockPos pos) {
-		super.place(level, pos);
+	public boolean place(World level, BlockPos pos) {
+		if (!super.place(level, pos))
+			return false;
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity != null) {
 			CompoundNBT tileData = this.blockEntity.save(new CompoundNBT());
@@ -115,7 +116,9 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 			tileData.putInt("y", pos.getY());
 			tileData.putInt("z", pos.getZ());
 			blockEntity.load(getBlockState(), tileData);
+			return true;
 		}
+		return false;
 	}
 
 }
