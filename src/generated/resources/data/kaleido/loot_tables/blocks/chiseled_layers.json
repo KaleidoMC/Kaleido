@@ -1,0 +1,123 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "kaleido:chiseled_layers"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "2"
+          }
+        }
+      ],
+      "count": 2
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "3"
+          }
+        }
+      ],
+      "count": 3
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "4"
+          }
+        }
+      ],
+      "count": 4
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "5"
+          }
+        }
+      ],
+      "count": 5
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "6"
+          }
+        }
+      ],
+      "count": 6
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "7"
+          }
+        }
+      ],
+      "count": 7
+    },
+    {
+      "function": "minecraft:set_count",
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "kaleido:chiseled_layers",
+          "properties": {
+            "layers": "8"
+          }
+        }
+      ],
+      "count": 8
+    },
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "Overrides",
+          "target": "BlockEntityTag.Overrides",
+          "op": "replace"
+        }
+      ]
+    }
+  ]
+}

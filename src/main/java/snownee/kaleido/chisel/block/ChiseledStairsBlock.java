@@ -29,7 +29,7 @@ import snownee.kiwi.block.ModBlock;
 public class ChiseledStairsBlock extends StairsBlock {
 
 	public ChiseledStairsBlock() {
-		super(() -> Blocks.STONE.defaultBlockState(), AbstractBlock.Properties.copy(Blocks.STONE_STAIRS));
+		super(() -> Blocks.OAK_PLANKS.defaultBlockState(), AbstractBlock.Properties.copy(Blocks.OAK_STAIRS));
 	}
 
 	@Override

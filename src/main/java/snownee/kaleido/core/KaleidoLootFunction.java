@@ -63,4 +63,8 @@ public class KaleidoLootFunction extends LootFunction {
 		}
 	}
 
+	public static LootFunction.Builder<?> create() {
+		return simpleBuilder(KaleidoLootFunction::new);
+	}
+
 }

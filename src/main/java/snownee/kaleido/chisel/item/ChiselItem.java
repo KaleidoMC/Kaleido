@@ -115,10 +115,13 @@ public class ChiselItem extends ModItem {
 		if (definition != null) {
 			CompoundNBT defTag = new CompoundNBT();
 			definition.save(defTag);
+			defTag.putString("Type", definition.getFactory().getId());
 			tag.put("Def", defTag);
 		}
 		if (player.level.isClientSide && !tag.equals(tag1)) {
-			player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
+			if (palette != ChiselPalette.NONE) {
+				player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
+			}
 			player.level.playSound(player, player.getX(), player.getY() + 0.5, player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 			new CChiselPickPacket(hand).send();
 		}

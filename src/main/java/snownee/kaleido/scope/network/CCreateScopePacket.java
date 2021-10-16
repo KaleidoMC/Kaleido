@@ -4,12 +4,16 @@ import java.util.function.Supplier;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
+import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
@@ -29,6 +33,7 @@ public class CCreateScopePacket extends ClientPacket {
 		public void encode(CCreateScopePacket pkt, PacketBuffer buf) {
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void handle(CCreateScopePacket pkt, Supplier<Context> ctx) {
 			ctx.get().enqueueWork(() -> {
@@ -36,18 +41,41 @@ public class CCreateScopePacket extends ClientPacket {
 				RayTraceResult hitResult = player.pick(KaleidoUtil.getPickRange(player), 0, false);
 				if (hitResult instanceof BlockRayTraceResult) {
 					BlockPos pos = ((BlockRayTraceResult) hitResult).getBlockPos();
-					BlockState state = player.level.getBlockState(pos);
-					if (state.is(ScopeModule.SCOPE)) {
-						return;
+					ItemStack stack = player.getMainHandItem();
+					boolean chisel = stack.getItem() instanceof ChiselItem;
+					if (chisel) {
+						pos = pos.relative(((BlockRayTraceResult) hitResult).getDirection());
 					}
+					BlockState state = player.level.getBlockState(pos);
 					if (!KaleidoUtil.canPlayerBreak(player, state, pos)) {
 						return;
 					}
+					if (chisel) {
+						BlockItemUseContext useContext = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, (BlockRayTraceResult) hitResult);
+						if (!state.canBeReplaced(useContext)) {
+							return;
+						}
+					} else {
+						if (state.isAir() || state.is(ScopeModule.SCOPE)) {
+							return;
+						}
+					}
 					TileEntity blockEntity0 = player.level.getBlockEntity(pos);
-					player.level.setBlockAndUpdate(pos, ScopeModule.SCOPE.defaultBlockState());
-					TileEntity blockEntity = player.level.getBlockEntity(pos);
-					if (blockEntity instanceof ScopeBlockEntity) {
-						((ScopeBlockEntity) blockEntity).addStack(BlockDefinition.fromBlock(state, blockEntity0, player.level, pos), player);
+					BlockDefinition definition;
+					if (chisel) {
+						definition = BlockDefinition.fromNBT(stack.getTagElement("Def"));
+					} else {
+						definition = BlockDefinition.fromBlock(state, blockEntity0, player.level, pos);
+					}
+					if (definition != null) {
+						player.level.setBlockAndUpdate(pos, ScopeModule.SCOPE.defaultBlockState());
+						TileEntity blockEntity = player.level.getBlockEntity(pos);
+						if (blockEntity instanceof ScopeBlockEntity) {
+							if (!chisel) {
+								((ScopeBlockEntity) blockEntity).fromLevel = true;
+							}
+							((ScopeBlockEntity) blockEntity).addStack(definition, player);
+						}
 					}
 				}
 			});

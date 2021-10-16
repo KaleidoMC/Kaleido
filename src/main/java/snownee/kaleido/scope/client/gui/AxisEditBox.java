@@ -14,10 +14,13 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import snownee.kaleido.core.client.Cursor;
+import snownee.kaleido.core.client.CursorChanger;
+import snownee.kaleido.core.client.StandardCursor;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class AxisEditBox extends TextFieldWidget {
+public class AxisEditBox extends TextFieldWidget implements CursorChanger {
 
 	private final BooleanSupplier snap;
 	private final float step;
@@ -37,7 +40,10 @@ public class AxisEditBox extends TextFieldWidget {
 
 	@Override
 	protected void onDrag(double pMouseX, double pMouseY, double pDragX, double pDragY) {
+		if (!active)
+			return;
 		mouseScrolled(pMouseX, pMouseY, pDragX * 0.5F);
+		StandardCursor.H_RESIZE.use();
 		super.setFocused(false);
 	}
 
@@ -166,6 +172,11 @@ public class AxisEditBox extends TextFieldWidget {
 	@Override
 	public ITextComponent getMessage() {
 		return new TranslationTextComponent("%s %s", super.getMessage(), axis);
+	}
+
+	@Override
+	public Cursor getCursor() {
+		return visible && active && !isFocused() ? StandardCursor.H_RESIZE : StandardCursor.ARROW;
 	}
 
 }

@@ -44,7 +44,8 @@ public class ScopeClient {
 			if (mc.screen != null && mc.gameMode.getPlayerMode().isBlockPlacingRestricted() || mc.hitResult == null || mc.hitResult.getType() != Type.BLOCK) {
 				return;
 			}
-			BlockPos pos = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
+			BlockRayTraceResult hitResult = (BlockRayTraceResult) mc.hitResult;
+			BlockPos pos = hitResult.getBlockPos();
 			BlockState state = mc.level.getBlockState(pos);
 			if (state.is(ScopeModule.SCOPE)) {
 				TileEntity blockEntity = mc.level.getBlockEntity(pos);

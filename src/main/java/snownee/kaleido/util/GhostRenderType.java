@@ -7,7 +7,6 @@ import java.util.Map;
 import com.google.common.util.concurrent.Runnables;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -20,6 +19,9 @@ public class GhostRenderType extends RenderType {
 	private static Map<RenderType, GhostRenderType> remappedTypes = new IdentityHashMap<>();
 
 	public static RenderType remap(RenderType type, float alpha) {
+		if (type == RenderType.translucent()) {
+			return type;
+		}
 		GhostRenderType remappedType = type instanceof GhostRenderType ? (GhostRenderType) type : remappedTypes.computeIfAbsent(type, GhostRenderType::new);
 		remappedType.alpha = MathHelper.clamp(alpha, 0, 1);
 		return remappedType;
@@ -70,8 +72,8 @@ public class GhostRenderType extends RenderType {
 		}
 
 		@Override
-		public IVertexBuilder getBuffer(RenderType type) {
-			return super.getBuffer(GhostRenderType.remap(type, alpha));
+		public BufferBuilder getBuffer(RenderType type) {
+			return (BufferBuilder) super.getBuffer(GhostRenderType.remap(type, alpha));
 		}
 
 	}

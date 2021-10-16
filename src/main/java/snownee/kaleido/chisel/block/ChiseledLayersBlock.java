@@ -29,7 +29,7 @@ import snownee.kiwi.block.ModBlock;
 public class ChiseledLayersBlock extends LayersBlock {
 
 	public ChiseledLayersBlock() {
-		super(AbstractBlock.Properties.copy(Blocks.STONE_SLAB));
+		super(AbstractBlock.Properties.copy(Blocks.OAK_SLAB));
 	}
 
 	@Override
@@ -50,9 +50,11 @@ public class ChiseledLayersBlock extends LayersBlock {
 	@Override
 	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
 		ItemStack stack = ModBlock.pickBlock(state, target, world, pos, player);
-		int i = state.getValue(LAYERS);
-		if (i > 1)
-			stack.getOrCreateTag().putInt("Layers", i);
+		if (player.isCreative()) {
+			int i = state.getValue(LAYERS);
+			if (i > 1)
+				stack.getOrCreateTag().putInt("Layers", i);
+		}
 		return stack;
 	}
 

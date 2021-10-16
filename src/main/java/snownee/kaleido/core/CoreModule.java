@@ -7,10 +7,12 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.loot.LootFunctionType;
+import net.minecraft.loot.LootParameterSets;
 import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
@@ -23,6 +25,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.action.ActionDeserializer;
@@ -52,6 +55,7 @@ import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.data.KaleidoBlockLoot;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
@@ -59,6 +63,7 @@ import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
 import snownee.kiwi.Name;
 import snownee.kiwi.NoItem;
+import snownee.kiwi.data.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.network.NetworkChannel;
 
@@ -140,6 +145,14 @@ public class CoreModule extends AbstractModule {
 	@OnlyIn(Dist.CLIENT)
 	public void registerModelLoader(ModelRegistryEvent event) {
 		ModelLoaderRegistry.registerLoader(RL("dynamic"), KaleidoModel.Loader.INSTANCE);
+	}
+
+	@SubscribeEvent
+	public void gatherData(GatherDataEvent event) {
+		DataGenerator generator = event.getGenerator();
+		if (event.includeServer()) {
+			generator.addProvider(new KiwiLootTableProvider(generator).add(KaleidoBlockLoot::new, LootParameterSets.BLOCK));
+		}
 	}
 
 }

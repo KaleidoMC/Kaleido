@@ -26,6 +26,7 @@ import snownee.kiwi.util.NBTHelper.NBT;
 
 public class ScopeBlockEntity extends BaseTile {
 
+	public boolean fromLevel;
 	public List<ScopeStack> stacks = Lists.newArrayList();
 	private IModelData modelData = EmptyModelData.INSTANCE;
 
@@ -61,12 +62,14 @@ public class ScopeBlockEntity extends BaseTile {
 	@Override
 	public void load(BlockState state, CompoundNBT data) {
 		readPacketData(data);
+		fromLevel = data.getBoolean("fromLevel");
 		super.load(state, data);
 	}
 
 	@Override
 	public CompoundNBT save(CompoundNBT data) {
 		writePacketData(data);
+		data.putBoolean("fromLevel", fromLevel);
 		return super.save(data);
 	}
 

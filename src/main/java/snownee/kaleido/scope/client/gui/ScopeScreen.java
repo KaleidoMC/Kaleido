@@ -18,6 +18,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockModelRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +31,10 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.common.MinecraftForge;
+import snownee.kaleido.core.client.Cursor;
+import snownee.kaleido.core.client.CursorChanger;
 import snownee.kaleido.core.client.KaleidoClient;
+import snownee.kaleido.core.client.StandardCursor;
 import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KaleidoButton;
 import snownee.kaleido.core.client.gui.Label;
@@ -85,6 +91,7 @@ public class ScopeScreen extends Screen {
 		}
 	}
 
+	private static boolean snap = true;
 	private final DarkBackground background = new DarkBackground();
 	private float ticks;
 	private final SimulationBlockReader blockReader = new SimulationBlockReader();
@@ -155,6 +162,7 @@ public class ScopeScreen extends Screen {
 
 		snapCheckbox = new CheckboxButton(0, 5, 30, 18, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
 		});
+		snapCheckbox.selected = snap;
 		addButton(snapCheckbox);
 
 		resetButton = new KaleidoButton(0, 5, 35, 18, new TranslationTextComponent("gui.kaleido.reset"), $ -> reset());
@@ -164,11 +172,11 @@ public class ScopeScreen extends Screen {
 		ITextComponent scaleTitle = new TranslationTextComponent("gui.kaleido.scale");
 		ITextComponent rotationTitle = new TranslationTextComponent("gui.kaleido.rotation");
 
-		positionLabel = new Label(0, 30, 100, 15, translationTitle);
+		positionLabel = new Label(0, 30, 100, 0, translationTitle);
 		addButton(positionLabel);
-		sizeLabel = new Label(0, 60, 100, 15, scaleTitle);
+		sizeLabel = new Label(0, 60, 100, 0, scaleTitle);
 		addButton(sizeLabel);
-		rotationLabel = new Label(0, 90, 100, 15, rotationTitle);
+		rotationLabel = new Label(0, 90, 100, 0, rotationTitle);
 		addButton(rotationLabel);
 
 		DecimalFormat dfCommas = new DecimalFormat("##.###");
@@ -338,11 +346,26 @@ public class ScopeScreen extends Screen {
 		}
 		pMatrixStack.pushPose();
 
-		pMatrixStack.translate(width / 2 + 0.5, height / 2 + 0.5, 100.5);
+		pMatrixStack.translate(width / 2 + 0.5, height / 2 + 0.5, 200.5);
 		pMatrixStack.scale(scale.value, -scale.value, scale.value);
 		pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(rotX.value));
 		pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(rotY.value));
 		pMatrixStack.translate(-0.5, -0.5, -0.5);
+
+		IGuiEventListener pointingListener = getChildAt(pMouseX, pMouseY).orElse(null);
+		boolean drawBox = false;
+		if (activeInfo != null) {
+			if (pointingListener instanceof AxisEditBox) {
+				drawBox = true;
+			} else if (getFocused() instanceof AxisEditBox) {
+				drawBox = true;
+			}
+		}
+		if (drawBox) {
+			IRenderTypeBuffer.Impl buffer = minecraft.renderBuffers().bufferSource();
+			WorldRenderer.renderLineBox(pMatrixStack, buffer.getBuffer(RenderType.lines()), 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0.45F, 0.45F, 0.45F);
+			buffer.endBatch();
+		}
 
 		GhostRenderType.Buffer buffer = GhostRenderType.defaultBuffer();
 		BlockModelRenderer.clearCache();
@@ -382,9 +405,21 @@ public class ScopeScreen extends Screen {
 			info.stack.render(pMatrixStack, buffer, blockReader, tilePos, OverlayTexture.NO_OVERLAY, false);
 		}
 		BlockModelRenderer.enableCaching();
-
+		//		buffer.endBatch(GhostRenderType.remap(RenderType.solid(), 1));
+		//		buffer.endBatch(GhostRenderType.remap(RenderType.cutoutMipped(), 1));
+		//		buffer.endBatch(GhostRenderType.remap(RenderType.cutout(), 1));
+		//		buffer.endBatch(RenderType.translucent());
+		//		buffer.getBuffer(RenderType.translucent()).sortQuads(1, 1, 1);
 		buffer.endBatch();
 		pMatrixStack.popPose();
+
+		if (!isDragging()) {
+			Cursor cursor = StandardCursor.ARROW;
+			if (pointingListener instanceof CursorChanger) {
+				cursor = ((CursorChanger) pointingListener).getCursor();
+			}
+			cursor.use();
+		}
 
 		super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
 	}
@@ -413,6 +448,9 @@ public class ScopeScreen extends Screen {
 				}
 				success = true;
 			}
+		}
+		if (!success) {
+			setFocused(null);
 		}
 		return success;
 	}

@@ -37,7 +37,7 @@ import snownee.kiwi.block.ModBlock;
 public class ChiseledSlabBlock extends SlabBlock {
 
 	public ChiseledSlabBlock() {
-		super(AbstractBlock.Properties.copy(Blocks.STONE_SLAB));
+		super(AbstractBlock.Properties.copy(Blocks.OAK_SLAB));
 	}
 
 	@Override

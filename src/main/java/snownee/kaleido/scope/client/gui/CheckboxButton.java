@@ -16,7 +16,7 @@ import snownee.kaleido.util.KaleidoUtil;
 @OnlyIn(Dist.CLIENT)
 public class CheckboxButton extends KaleidoButton {
 
-	private boolean selected;
+	public boolean selected;
 
 	public CheckboxButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress) {
 		super(pX, pY, pWidth, pHeight, pMessage, pOnPress);

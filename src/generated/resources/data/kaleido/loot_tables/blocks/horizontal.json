@@ -6,14 +6,19 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "kaleido:data"
-            }
-          ],
           "name": "kaleido:stuff"
         }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
       ]
+    }
+  ],
+  "functions": [
+    {
+      "function": "kaleido:data"
     }
   ]
 }
