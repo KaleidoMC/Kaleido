@@ -69,7 +69,7 @@ public class KaleidoButton extends Button {
 	public void drawText(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		FontRenderer font = Minecraft.getInstance().font;
 		int j = getFGColor();
-		int textColor = j | MathHelper.ceil(this.alpha * 255.0F) << 24;
+		int textColor = j | MathHelper.ceil(alpha * 255.0F) << 24;
 		RenderSystem.disableDepthTest();
 		if (wrappedTitle != null) {
 			ITextProperties properties = isHovered ? getMessage() : wrappedTitle;
