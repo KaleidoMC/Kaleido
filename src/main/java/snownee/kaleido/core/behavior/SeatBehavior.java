@@ -65,6 +65,7 @@ public class SeatBehavior implements Behavior {
 
 		List<SeatEntity> seats = worldIn.getEntitiesOfClass(SeatEntity.class, new AxisAlignedBB(pos));
 
+		//FIXME
 		if (!seats.isEmpty()) {
 			return ActionResultType.FAIL;
 		}

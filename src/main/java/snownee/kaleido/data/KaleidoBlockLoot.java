@@ -37,7 +37,7 @@ public class KaleidoBlockLoot extends BlockLootTables {
 		add(ChiselModule.CHISELED_SLAB, chiseled(createSlabItemTable(ChiselModule.CHISELED_SLAB)));
 		add(ChiselModule.CHISELED_LAYERS, chiseled(createLayersItemTable(ChiselModule.CHISELED_LAYERS)));
 
-		for (Block block : CoreModule.ALL_MASTER_BLOCKS)
+		for (Block block : CoreModule.MASTER_BLOCKS)
 			add(block, createSingleItemTable(block).apply(KaleidoLootFunction.create()));
 	}
 

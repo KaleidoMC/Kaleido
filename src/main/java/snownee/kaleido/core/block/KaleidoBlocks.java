@@ -10,6 +10,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -28,6 +29,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
@@ -55,7 +57,7 @@ public final class KaleidoBlocks {
 	@Nullable
 	public static ModelInfo getInfo(IBlockReader level, BlockPos pos) {
 		ModelInfo info = null;
-		if (FMLEnvironment.dist.isClient() && Minecraft.getInstance().level != null) {
+		if (FMLEnvironment.dist.isClient() && level instanceof ServerWorld && Minecraft.getInstance().level != null) {
 			level = Minecraft.getInstance().level;
 		}
 		if (level instanceof World) {
@@ -117,6 +119,20 @@ public final class KaleidoBlocks {
 			return ((MasterBlockEntity) tile).use(state, worldIn, pos, player, handIn, hit);
 		}
 		return ActionResultType.PASS;
+	}
+
+	public static void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
+		TileEntity tile = pLevel.getBlockEntity(pPos);
+		if (tile instanceof MasterBlockEntity) {
+			((MasterBlockEntity) tile).attack(pState, pLevel, pPos, pPlayer);
+		}
+	}
+
+	public static void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
+		TileEntity tile = pLevel.getBlockEntity(pHit.getBlockPos());
+		if (tile instanceof MasterBlockEntity) {
+			((MasterBlockEntity) tile).onProjectileHit(pLevel, pState, pHit, pProjectile);
+		}
 	}
 
 	public static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {

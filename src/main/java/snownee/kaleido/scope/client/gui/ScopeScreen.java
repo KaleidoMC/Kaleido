@@ -31,10 +31,10 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.common.MinecraftForge;
-import snownee.kaleido.core.client.Cursor;
-import snownee.kaleido.core.client.CursorChanger;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.client.StandardCursor;
+import snownee.kaleido.core.client.cursor.Cursor;
+import snownee.kaleido.core.client.cursor.CursorChanger;
+import snownee.kaleido.core.client.cursor.StandardCursor;
 import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KaleidoButton;
 import snownee.kaleido.core.client.gui.Label;
@@ -188,16 +188,20 @@ public class ScopeScreen extends Screen {
 			editBox = new AxisEditBox(0, 0, 40, 15, translationTitle, snapCheckbox::selected, 1, axis);
 			editBox.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.translation.get(ord).getTarget());
 			editBox.setter = f -> {
-				if (activeInfo != null)
+				if (activeInfo != null) {
+					f = MathHelper.clamp(f, -32, 32);
 					activeInfo.translation.get(ord).target(f);
+				}
 			};
 			editBoxes[ord] = editBox;
 			// scale
 			editBox = new AxisEditBox(0, 0, 40, 15, scaleTitle, snapCheckbox::selected, 0.1F, axis);
 			editBox.getter = () -> activeInfo == null ? "" : dfCommas.format(activeInfo.scale.get(ord).getTarget());
 			editBox.setter = f -> {
-				if (activeInfo != null)
+				if (activeInfo != null) {
+					f = MathHelper.clamp(f, -2, 2);
 					activeInfo.scale.get(ord).target(f);
+				}
 			};
 			editBoxes[ord + 3] = editBox;
 			// rotation
@@ -230,7 +234,7 @@ public class ScopeScreen extends Screen {
 		inDevLabel.active = false;
 		addButton(inDevLabel);
 
-		setActiveInfo(null);
+		setActiveInfo(stacks.size() == 1 ? getInfo(stacks.get(0)) : null);
 	}
 
 	@Override
@@ -389,6 +393,11 @@ public class ScopeScreen extends Screen {
 						hovered = info;
 					}
 				}
+
+				if (info.removeButton.visible && info.button.wrappedTitle != null) {
+					String x = info.button.hackyIsHovered() ? "" : "X";
+					info.removeButton.setMessage(new StringTextComponent(x));
+				}
 			}
 			toRender.add(info);
 		}
@@ -416,7 +425,7 @@ public class ScopeScreen extends Screen {
 		if (!isDragging()) {
 			Cursor cursor = StandardCursor.ARROW;
 			if (pointingListener instanceof CursorChanger) {
-				cursor = ((CursorChanger) pointingListener).getCursor();
+				cursor = ((CursorChanger) pointingListener).getCursor(pMouseX, pMouseY, pPartialTicks);
 			}
 			cursor.use();
 		}

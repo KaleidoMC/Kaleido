@@ -4,9 +4,12 @@ import java.util.function.Supplier;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -68,7 +71,12 @@ public class CCreateScopePacket extends ClientPacket {
 						definition = BlockDefinition.fromBlock(state, blockEntity0, player.level, pos);
 					}
 					if (definition != null) {
-						player.level.setBlockAndUpdate(pos, ScopeModule.SCOPE.defaultBlockState());
+						FluidState fluidstate = player.level.getFluidState(pos);
+						boolean waterlog = fluidstate.getType() == Fluids.WATER;
+						if (!waterlog && chisel && definition.getBlockState().getFluidState().getType() == Fluids.WATER) {
+							waterlog = true;
+						}
+						player.level.setBlockAndUpdate(pos, ScopeModule.SCOPE.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, waterlog));
 						TileEntity blockEntity = player.level.getBlockEntity(pos);
 						if (blockEntity instanceof ScopeBlockEntity) {
 							if (!chisel) {

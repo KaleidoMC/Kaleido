@@ -1,4 +1,4 @@
-package snownee.kaleido.core.client;
+package snownee.kaleido.core.client.cursor;
 
 import org.lwjgl.glfw.GLFW;
 

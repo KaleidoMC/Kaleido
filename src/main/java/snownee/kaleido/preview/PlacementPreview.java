@@ -233,10 +233,15 @@ public final class PlacementPreview {
 			//				((BannerTileEntity) tile).fromItem(stack, ((AbstractBannerBlock) state.getBlock()).getColor());
 			//			}
 			if (stack.hasTag()) {
-				CompoundNBT tileData = stack.getTagElement("BlockEntityTag");
-				if (tileData != null) {
-					tile.load(state, tileData);
-					tile.setPosition(pos);
+				if (info != null && tile instanceof MasterBlockEntity) {
+					MasterBlockEntity master = (MasterBlockEntity) tile;
+					master.setModelInfo(info);
+				} else {
+					CompoundNBT tileData = stack.getTagElement("BlockEntityTag");
+					if (tileData != null) {
+						tile.load(state, tileData);
+						tile.setPosition(pos);
+					}
 				}
 			}
 			if (renderer != null) {
@@ -244,7 +249,7 @@ public final class PlacementPreview {
 					// 0x00F0_00F0 means "full sky light and full block light".
 					// Reference: LightTexture.packLight (func_228451_a_)
 					renderer.render(tile, 0F, transforms, renderBuffer, 0x00F0_00F0, OverlayTexture.NO_OVERLAY);
-				} catch (Exception ignored) {
+				} catch (Throwable ignored) {
 				}
 			}
 		}

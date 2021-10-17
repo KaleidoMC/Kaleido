@@ -50,7 +50,9 @@ public interface Behavior {
 		return KaleidoDataManager.GSON.fromJson(json, Behavior.class);
 	}
 
-	Behavior copy(MasterBlockEntity tile);
+	default Behavior copy(MasterBlockEntity tile) {
+		return this;
+	}
 
 	default <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
 		return LazyOptional.empty();
@@ -58,6 +60,12 @@ public interface Behavior {
 
 	default ActionResultType use(ActionContext context) {
 		return ActionResultType.PASS;
+	}
+
+	default void attack(ActionContext context) {
+	}
+
+	default void onProjectileHit(ActionContext context) {
 	}
 
 	default void load(CompoundNBT data) {

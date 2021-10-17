@@ -1,7 +1,6 @@
 package snownee.kaleido.scope;
 
 import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,10 +30,6 @@ public class ScopeModule extends AbstractModule {
 
 	@Name("scope")
 	public static final TileEntityType<ScopeBlockEntity> TILE = TileEntityType.Builder.of(ScopeBlockEntity::new, SCOPE).build(null);
-
-	public static final Item ROT = new TunerItem(itemProp(), ScopeStack::rotate, -22.5F);
-	public static final Item TRANS = new TunerItem(itemProp(), ScopeStack::translate, -1);
-	public static final Item SCALE = new TunerItem(itemProp(), ScopeStack::scale, -0.1F);
 
 	@Override
 	protected void init(FMLCommonSetupEvent event) {

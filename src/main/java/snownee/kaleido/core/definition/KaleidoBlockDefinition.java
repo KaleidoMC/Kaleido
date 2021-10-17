@@ -173,7 +173,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public int getColor(BlockState blockState, IBlockDisplayReader level, BlockPos worldPosition, int index) {
-		return -1;
+		return getModelInfo().getBlockColor(blockState, level, worldPosition, index);
 	}
 
 	@Override

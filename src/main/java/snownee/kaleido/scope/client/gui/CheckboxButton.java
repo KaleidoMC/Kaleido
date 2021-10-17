@@ -1,14 +1,10 @@
 package snownee.kaleido.scope.client.gui;
 
-import java.util.Arrays;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.client.gui.GuiUtils;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.gui.KaleidoButton;
 import snownee.kaleido.util.KaleidoUtil;
@@ -46,9 +42,9 @@ public class CheckboxButton extends KaleidoButton {
 	@Override
 	public void renderToolTip(MatrixStack pPoseStack, int pMouseX, int pMouseY) {
 		//FIXME tooltip z index
-		int width = Minecraft.getInstance().getWindow().getGuiScaledWidth();
-		int height = Minecraft.getInstance().getWindow().getGuiScaledWidth();
-		GuiUtils.drawHoveringText(pPoseStack, Arrays.asList(getMessage()), pMouseX, pMouseY, width, height, -1, Minecraft.getInstance().font);
+		//		int width = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+		//		int height = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+		//		GuiUtils.drawHoveringText(pPoseStack, Arrays.asList(getMessage()), pMouseX, pMouseY, width, height, -1, Minecraft.getInstance().font);
 	}
 
 	@Override

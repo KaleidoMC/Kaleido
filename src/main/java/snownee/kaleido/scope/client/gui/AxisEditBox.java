@@ -14,9 +14,9 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kaleido.core.client.Cursor;
-import snownee.kaleido.core.client.CursorChanger;
-import snownee.kaleido.core.client.StandardCursor;
+import snownee.kaleido.core.client.cursor.Cursor;
+import snownee.kaleido.core.client.cursor.CursorChanger;
+import snownee.kaleido.core.client.cursor.StandardCursor;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
@@ -175,7 +175,7 @@ public class AxisEditBox extends TextFieldWidget implements CursorChanger {
 	}
 
 	@Override
-	public Cursor getCursor() {
+	public Cursor getCursor(int pMouseX, int pMouseY, float pPartialTicks) {
 		return visible && active && !isFocused() ? StandardCursor.H_RESIZE : StandardCursor.ARROW;
 	}
 

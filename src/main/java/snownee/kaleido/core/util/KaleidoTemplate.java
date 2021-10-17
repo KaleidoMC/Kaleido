@@ -39,7 +39,7 @@ public enum KaleidoTemplate {
 		this.metaCount = metaCount;
 		this.defaultMeta = defaultMeta;
 		if (block != Blocks.AIR) {
-			CoreModule.ALL_MASTER_BLOCKS.add(block);
+			CoreModule.MASTER_BLOCKS.add(block);
 		}
 	}
 

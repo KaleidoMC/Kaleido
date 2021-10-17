@@ -80,14 +80,14 @@ public class StuffItem extends ModBlockItem {
 
 	@Override
 	public void registerBlocks(Map<Block, Item> map, Item item) {
-		for (Block block : CoreModule.ALL_MASTER_BLOCKS) {
+		for (Block block : CoreModule.MASTER_BLOCKS) {
 			map.put(block, item);
 		}
 	}
 
 	@Override
 	public void removeFromBlockToItemMap(Map<Block, Item> map, Item item) {
-		for (Block block : CoreModule.ALL_MASTER_BLOCKS) {
+		for (Block block : CoreModule.MASTER_BLOCKS) {
 			map.remove(block, item);
 		}
 	}

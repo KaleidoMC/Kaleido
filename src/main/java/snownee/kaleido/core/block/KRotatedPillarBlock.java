@@ -6,6 +6,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -46,6 +47,16 @@ public class KRotatedPillarBlock extends RotatedPillarBlock {
 	@Override
 	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		return KaleidoBlocks.use(state, worldIn, pos, player, handIn, hit);
+	}
+
+	@Override
+	public void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
+		KaleidoBlocks.attack(pState, pLevel, pPos, pPlayer);
+	}
+
+	@Override
+	public void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
+		KaleidoBlocks.onProjectileHit(pLevel, pState, pHit, pProjectile);
 	}
 
 	@Override

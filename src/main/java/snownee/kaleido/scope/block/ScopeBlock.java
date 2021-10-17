@@ -118,7 +118,7 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 	public BlockState getStateForPlacement(BlockItemUseContext pContext) {
 		FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
 		boolean flag = fluidstate.getType() == Fluids.WATER;
-		return super.getStateForPlacement(pContext).setValue(BlockStateProperties.WATERLOGGED, flag);
+		return defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, flag);
 	}
 
 	@Override

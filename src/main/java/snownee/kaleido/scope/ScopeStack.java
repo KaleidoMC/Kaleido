@@ -20,19 +20,25 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.DynamicBlockDefinition;
+import snownee.kaleido.core.definition.KaleidoBlockDefinition;
 import snownee.kaleido.util.SimulationBlockReader;
 
 public class ScopeStack {
 
 	@OnlyIn(Dist.CLIENT)
 	private static BlockModelRenderer modelRenderer;
+	@OnlyIn(Dist.CLIENT)
+	private static MasterBlockEntity dummyMasterTile;
 	public final BlockDefinition blockDefinition;
 	public final Vector3f translation = new Vector3f();
 	public final Vector3f rotation = new Vector3f();
 	public final Vector3f scale = new Vector3f();
+	@OnlyIn(Dist.CLIENT)
 	private Quaternion quaternion;
 
 	public ScopeStack(BlockDefinition blockDefinition) {
@@ -96,6 +102,12 @@ public class ScopeStack {
 		world.setPos(posIn);
 		if (blockDefinition.getClass() == DynamicBlockDefinition.class) {
 			world.setBlockEntity(((DynamicBlockDefinition) blockDefinition).blockEntity);
+		} else if (blockDefinition.getClass() == KaleidoBlockDefinition.class) {
+			if (dummyMasterTile == null) {
+				dummyMasterTile = new MasterBlockEntity();
+			}
+			dummyMasterTile.setModelInfo(((KaleidoBlockDefinition) blockDefinition).getModelInfo());
+			world.setBlockEntity(dummyMasterTile);
 		} else {
 			world.setBlockEntity(null);
 		}
@@ -150,7 +162,9 @@ public class ScopeStack {
 	}
 
 	public void updateRotation() {
-		quaternion = new Quaternion(rotation.x(), rotation.y(), rotation.z(), true);
+		if (FMLEnvironment.dist.isClient()) {
+			quaternion = new Quaternion(rotation.x(), rotation.y(), rotation.z(), true);
+		}
 	}
 
 	private void addVec(Vector3f vec, Axis axis, float f) {

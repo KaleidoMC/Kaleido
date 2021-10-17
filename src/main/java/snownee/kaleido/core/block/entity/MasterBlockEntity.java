@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -16,6 +17,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -138,14 +140,14 @@ public class MasterBlockEntity extends BaseTile {
 	public void setModelInfo(ModelInfo modelInfo) {
 		this.modelInfo = modelInfo;
 		modelId = modelInfo.id;
-		if (!modelInfo.behaviors.isEmpty()) {
-			ImmutableList.Builder<Behavior> list = ImmutableList.builder();
-			for (Behavior behavior : modelInfo.behaviors) {
-				list.add(behavior.copy(this));
-			}
-			behaviors = list.build();
-		}
 		if (level != null) {
+			if (!modelInfo.behaviors.isEmpty()) {
+				ImmutableList.Builder<Behavior> list = ImmutableList.builder();
+				for (Behavior behavior : modelInfo.behaviors) {
+					list.add(behavior.copy(this));
+				}
+				behaviors = list.build();
+			}
 			if (getLightValue() > 0) {
 				level.getLightEngine().checkBlock(worldPosition);
 			}
@@ -205,6 +207,27 @@ public class MasterBlockEntity extends BaseTile {
 			}
 		}
 		return ActionResultType.PASS;
+	}
+
+	public void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity player) {
+		if (!isValid())
+			return;
+		ItemStack stack = player.getMainHandItem();
+		BlockRayTraceResult hit = new BlockRayTraceResult(Vector3d.ZERO, Direction.DOWN, pPos, false);
+		ActionContext context = new ActionContext(player, Hand.MAIN_HAND, stack, hit, modelInfo);
+		for (Behavior behavior : behaviors) {
+			behavior.attack(context);
+		}
+	}
+
+	public void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
+		if (!isValid())
+			return;
+		ActionContext context = new ActionContext(pLevel, null, Hand.MAIN_HAND, ItemStack.EMPTY, pHit, modelInfo);
+		context.entity = pProjectile;
+		for (Behavior behavior : behaviors) {
+			behavior.onProjectileHit(context);
+		}
 	}
 
 	public boolean cycleModels() {

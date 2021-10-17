@@ -7,6 +7,8 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -19,6 +21,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -34,6 +37,8 @@ import snownee.kaleido.core.action.TransformAction;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.ItemStorageBehavior;
 import snownee.kaleido.core.behavior.LightBehavior;
+import snownee.kaleido.core.behavior.OnAttackBlockBehavior;
+import snownee.kaleido.core.behavior.OnProjectileHitBehavior;
 import snownee.kaleido.core.behavior.OnUseBlockBehavior;
 import snownee.kaleido.core.behavior.SeatBehavior;
 import snownee.kaleido.core.behavior.seat.EmptyEntityRenderer;
@@ -41,6 +46,7 @@ import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.KDirectionalBlock;
 import snownee.kaleido.core.block.KHorizontalBlock;
 import snownee.kaleido.core.block.KRotatedPillarBlock;
+import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
@@ -86,8 +92,8 @@ public class CoreModule extends AbstractModule {
 
 	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
-	public static final Set<Block> ALL_MASTER_BLOCKS = Sets.newHashSet();
-	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, ALL_MASTER_BLOCKS, null);
+	public static final Set<Block> MASTER_BLOCKS = Sets.newHashSet();
+	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, MASTER_BLOCKS, null);
 
 	public static final EntityType<?> SEAT = EntityType.Builder.createNothing(EntityClassification.MISC).setCustomClientFactory((spawnEntity, world) -> new SeatEntity(world)).sized(0.0001F, 0.0001F).setTrackingRange(16).setUpdateInterval(20).build("kaleido.seat");
 
@@ -120,6 +126,8 @@ public class CoreModule extends AbstractModule {
 		Behavior.Deserializer.registerFactory("itemStorage", ItemStorageBehavior::create);
 		Behavior.Deserializer.registerFactory("light", LightBehavior::create);
 		Behavior.Deserializer.registerFactory("onUseBlock", OnUseBlockBehavior::create);
+		Behavior.Deserializer.registerFactory("onAttackBlock", OnAttackBlockBehavior::create);
+		Behavior.Deserializer.registerFactory("onProjectileHit", OnProjectileHitBehavior::create);
 
 		ActionDeserializer.registerFactory("transform", TransformAction::create);
 		ActionDeserializer.registerFactory("command", CommandAction::create);
@@ -153,6 +161,34 @@ public class CoreModule extends AbstractModule {
 		if (event.includeServer()) {
 			generator.addProvider(new KiwiLootTableProvider(generator).add(KaleidoBlockLoot::new, LootParameterSets.BLOCK));
 		}
+	}
+
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public void blockColors(ColorHandlerEvent.Block event) {
+		BlockColors blockColors = event.getBlockColors();
+		blockColors.register((state, level, pos, i) -> {
+			if (level != null && pos != null) {
+				ModelInfo info = KaleidoBlocks.getInfo(level, pos);
+				if (info != null) {
+					return info.getBlockColor(state, level, pos, i);
+				}
+			}
+			return -1;
+		}, MASTER_BLOCKS.toArray(new Block[0]));
+	}
+
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public void itemColors(ColorHandlerEvent.Item event) {
+		ItemColors itemColors = event.getItemColors();
+		itemColors.register((stack, i) -> {
+			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			if (info != null) {
+				return info.getItemColor(stack, i);
+			}
+			return -1;
+		}, STUFF_ITEM);
 	}
 
 }
