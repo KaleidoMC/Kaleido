@@ -15,7 +15,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.AbstractBlock.AbstractBlockState;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -45,12 +47,14 @@ import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.client.model.KaleidoModel;
+import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.client.model.ScopeModel;
 import snownee.kaleido.util.SimulationBlockReader;
 
 public final class Hooks {
 
+	public static boolean carpentryEnabled;
 	public static boolean chiselEnabled;
 	public static boolean scopeEnabled;
 
@@ -178,5 +182,19 @@ public final class Hooks {
 		RenderSystem.scalef(0.55F, 0.55F, 0.55F);
 		mc.getItemRenderer().renderGuiItem(icon, 0, 0);
 		RenderSystem.popMatrix();
+	}
+
+	public static MaterialColor getMapColor(AbstractBlockState state, IBlockReader pLevel, BlockPos pPos) {
+		TileEntity blockEntity = pLevel.getBlockEntity(pPos);
+		if (blockEntity instanceof ChiseledBlockEntity) {
+			BlockDefinition definition = ((ChiseledBlockEntity) blockEntity).getTexture();
+			if (definition != null) {
+				BlockState blockState = definition.getBlockState();
+				if (!ChiselModule.CHISELED_BLOCKS.contains(blockState.getBlock())) {
+					return blockState.getMapColor(pLevel, pPos);
+				}
+			}
+		}
+		return MaterialColor.NONE;
 	}
 }

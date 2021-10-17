@@ -1,6 +1,7 @@
 package snownee.kaleido.carpentry;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -27,8 +28,11 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.carpentry.block.WoodworkingBenchBlock;
+import snownee.kaleido.carpentry.item.LuckyBoxItem;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kiwi.AbstractModule;
@@ -46,6 +50,8 @@ public class CarpentryModule extends AbstractModule {
 
 	public static final Item CLOTH = new ModItem(itemProp());
 
+	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
+
 	public static final WoodworkingBenchBlock WOODWORKING_BENCH = new WoodworkingBenchBlock(blockProp(Material.WOOD));
 
 	@Name("collector")
@@ -54,6 +60,11 @@ public class CarpentryModule extends AbstractModule {
 	public static final VillagerProfession COLLECTOR = new VillagerProfession("kaleido.collector", COLLECTOR_POI, ImmutableSet.of(), ImmutableSet.of(), null);
 
 	private CollectorTrade trade;
+
+	@Override
+	protected void init(FMLCommonSetupEvent event) {
+		Hooks.carpentryEnabled = true;
+	}
 
 	@SubscribeEvent
 	public void addVillagerTrades(VillagerTradesEvent event) {
@@ -111,14 +122,18 @@ public class CarpentryModule extends AbstractModule {
 			// Unlock
 			AxisAlignedBB bb = new AxisAlignedBB(villager.position().subtract(5, 5, 5), villager.position().add(5, 5, 5));
 			List<ServerPlayerEntity> players = villager.level.getEntitiesOfClass(ServerPlayerEntity.class, bb, $ -> !$.isSpectator());
-			ModelInfo info = KaleidoDataManager.INSTANCE.getRandomLocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
+			ModelInfo info = getRandomLocked((ServerPlayerEntity) villager.lastTradedPlayer, villager.lastTradedPlayer.getRandom());
 			if (info != null) {
 				for (ServerPlayerEntity player : players) {
 					info.grant(player);
 				}
 			}
 		}
+	}
 
+	public static ModelInfo getRandomLocked(ServerPlayerEntity player, Random rand) {
+		List<ModelInfo> list = KaleidoDataManager.INSTANCE.allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
+		return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
 	}
 
 	@SubscribeEvent

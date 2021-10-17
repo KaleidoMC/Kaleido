@@ -13,23 +13,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import moe.mmf.csscolors.Color;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractBlock.OffsetType;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.color.IBlockColor;
-import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -53,17 +45,14 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.util.JsonUtils;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.behavior.Behavior;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
-import snownee.kaleido.mixin.MixinBlockColors;
-import snownee.kaleido.mixin.MixinItemColors;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kiwi.util.NBTHelper;
@@ -86,10 +75,6 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
 	public SoundTypeEnum soundType = SoundTypeEnum.wood;
-	@OnlyIn(Dist.CLIENT)
-	private IItemColor[] itemColorCache;
-	@OnlyIn(Dist.CLIENT)
-	private IBlockColor[] blockColorCache;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
@@ -175,7 +160,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (nbt != null)
 			stack.setTag(nbt.copy());
 		NBTHelper data = NBTHelper.of(stack);
-		data.setString(KaleidoBlocks.NBT_ID, id.toString());
+		data.setString("Kaleido.Id", id.toString());
 		return data.getItem();
 	}
 
@@ -270,7 +255,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				for (JsonElement e : element.getAsJsonArray()) {
 					tint.add(e.getAsString());
 				}
-				info.tint = tint.toArray(new String[0]);
+				if (!tint.isEmpty()) {
+					info.tint = tint.toArray(new String[0]);
+				}
 			}
 		}
 		info.behaviors = behaviors.build();
@@ -365,31 +352,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (index < 0 || index >= tint.length) {
 			index = 0;
 		}
-		if (itemColorCache == null) {
-			itemColorCache = new IItemColor[tint.length];
-		}
-		if (itemColorCache[index] == null) {
-			IItemColor itemColor = null;
-			Color color = Color.fromString(tint[index]);
-			if (color == null) {
-				ResourceLocation id = ResourceLocation.tryParse(tint[index]);
-				if (id != null) {
-					Item item = ForgeRegistries.ITEMS.getValue(id);
-					if (item != null) {
-						ItemColors itemColors = Minecraft.getInstance().getItemColors();
-						itemColor = ((MixinItemColors) itemColors).getItemColors().get(item.delegate);
-					}
-				}
-			} else {
-				int i = color.toInt();
-				itemColor = (a, b) -> i;
-			}
-			if (itemColor == null) {
-				itemColor = (a, b) -> -1;
-			}
-			itemColorCache[index] = itemColor;
-		}
-		return itemColorCache[index].getColor(stack, index);
+		return KaleidoClient.ITEM_COLORS.getColor(tint[index], stack, index);
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -400,41 +363,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (index < 0 || index >= tint.length) {
 			index = 0;
 		}
-		if (blockColorCache == null) {
-			blockColorCache = new IBlockColor[tint.length];
-		}
-		if (blockColorCache[index] == null) {
-			IBlockColor blockColor = null;
-			Color color = Color.fromString(tint[index]);
-			if (color == null) {
-				ResourceLocation id = ResourceLocation.tryParse(tint[index]);
-				if (id != null) {
-					Block block = ForgeRegistries.BLOCKS.getValue(id);
-					if (block != null) {
-						BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-						blockColor = ((MixinBlockColors) blockColors).getBlockColors().get(block.delegate);
-						//						if (blockColor != null) {
-						//							IBlockColor blockColor0 = blockColor;
-						//							BlockState blockState = block.defaultBlockState();
-						//							blockColor = (a, b, c, d) -> blockColor0.getColor(blockState, b, c, d);
-						//						}
-					}
-				}
-			} else {
-				int i = color.toInt();
-				blockColor = (a, b, c, d) -> i;
-			}
-			if (blockColor == null) {
-				blockColor = (a, b, c, d) -> -1;
-			}
-			blockColorCache[index] = blockColor;
-		}
-		try {
-			return blockColorCache[index].getColor(state, level, pos, index);
-		} catch (Throwable e) {
-			blockColorCache[index] = (a, b, c, d) -> -1;
-			return -1;
-		}
+		return KaleidoClient.BLOCK_COLORS.getColor(tint[index], state, level, pos, index);
 	}
 
 }

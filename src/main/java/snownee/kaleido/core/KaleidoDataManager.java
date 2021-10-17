@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Stopwatch;
@@ -43,13 +42,14 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
+import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.compat.worldedit.WorldEditModule;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
-import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.util.ShapeCache;
 import snownee.kaleido.util.ShapeSerializer;
 import snownee.kiwi.util.Util;
@@ -171,6 +171,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	public void onAdvancement(AdvancementEvent event) {
+		if (!Hooks.carpentryEnabled)
+			return;
 		ResourceLocation id = event.getAdvancement().getId();
 		if (id.getNamespace().equals(Kaleido.MODID) && !id.getPath().equals("root")) {
 			ResourceLocation realId = Util.RL(id.getPath().replace('/', ':'));
@@ -206,7 +208,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	public void syncAllLockInfo(ServerPlayerEntity player) {
-		if (KaleidoCommonConfig.autoUnlock)
+		if (!Hooks.carpentryEnabled || KaleidoCommonConfig.autoUnlock)
 			return;
 		/* off */
         List<ResourceLocation> list = allInfos.values().stream()
@@ -250,11 +252,6 @@ public class KaleidoDataManager extends JsonReloadListener {
 				new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
 			}
 		}
-	}
-
-	public ModelInfo getRandomLocked(ServerPlayerEntity player, Random rand) {
-		List<ModelInfo> list = allInfos.values().stream().filter($ -> !$.reward).filter($ -> $.isLockedServer(player)).collect(Collectors.toList());
-		return list.isEmpty() ? null : list.get(rand.nextInt(list.size()));
 	}
 
 	public void skipOnce() {

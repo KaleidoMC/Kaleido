@@ -198,7 +198,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	@Override
 	public ItemStack createItem(RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
 		NBTHelper data = NBTHelper.of(new ItemStack(CoreModule.STUFF_ITEM));
-		data.setString(KaleidoBlocks.NBT_ID, getModelInfo().id.toString());
+		data.setString("Kaleido.Id", getModelInfo().id.toString());
 		return data.getItem();
 	}
 

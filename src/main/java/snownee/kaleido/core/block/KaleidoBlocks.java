@@ -41,13 +41,11 @@ import snownee.kiwi.util.Util;
 
 public final class KaleidoBlocks {
 
-	public static final String NBT_ID = "Kaleido.Id";
-
 	public static ModelInfo getInfo(ItemStack stack) {
 		if (stack.getItem() != CoreModule.STUFF_ITEM)
 			return null;
 		NBTHelper data = NBTHelper.of(stack);
-		ResourceLocation modelId = Util.RL(data.getString(NBT_ID));
+		ResourceLocation modelId = Util.RL(data.getString("Kaleido.Id"));
 		if (modelId == null || modelId.getPath().isEmpty()) {
 			return null;
 		}
@@ -84,7 +82,7 @@ public final class KaleidoBlocks {
 		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM);
 		ModelInfo info = getInfo(world, pos);
 		if (info != null) {
-			NBTHelper.of(stack).setString(NBT_ID, info.id.toString());
+			NBTHelper.of(stack).setString("Kaleido.Id", info.id.toString());
 		}
 		return stack;
 	}

@@ -4,7 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.core.definition.BlockDefinition;
-import snownee.kaleido.core.definition.SimpleBlockDefinition;
 
 public class ChiseledBlockEntity extends RetextureBlockEntity {
 
@@ -39,12 +38,8 @@ public class ChiseledBlockEntity extends RetextureBlockEntity {
 
 	@Override
 	public boolean isValidTexture(BlockDefinition modelSupplier) {
-		if (modelSupplier instanceof SimpleBlockDefinition) {
-			BlockState state = ((SimpleBlockDefinition) modelSupplier).state;
-			if (ChiselModule.CHISELED_BLOCKS.contains(state.getBlock()))
-				return false;
-		}
-		return true;
+		BlockState state = modelSupplier.getBlockState();
+		return !ChiselModule.CHISELED_BLOCKS.contains(state.getBlock());
 	}
 
 }

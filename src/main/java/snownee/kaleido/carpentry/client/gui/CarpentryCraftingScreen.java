@@ -38,12 +38,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.carpentry.CarpentryModule;
+import snownee.kaleido.carpentry.network.CRedeemPacket;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.client.gui.DarkBackground;
-import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)

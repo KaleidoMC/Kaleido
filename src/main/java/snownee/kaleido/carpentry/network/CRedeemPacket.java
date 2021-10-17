@@ -1,4 +1,4 @@
-package snownee.kaleido.core.network;
+package snownee.kaleido.carpentry.network;
 
 import java.util.function.Supplier;
 

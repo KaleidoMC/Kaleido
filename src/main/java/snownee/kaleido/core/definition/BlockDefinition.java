@@ -108,6 +108,19 @@ public interface BlockDefinition {
 
 	BlockState getBlockState();
 
+	default BlockDefinition getCamoDefinition() {
+		return null;
+	}
+
+	static BlockDefinition getCamo(BlockDefinition definition) {
+		BlockDefinition camo = definition.getCamoDefinition();
+		while (camo != null && camo != definition) {
+			definition = camo;
+			camo = definition.getCamoDefinition();
+		}
+		return definition;
+	}
+
 	SoundType getSoundType();
 
 	interface Factory<T extends BlockDefinition> {

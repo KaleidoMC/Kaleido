@@ -121,4 +121,15 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 		return false;
 	}
 
+	@Override
+	public BlockDefinition getCamoDefinition() {
+		if (blockEntity instanceof ChiseledBlockEntity) {
+			return ((ChiseledBlockEntity) blockEntity).getTexture();
+		}
+		if (blockEntity instanceof ScopeBlockEntity) {
+			return ((ScopeBlockEntity) blockEntity).getBlockDefinition();
+		}
+		return null;
+	}
+
 }

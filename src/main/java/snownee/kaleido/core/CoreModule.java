@@ -16,6 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.loot.LootFunctionType;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.tags.ITag.INamedTag;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -30,6 +31,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import snownee.kaleido.Kaleido;
+import snownee.kaleido.brush.network.CConfigureBrushPacket;
+import snownee.kaleido.carpentry.network.CRedeemPacket;
+import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.action.ActionDeserializer;
 import snownee.kaleido.core.action.CommandAction;
@@ -54,12 +58,9 @@ import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.DynamicBlockDefinition;
 import snownee.kaleido.core.definition.KaleidoBlockDefinition;
 import snownee.kaleido.core.definition.SimpleBlockDefinition;
-import snownee.kaleido.core.item.LuckyBoxItem;
 import snownee.kaleido.core.item.StuffItem;
-import snownee.kaleido.core.network.CRedeemPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
-import snownee.kaleido.core.network.SUnlockModelsPacket;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.data.KaleidoBlockLoot;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
@@ -89,8 +90,6 @@ public class CoreModule extends AbstractModule {
 
 	@NoItem
 	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(HORIZONTAL));
-
-	public static final LuckyBoxItem LUCKY_BOX = new LuckyBoxItem(itemProp());
 
 	public static final Set<Block> MASTER_BLOCKS = Sets.newHashSet();
 	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, MASTER_BLOCKS, null);
@@ -147,6 +146,7 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(CChiselPickPacket.class, new CChiselPickPacket.Handler());
 		NetworkChannel.register(CCreateScopePacket.class, new CCreateScopePacket.Handler());
 		NetworkChannel.register(CConfigureScopePacket.class, new CConfigureScopePacket.Handler());
+		NetworkChannel.register(CConfigureBrushPacket.class, new CConfigureBrushPacket.Handler());
 	}
 
 	@SubscribeEvent
@@ -169,9 +169,9 @@ public class CoreModule extends AbstractModule {
 		BlockColors blockColors = event.getBlockColors();
 		blockColors.register((state, level, pos, i) -> {
 			if (level != null && pos != null) {
-				ModelInfo info = KaleidoBlocks.getInfo(level, pos);
-				if (info != null) {
-					return info.getBlockColor(state, level, pos, i);
+				TileEntity blockEntity = level.getBlockEntity(pos);
+				if (blockEntity instanceof MasterBlockEntity) {
+					return ((MasterBlockEntity) blockEntity).getColor(state, level, pos, i);
 				}
 			}
 			return -1;

@@ -1,4 +1,4 @@
-package snownee.kaleido.core.item;
+package snownee.kaleido.carpentry.item;
 
 import java.util.Collection;
 
@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import snownee.kaleido.carpentry.CarpentryModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kiwi.item.ModItem;
@@ -30,7 +31,7 @@ public class LuckyBoxItem extends ModItem {
 				//            List<ModelInfo> list = ImmutableList.copyOf(infos);
 				//            ModelInfo info = list.get(worldIn.rand.nextInt(list.size()));
 				//            ItemHandlerHelper.giveItemToPlayer(playerIn, info.makeItem());
-				ModelInfo info = KaleidoDataManager.INSTANCE.getRandomLocked((ServerPlayerEntity) playerIn, playerIn.getRandom());
+				ModelInfo info = CarpentryModule.getRandomLocked((ServerPlayerEntity) playerIn, playerIn.getRandom());
 				if (info != null && info.grant((ServerPlayerEntity) playerIn)) {
 					if (!playerIn.isCreative()) {
 						stack.shrink(1);

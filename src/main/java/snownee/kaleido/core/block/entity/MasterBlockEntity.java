@@ -2,6 +2,8 @@ package snownee.kaleido.core.block.entity;
 
 import java.util.List;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockState;
@@ -11,26 +13,32 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import snownee.kaleido.brush.item.BrushItem;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.KaleidoBlockDefinition;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
@@ -42,6 +50,7 @@ public class MasterBlockEntity extends BaseTile {
 
 	private ResourceLocation modelId;
 	private ModelInfo modelInfo;
+	public String[] tint;
 
 	public MasterBlockEntity() {
 		super(CoreModule.MASTER);
@@ -111,6 +120,20 @@ public class MasterBlockEntity extends BaseTile {
 				}
 			}
 		}
+		if (data.contains("Tint")) {
+			ListNBT list = data.getList("Tint", NBT.STRING);
+			if (!list.isEmpty()) {
+				tint = new String[list.size()]; //TODO don't always create new array
+				for (int i = 0; i < tint.length; i++) {
+					String s = list.getString(i);
+					if (!s.isEmpty()) {
+						tint[i] = s;
+					}
+				}
+			}
+		} else {
+			tint = null;
+		}
 	}
 
 	@Override
@@ -140,6 +163,7 @@ public class MasterBlockEntity extends BaseTile {
 	public void setModelInfo(ModelInfo modelInfo) {
 		this.modelInfo = modelInfo;
 		modelId = modelInfo.id;
+		tint = null;
 		if (level != null) {
 			if (!modelInfo.behaviors.isEmpty()) {
 				ImmutableList.Builder<Behavior> list = ImmutableList.builder();
@@ -179,6 +203,15 @@ public class MasterBlockEntity extends BaseTile {
 				data.put("SubTiles", list);
 			}
 		}
+		if (tint != null) {
+			ListNBT list = new ListNBT();
+			for (String s : tint) {
+				if (s == null)
+					s = "";
+				list.add(StringNBT.valueOf(s));
+			}
+			data.put("Tint", list);
+		}
 		return data;
 	}
 
@@ -194,6 +227,29 @@ public class MasterBlockEntity extends BaseTile {
 		if (!isValid())
 			return ActionResultType.PASS;
 		ItemStack stack = player.getItemInHand(handIn);
+		if (stack.getItem() instanceof BrushItem) {
+			String key = BrushItem.getTint(stack);
+			if (Strings.isNullOrEmpty(key)) {
+				KaleidoUtil.displayClientMessage(player, "msg.kaleido.brushNoColor", true);
+				return ActionResultType.FAIL;
+			}
+			if (modelInfo.tint == null) {
+				KaleidoUtil.displayClientMessage(player, "msg.kaleido.brushBlockNotDyeable", true);
+				return ActionResultType.FAIL;
+			}
+			if (!worldIn.isClientSide) {
+				int i = BrushItem.getIndex(stack);
+				i = MathHelper.clamp(i, 0, modelInfo.tint.length - 1); //TODO select ui
+				if (tint == null) {
+					tint = new String[modelInfo.tint.length];
+				}
+				if (!Objects.equal(tint[i], key)) {
+					tint[i] = key;
+					refresh();
+				}
+			}
+			return ActionResultType.SUCCESS;
+		}
 		ActionContext context = new ActionContext(player, handIn, stack, hit, modelInfo);
 		for (Behavior behavior : behaviors) {
 			ActionResultType resultType = behavior.use(context);
@@ -244,6 +300,20 @@ public class MasterBlockEntity extends BaseTile {
 		setModelInfo(newInfo);
 		refresh();
 		return true;
+	}
+
+	public int getColor(BlockState state, IBlockDisplayReader level, BlockPos pos, int i) {
+		ModelInfo info = getModelInfo();
+		if (info == null) {
+			return -1;
+		}
+		if (tint != null) {
+			if (i < 0 || i >= tint.length) {
+				i = 0;
+			}
+			return KaleidoClient.BLOCK_COLORS.getColor(tint[i], state, level, pos, i);
+		}
+		return info.getBlockColor(state, level, pos, i);
 	}
 
 }

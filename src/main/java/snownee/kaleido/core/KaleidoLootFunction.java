@@ -15,7 +15,6 @@ import net.minecraft.loot.LootParameter;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.tileentity.TileEntity;
-import snownee.kaleido.core.block.KaleidoBlocks;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.util.NBTHelper;
 
@@ -45,7 +44,7 @@ public class KaleidoLootFunction extends LootFunction {
 					stack.getOrCreateTag().merge(info.nbt);
 				}
 				NBTHelper data = NBTHelper.of(stack);
-				data.setString(KaleidoBlocks.NBT_ID, info.id.toString());
+				data.setString("Kaleido.Id", info.id.toString());
 			}
 		}
 		return stack;

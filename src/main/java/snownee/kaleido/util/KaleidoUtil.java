@@ -2,6 +2,8 @@ package snownee.kaleido.util;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Iterables;
 
 import net.minecraft.block.BlockState;
@@ -12,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Lazy;
@@ -150,5 +153,15 @@ public class KaleidoUtil {
 
 	public static void copyVector(Vector3f from, Vector3f to) {
 		to.set(from.x(), from.y(), from.z());
+	}
+
+	public static void displayClientMessage(@Nullable PlayerEntity player, String key, boolean client, Object... args) {
+		if (player == null) {
+			return;
+		}
+		if (client != player.level.isClientSide) {
+			return;
+		}
+		player.displayClientMessage(new TranslationTextComponent(key, args), client);
 	}
 }

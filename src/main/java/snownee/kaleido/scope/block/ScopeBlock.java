@@ -89,7 +89,7 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 		if (blockEntity instanceof ScopeBlockEntity) {
 			BlockDefinition definition = ((ScopeBlockEntity) blockEntity).getBlockDefinition();
 			if (definition != null) {
-				return definition.getSoundType();
+				return BlockDefinition.getCamo(definition).getSoundType();
 			}
 		}
 		return SoundType.GLASS;

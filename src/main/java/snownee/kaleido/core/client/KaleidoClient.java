@@ -43,6 +43,8 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 	public static final Map<ModelInfo, IBakedModel[]> MODEL_MAP = Maps.newIdentityHashMap();
 	public static final boolean ctm = ModList.get().isLoaded("ctm");
 	public static final Set<RenderType> blockRenderTypes = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
+	public static final ItemColorCache ITEM_COLORS = new ItemColorCache();
+	public static final BlockColorCache BLOCK_COLORS = new BlockColorCache();
 
 	public static int bgColor = 0xAA212429;
 

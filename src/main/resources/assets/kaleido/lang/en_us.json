@@ -1,24 +1,20 @@
 {
-"item.kaleido.lucky_box": "Lucky Box",
-"item.kaleido.lucky_box.tip": "Unlock random kaleido recipe",
-"item.kaleido.cloth": "Magicloth",
-
 "block.kaleido.stuff": "Kaleido Decor",
 "block.kaleido.horizontal": "Kaleido Decor",
 "block.kaleido.pillar": "Kaleido Decor",
-"block.kaleido.woodworking_bench": "Woodworking Bench",
-
-"entity.minecraft.villager.kaleido.collector": "Collector",
-
 "tip.kaleido.group": "Group: %s#%s",
+
+"item.kaleido.cloth": "Magicloth",
+"item.kaleido.lucky_box": "Lucky Box",
+"item.kaleido.lucky_box.tip": "Unlock random kaleido recipe",
+"block.kaleido.woodworking_bench": "Woodworking Bench",
+"entity.minecraft.villager.kaleido.collector": "Collector",
 "tip.kaleido.unlock": "Trade with collector to unlock a new decoration per day",
 "tip.kaleido.quickSelect": "Press %s on item to quick-select",
-
 "kaleido.toast.title": "New Decors Unlocked!",
 "kaleido.toast.description": "Check woodworking bench",
 
 "item.kaleido.chisel": "Chisel",
-
 "block.kaleido.chiseled": "%s - %s",
 "block.kaleido.chiseled_stairs": "Chiseled Stairs",
 "block.kaleido.chiseled_slab": "Chiseled Slab",
@@ -27,6 +23,10 @@
 "block.kaleido.chiseled_wall": "Chiseled Wall",
 "block.kaleido.chiseled_fence": "Chiseled Fence",
 "block.kaleido.chiseled_fence_gate": "Chiseled Fence Gate",
+
+"item.kaleido.brush": "Brush",
+"msg.kaleido.brushNoColor": "You haven't picked any color yet",
+"msg.kaleido.brushBlockNotDyeable": "This block is not dyeable",
 
 "block.kaleido.scope": "Stored Multipart",
 "gui.kaleido.scope": "Edit Multipart",
@@ -37,5 +37,6 @@
 "gui.kaleido.rotation": "Rotation",
 "gui.kaleido.scale": "Size",
 "gui.kaleido.confirm": "Confirm",
-"gui.kaleido.cancel": "Cancel"
+"gui.kaleido.cancel": "Cancel",
+"msg.kaleido.scopeReachStackLimit": "The number has reached the limit"
 }

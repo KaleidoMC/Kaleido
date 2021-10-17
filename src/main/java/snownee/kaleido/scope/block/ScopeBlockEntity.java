@@ -11,7 +11,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
@@ -21,6 +20,7 @@ import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.client.model.ScopeModel;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.tile.BaseTile;
 import snownee.kiwi.util.NBTHelper.NBT;
 
@@ -75,9 +75,7 @@ public class ScopeBlockEntity extends BaseTile {
 
 	public ScopeStack addStack(BlockDefinition definition, @Nullable PlayerEntity player) {
 		if (stacks.size() >= KaleidoCommonConfig.scopeStackLimit) {
-			if (player != null && !player.level.isClientSide) {
-				player.displayClientMessage(new TranslationTextComponent("kaleido.scopeReachStackLimit"), true);
-			}
+			KaleidoUtil.displayClientMessage(player, "msg.kaleido.scopeReachStackLimit", true);
 			return null;
 		}
 		ScopeStack stack = new ScopeStack(definition);
