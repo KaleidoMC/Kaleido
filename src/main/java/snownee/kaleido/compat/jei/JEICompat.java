@@ -16,7 +16,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 
 @JeiPlugin
 public class JEICompat implements IModPlugin {
@@ -32,7 +32,7 @@ public class JEICompat implements IModPlugin {
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
 		if (KaleidoClientConfig.showInJEI) {
 			registration.registerSubtypeInterpreter(CoreModule.STUFF_ITEM, (stack, ctx) -> {
-				ModelInfo info = KaleidoBlocks.getInfo(stack);
+				ModelInfo info = KaleidoBlock.getInfo(stack);
 				if (info == null || info.expired)
 					return IIngredientSubtypeInterpreter.NONE;
 				return info.id.toString();

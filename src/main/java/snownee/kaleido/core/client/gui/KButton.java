@@ -19,7 +19,7 @@ import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.SmoothChasingValue;
 
 @OnlyIn(Dist.CLIENT)
-public class KaleidoButton extends Button {
+public class KButton extends Button {
 
 	public int xOffset;
 	public int yOffset;
@@ -30,11 +30,11 @@ public class KaleidoButton extends Button {
 	public float textWidth;
 	public ITextProperties wrappedTitle;
 
-	public KaleidoButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress) {
+	public KButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress) {
 		this(pX, pY, pWidth, pHeight, pMessage, pOnPress, NO_TOOLTIP);
 	}
 
-	public KaleidoButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress, ITooltip pOnTooltip) {
+	public KButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress, ITooltip pOnTooltip) {
 		super(pX, pY, pWidth, pHeight, pMessage, pOnPress, pOnTooltip);
 		pos.x.start(pX);
 		pos.y.start(pY);

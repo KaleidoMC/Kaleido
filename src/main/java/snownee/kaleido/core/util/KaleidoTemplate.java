@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoader;
@@ -25,6 +27,7 @@ public enum KaleidoTemplate {
 	horizontal(CoreModule.HORIZONTAL, true, 4, 2),
 	directional(CoreModule.DIRECTIONAL, true, 6, 2), //TODO nonSolid
 	pillar(CoreModule.PILLAR, true, 3, 1),
+	leaves(CoreModule.LEAVES, false, 4, 2),
 	item(Blocks.AIR, true, 1, 0);
 	/* on */
 
@@ -47,6 +50,7 @@ public enum KaleidoTemplate {
 		switch (this) {
 		case none:
 		case horizontal:
+		case leaves:
 			if (!state.hasProperty(HorizontalBlock.FACING))
 				break;
 			return state.getValue(HorizontalBlock.FACING).get2DDataValue();
@@ -73,6 +77,7 @@ public enum KaleidoTemplate {
 			return bloc.defaultBlockState();
 		case none:
 		case horizontal:
+		case leaves:
 			return bloc.defaultBlockState().setValue(HorizontalBlock.FACING, Direction.from2DDataValue(meta));
 		case directional:
 			return bloc.defaultBlockState().setValue(DirectionalBlock.FACING, Direction.from3DDataValue(meta));
@@ -88,7 +93,7 @@ public enum KaleidoTemplate {
 	@Nullable
 	public IBakedModel loadModel(ModelLoader modelLoader, ModelInfo info, int variant) {
 		ModelRotation transform = ModelRotation.X0_Y0;
-		if (this == none || this == horizontal) {
+		if (this == none || this == horizontal || this == leaves) {
 			if (variant == Direction.SOUTH.get2DDataValue()) {
 				transform = ModelRotation.X0_Y180;
 			} else if (variant == Direction.WEST.get2DDataValue()) {
@@ -121,5 +126,19 @@ public enum KaleidoTemplate {
 
 	public ResourceLocation getModelLocation(ModelInfo info, int variant) {
 		return new ResourceLocation(info.id.getNamespace(), "kaleido/" + info.id.getPath());
+	}
+
+	public boolean allowsCustomShape() {
+		return this == none || this == leaves;
+	}
+
+	public VoxelShape getShape() {
+		return VoxelShapes.block();
+	}
+
+	public SoundTypeEnum defaultSoundType() {
+		if (this == leaves)
+			return SoundTypeEnum.grass;
+		return SoundTypeEnum.wood;
 	}
 }

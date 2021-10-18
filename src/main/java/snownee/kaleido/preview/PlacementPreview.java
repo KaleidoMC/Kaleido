@@ -53,7 +53,7 @@ import snownee.kaleido.KaleidoClientConfig;
 import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
@@ -121,12 +121,12 @@ public final class PlacementPreview {
 		}
 		if (held.getItem() instanceof BlockItem) {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
-			ModelInfo info = KaleidoBlocks.getInfo(held);
+			ModelInfo info = KaleidoBlock.getInfo(held);
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
 				if (info == null || info.template == KaleidoTemplate.item) {
 					return false;
 				}
-				if (info.template == KaleidoTemplate.none) {
+				if (info.template.allowsCustomShape()) { // do not render if held model is simple and the same as target
 					TileEntity tile = mc.level.getBlockEntity(((BlockRayTraceResult) mc.hitResult).getBlockPos());
 					if (tile instanceof MasterBlockEntity) {
 						MasterBlockEntity masterTile = (MasterBlockEntity) tile;

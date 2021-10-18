@@ -18,7 +18,6 @@ import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.Button.IPressable;
 import net.minecraft.client.gui.widget.button.Button.ITooltip;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -44,6 +43,7 @@ import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.client.gui.DarkBackground;
+import snownee.kaleido.core.client.gui.KButton;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
@@ -184,15 +184,15 @@ public class CarpentryCraftingScreen extends Screen {
 	private static final Set<String> foldEntries = Sets.newHashSet();
 	private static double scrollAmount;
 	private static final Random RANDOM = new Random();
-	private Button addBtn;
 	private int coins;
 	private ItemStack coinStack;
-	private Button confirmBtn;
 	private int cooldown;
 	private List list;
 	private final BlockPos pos;
 	private StackButton selectedButton;
-	private Button shrinkBtn;
+	private KButton addBtn;
+	private KButton shrinkBtn;
+	private KButton confirmBtn;
 	private TextFieldWidget textField;
 	private int timer;
 	private float ticks;
@@ -285,7 +285,7 @@ public class CarpentryCraftingScreen extends Screen {
 			}
 			return true;
 		});
-		addButton(confirmBtn = new Button(x + 40, y, 20, 20, new StringTextComponent("✓"), btn -> {
+		addButton(confirmBtn = new KButton(x + 40, y, 20, 20, new StringTextComponent("✓"), btn -> {
 			if (cooldown > 0) {
 				return;
 			}
@@ -300,10 +300,10 @@ public class CarpentryCraftingScreen extends Screen {
 				redeemed = true;
 			}
 		}));
-		addButton(addBtn = new Button(x + 20, y, 20, 20, new StringTextComponent("+"), btn -> {
+		addButton(addBtn = new KButton(x + 20, y, 20, 20, new StringTextComponent("+"), btn -> {
 			addNum(1);
 		}));
-		addButton(shrinkBtn = new Button(x - 40, y, 20, 20, new StringTextComponent("-"), btn -> {
+		addButton(shrinkBtn = new KButton(x - 40, y, 20, 20, new StringTextComponent("-"), btn -> {
 			addNum(-1);
 		}));
 		if (selectedButton == null) {

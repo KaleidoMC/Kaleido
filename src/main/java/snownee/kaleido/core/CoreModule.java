@@ -5,6 +5,8 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -19,7 +21,9 @@ import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -49,8 +53,9 @@ import snownee.kaleido.core.behavior.seat.EmptyEntityRenderer;
 import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.KDirectionalBlock;
 import snownee.kaleido.core.block.KHorizontalBlock;
+import snownee.kaleido.core.block.KLeavesBlock;
 import snownee.kaleido.core.block.KRotatedPillarBlock;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
@@ -91,6 +96,9 @@ public class CoreModule extends AbstractModule {
 	@NoItem
 	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(HORIZONTAL));
 
+	@NoItem
+	public static final KLeavesBlock LEAVES = new KLeavesBlock(blockProp(Material.LEAVES).strength(0.2F).randomTicks().sound(SoundType.GRASS).noOcclusion().isValidSpawn(CoreModule::ocelotOrParrot).isSuffocating(CoreModule::never).isViewBlocking(CoreModule::never));
+
 	public static final Set<Block> MASTER_BLOCKS = Sets.newHashSet();
 	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, MASTER_BLOCKS, null);
 
@@ -108,12 +116,21 @@ public class CoreModule extends AbstractModule {
 		KaleidoTemplate.none.hashCode();
 	}
 
+	private static Boolean ocelotOrParrot(BlockState p_235441_0_, IBlockReader p_235441_1_, BlockPos p_235441_2_, EntityType<?> p_235441_3_) {
+		return p_235441_3_ == EntityType.OCELOT || p_235441_3_ == EntityType.PARROT;
+	}
+
+	private static boolean never(BlockState p_235436_0_, IBlockReader p_235436_1_, BlockPos p_235436_2_) {
+		return false;
+	}
+
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(FMLClientSetupEvent event) {
 		RenderingRegistry.registerEntityRenderingHandler(SEAT, EmptyEntityRenderer::new);
 
 		RenderTypeLookup.setRenderLayer(STUFF, KaleidoClient.blockRenderTypes::contains);
+		RenderTypeLookup.setRenderLayer(LEAVES, KaleidoClient.blockRenderTypes::contains);
 
 		KaleidoClient.init();
 		ModBlockItem.INSTANT_UPDATE_TILES.add(MASTER);
@@ -183,7 +200,7 @@ public class CoreModule extends AbstractModule {
 	public void itemColors(ColorHandlerEvent.Item event) {
 		ItemColors itemColors = event.getItemColors();
 		itemColors.register((stack, i) -> {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			ModelInfo info = KaleidoBlock.getInfo(stack);
 			if (info != null) {
 				return info.getItemColor(stack, i);
 			}

@@ -128,6 +128,7 @@ public class MasterBlockEntity extends BaseTile {
 					String s = list.getString(i);
 					if (!s.isEmpty()) {
 						tint[i] = s;
+						KaleidoClient.BLOCK_COLORS.ensureCache(s);
 					}
 				}
 			}

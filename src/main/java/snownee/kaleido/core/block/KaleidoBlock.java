@@ -30,18 +30,51 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
 
-public final class KaleidoBlocks {
+public interface KaleidoBlock extends IForgeBlock {
 
-	public static ModelInfo getInfo(ItemStack stack) {
+	@Override
+	default boolean hasTileEntity(BlockState state) {
+		return true;
+	}
+
+	@Override
+	default TileEntity createTileEntity(BlockState state, IBlockReader world) {
+		return new MasterBlockEntity();
+	}
+
+	@Override
+	default ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM);
+		ModelInfo info = getInfo(world, pos);
+		if (info != null) {
+			NBTHelper.of(stack).setString("Kaleido.Id", info.id.toString());
+		}
+		return stack;
+	}
+
+	@Override
+	default int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+		TileEntity tile = world.getBlockEntity(pos);
+		if (tile instanceof MasterBlockEntity) {
+			return ((MasterBlockEntity) tile).getLightValue();
+		}
+		return 0;
+	}
+
+	KaleidoTemplate getTemplate();
+
+	static ModelInfo getInfo(ItemStack stack) {
 		if (stack.getItem() != CoreModule.STUFF_ITEM)
 			return null;
 		NBTHelper data = NBTHelper.of(stack);
@@ -53,7 +86,7 @@ public final class KaleidoBlocks {
 	}
 
 	@Nullable
-	public static ModelInfo getInfo(IBlockReader level, BlockPos pos) {
+	static ModelInfo getInfo(IBlockReader level, BlockPos pos) {
 		ModelInfo info = null;
 		if (FMLEnvironment.dist.isClient() && level instanceof ServerWorld && Minecraft.getInstance().level != null) {
 			level = Minecraft.getInstance().level;
@@ -78,24 +111,7 @@ public final class KaleidoBlocks {
 		return info;
 	}
 
-	public static ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM);
-		ModelInfo info = getInfo(world, pos);
-		if (info != null) {
-			NBTHelper.of(stack).setString("Kaleido.Id", info.id.toString());
-		}
-		return stack;
-	}
-
-	public static int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			return ((MasterBlockEntity) tile).getLightValue();
-		}
-		return 0;
-	}
-
-	public static void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+	static void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
 		if (stack.getItem() != CoreModule.STUFF_ITEM)
 			return;
 		ModelInfo info = getInfo(stack);
@@ -109,7 +125,7 @@ public final class KaleidoBlocks {
 		}
 	}
 
-	public static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		if (handIn == Hand.OFF_HAND)
 			return ActionResultType.PASS;
 		TileEntity tile = worldIn.getBlockEntity(pos);
@@ -119,23 +135,24 @@ public final class KaleidoBlocks {
 		return ActionResultType.PASS;
 	}
 
-	public static void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
+	static void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
 		TileEntity tile = pLevel.getBlockEntity(pPos);
 		if (tile instanceof MasterBlockEntity) {
 			((MasterBlockEntity) tile).attack(pState, pLevel, pPos, pPlayer);
 		}
 	}
 
-	public static void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
+	static void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
 		TileEntity tile = pLevel.getBlockEntity(pHit.getBlockPos());
 		if (tile instanceof MasterBlockEntity) {
 			((MasterBlockEntity) tile).onProjectileHit(pLevel, pState, pHit, pProjectile);
 		}
 	}
 
-	public static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		if (!state.is(CoreModule.STUFF)) {
-			return VoxelShapes.block();
+	static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
+		if (!template.allowsCustomShape()) {
+			return template.getShape();
 		}
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null) {
@@ -147,9 +164,10 @@ public final class KaleidoBlocks {
 		return VoxelShapes.block();
 	}
 
-	public static VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		if (!state.is(CoreModule.STUFF)) {
-			return VoxelShapes.block();
+	static VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
+		if (!template.allowsCustomShape()) {
+			return template.getShape();
 		}
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null && !info.noCollision) {
@@ -162,7 +180,7 @@ public final class KaleidoBlocks {
 		return VoxelShapes.empty();
 	}
 
-	public static void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+	static void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
 		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
 			fillEmpty(items);
 			Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream()).map(ModelInfo::makeItem).forEach(items::add);
@@ -172,13 +190,13 @@ public final class KaleidoBlocks {
 		}
 	}
 
-	private static void fillEmpty(NonNullList<ItemStack> items) {
+	static void fillEmpty(NonNullList<ItemStack> items) {
 		while (items.size() % 9 != 0) {
 			items.add(ItemStack.EMPTY);
 		}
 	}
 
-	public static SoundType getSoundType(IWorldReader world, BlockPos pos) {
+	static SoundType getSoundType(IWorldReader world, BlockPos pos) {
 		ModelInfo info = getInfo(world, pos);
 		return info == null ? SoundType.WOOD : info.soundType.soundType;
 	}

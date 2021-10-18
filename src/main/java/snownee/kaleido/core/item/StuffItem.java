@@ -21,7 +21,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.item.ModBlockItem;
 
@@ -33,7 +33,7 @@ public class StuffItem extends ModBlockItem {
 
 	@Override
 	public String getDescriptionId(ItemStack stack) {
-		ModelInfo info = KaleidoBlocks.getInfo(stack);
+		ModelInfo info = KaleidoBlock.getInfo(stack);
 		if (info != null) {
 			return info.getDescription().getKey();
 		}
@@ -44,7 +44,7 @@ public class StuffItem extends ModBlockItem {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		if (flagIn.isAdvanced()) {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			ModelInfo info = KaleidoBlock.getInfo(stack);
 			if (info != null && info.group != null) {
 				int i = info.group.infos.indexOf(info);
 				tooltip.add(new TranslationTextComponent("tip.kaleido.group", info.group.id.toString(), i).withStyle(TextFormatting.GRAY));
@@ -56,7 +56,7 @@ public class StuffItem extends ModBlockItem {
 	@Override
 	@Nullable
 	protected BlockState getPlacementState(BlockItemUseContext ctx) {
-		ModelInfo info = KaleidoBlocks.getInfo(ctx.getItemInHand());
+		ModelInfo info = KaleidoBlock.getInfo(ctx.getItemInHand());
 		Block block;
 		if (info == null || info.template == KaleidoTemplate.item)
 			return null;
@@ -67,8 +67,8 @@ public class StuffItem extends ModBlockItem {
 
 	@Override
 	protected boolean canPlace(BlockItemUseContext ctx, BlockState state) {
-		ModelInfo info = KaleidoBlocks.getInfo(ctx.getItemInHand());
-		if (info != null && info.template == KaleidoTemplate.none) {
+		ModelInfo info = KaleidoBlock.getInfo(ctx.getItemInHand());
+		if (info != null) {
 			if (info.noCollision)
 				return true;
 			BlockPos pos = ctx.getClickedPos();

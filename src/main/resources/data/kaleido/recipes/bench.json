@@ -1,5 +1,11 @@
 {
   "type": "crafting_shaped",
+  "conditions": [
+    {
+      "type": "kiwi:is_loaded",
+      "module": "kaleido:carpentry"
+    }
+  ],
   "pattern": [
     "A",
     "B"

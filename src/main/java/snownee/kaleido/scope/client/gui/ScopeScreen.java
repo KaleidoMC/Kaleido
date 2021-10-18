@@ -36,7 +36,7 @@ import snownee.kaleido.core.client.cursor.Cursor;
 import snownee.kaleido.core.client.cursor.CursorChanger;
 import snownee.kaleido.core.client.cursor.StandardCursor;
 import snownee.kaleido.core.client.gui.DarkBackground;
-import snownee.kaleido.core.client.gui.KaleidoButton;
+import snownee.kaleido.core.client.gui.KButton;
 import snownee.kaleido.core.client.gui.Label;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
@@ -57,8 +57,8 @@ public class ScopeScreen extends Screen {
 		private final SmoothChasingVector scale = new SmoothChasingVector();
 		private final SmoothChasingVector translation = new SmoothChasingVector();
 		private boolean removed;
-		private KaleidoButton button;
-		private KaleidoButton removeButton;
+		private KButton button;
+		private KButton removeButton;
 
 		private StackInfo(ScopeStack stack) {
 			this.stack = stack;
@@ -105,10 +105,10 @@ public class ScopeScreen extends Screen {
 	@Nullable
 	private StackInfo activeInfo;
 	private CheckboxButton snapCheckbox;
-	private KaleidoButton resetButton;
+	private KButton resetButton;
 	private boolean canceled;
-	private KaleidoButton cancelButton;
-	private KaleidoButton confirmButton;
+	private KButton cancelButton;
+	private KButton confirmButton;
 	private Label positionLabel;
 	private Label sizeLabel;
 	private Label rotationLabel;
@@ -135,14 +135,14 @@ public class ScopeScreen extends Screen {
 		ITextComponent xTitle = new StringTextComponent("X");
 		for (ScopeStack stack : stacks) {
 			StackInfo info = getInfo(stack);
-			KaleidoButton button = new KaleidoButton(0, 50 + i * 20, 90, 20, stack.blockDefinition.getDescription(), $ -> {
+			KButton button = new KButton(0, 50 + i * 20, 90, 20, stack.blockDefinition.getDescription(), $ -> {
 				setActiveInfo(info);
 			});
 			button.yOffset = 1;
 			info.button = button;
 			addButton(button);
 			if (i != 0 || minecraft.player.isCreative()) {
-				KaleidoButton removeButton = new KaleidoButton(90, 50 + i * 20, 20, 20, xTitle, $ -> {
+				KButton removeButton = new KButton(90, 50 + i * 20, 20, 20, xTitle, $ -> {
 					info.removed = true;
 					info.button.visible = false;
 					$.visible = false;
@@ -165,7 +165,7 @@ public class ScopeScreen extends Screen {
 		snapCheckbox.selected = snap;
 		addButton(snapCheckbox);
 
-		resetButton = new KaleidoButton(0, 5, 35, 18, new TranslationTextComponent("gui.kaleido.reset"), $ -> reset());
+		resetButton = new KButton(0, 5, 35, 18, new TranslationTextComponent("gui.kaleido.reset"), $ -> reset());
 		addButton(resetButton);
 
 		ITextComponent translationTitle = new TranslationTextComponent("gui.kaleido.translation");
@@ -218,13 +218,13 @@ public class ScopeScreen extends Screen {
 			addButton(editBox2);
 		}
 
-		cancelButton = new KaleidoButton(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.cancel"), $ -> {
+		cancelButton = new KButton(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.cancel"), $ -> {
 			canceled = true;
 			onClose();
 		});
 		addButton(cancelButton);
 
-		confirmButton = new KaleidoButton(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.confirm"), $ -> {
+		confirmButton = new KButton(0, 0, 50, 20, new TranslationTextComponent("gui.kaleido.confirm"), $ -> {
 			onClose();
 		});
 		confirmButton.lineColor = 0x0894ED;

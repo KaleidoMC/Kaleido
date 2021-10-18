@@ -33,7 +33,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockDisplayReader;
@@ -74,7 +73,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public String[] tint;
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
-	public SoundTypeEnum soundType = SoundTypeEnum.wood;
+	public SoundTypeEnum soundType;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
@@ -184,9 +183,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				buf.writeUtf(s, 64);
 			}
 		}
-		if (!template.solid) {
+		if (template.allowsCustomShape()) {
 			buf.writeByteArray(shapes.hashCode.asBytes());
 			buf.writeBoolean(noCollision);
+		}
+		if (!template.solid) {
 			buf.writeBoolean(glass);
 			buf.writeEnum(offset);
 			buf.writeByte(renderTypes.size());
@@ -213,9 +214,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				info.tint[i] = buf.readUtf(64);
 			}
 		}
-		if (!info.template.solid) {
+		if (info.template.allowsCustomShape()) {
 			info.shapes = KaleidoDataManager.INSTANCE.shapeCache.get(HashCode.fromBytes(buf.readByteArray()));
 			info.noCollision = buf.readBoolean();
+		}
+		if (!info.template.solid) {
 			info.glass = buf.readBoolean();
 			info.offset = buf.readEnum(OffsetType.class);
 			byte size = buf.readByte();
@@ -237,6 +240,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
 		if (json.has("sound"))
 			info.soundType = SoundTypeEnum.valueOf(JSONUtils.getAsString(json, "sound"));
+		else
+			info.soundType = info.template.defaultSoundType();
 		ImmutableList.Builder<Behavior> behaviors = ImmutableList.builder();
 		if (json.has("behavior")) {
 			behaviors.add(Behavior.fromJson(json.get("behavior")));
@@ -264,11 +269,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 		info.price = JSONUtils.getAsInt(json, "price", 1);
 		info.nbt = JsonUtils.readNBT(json, "nbt");
-		if (!info.template.solid) {
+		if (info.template.allowsCustomShape()) {
 			if (json.has("shape")) {
 				info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
 			}
 			info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
+		}
+		if (!info.template.solid) {
 			info.glass = JSONUtils.getAsBoolean(json, "glass", false);
 			if (json.has("renderType")) {
 				info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
@@ -286,8 +293,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public VoxelShape getShape(Direction direction, BlockPos pos) {
-		if (template.solid)
-			return VoxelShapes.block();
+		if (!template.allowsCustomShape())
+			return template.getShape();
 		if (direction == null)
 			direction = Direction.NORTH;
 

@@ -12,11 +12,15 @@ import snownee.kiwi.config.KiwiConfig.Range;
 public final class KaleidoCommonConfig {
 
 	public static List<String> ignoredNamespaces = Collections.EMPTY_LIST;
-	public static boolean autoUnlock = true; //TODO change to false
+
 	@Comment(
 		"Disable generating advancements to accelerate loading and save memories. Only available if autoUnlock is true"
 	)
 	public static boolean disableAdvancements = false;
+
+	@Path("carpentry.autoUnlock")
+	public static boolean autoUnlock = true; //TODO change to false
+
 	@Path("debugWorld.patch")
 	public static boolean patchDebugWorld = true;
 	@Path("debugWorld.spacing")

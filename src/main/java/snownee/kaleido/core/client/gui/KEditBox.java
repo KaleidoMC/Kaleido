@@ -1,72 +1,70 @@
-package snownee.kaleido.scope.client.gui;
+package snownee.kaleido.core.client.gui;
 
-import java.util.function.BooleanSupplier;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.Direction.Axis;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kaleido.core.client.cursor.Cursor;
-import snownee.kaleido.core.client.cursor.CursorChanger;
-import snownee.kaleido.core.client.cursor.StandardCursor;
-import snownee.kaleido.core.client.gui.KEditBox;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class AxisEditBox extends KEditBox implements CursorChanger {
+public class KEditBox extends TextFieldWidget {
 
-	private final BooleanSupplier snap;
-	private final float step;
-	private final Axis axis;
 	public Supplier<String> getter;
 	public FloatConsumer setter;
-	private float scrolledValue;
+	private ContentType contentType = ContentType.Text;
 
-	public AxisEditBox(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, BooleanSupplier snap, float step, Axis axis) {
-		super(pX, pY, pWidth, pHeight, pMessage);
-		this.snap = snap;
-		this.step = step;
-		this.axis = axis;
-		active = false;
-		setContentType(ContentType.Number);
+	public KEditBox(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage) {
+		super(Minecraft.getInstance().font, pX, pY, pWidth, pHeight, pMessage);
+	}
+
+	public float getFloat() {
+		try {
+			return Float.valueOf(getValue());
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	public int getInt() {
+		try {
+			return Integer.valueOf(getValue());
+		} catch (Throwable e) {
+			return 0;
+		}
 	}
 
 	@Override
-	protected void onDrag(double pMouseX, double pMouseY, double pDragX, double pDragY) {
-		if (!active)
-			return;
-		mouseScrolled(pMouseX, pMouseY, pDragX * 0.5F);
-		StandardCursor.H_RESIZE.use();
-		super.setFocused(false);
-	}
-
-	@Override
-	public float getStep() {
-		return step;
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+		if (!active) {
+			return visible && pMouseX >= x && pMouseY >= y && pMouseX < x + width && pMouseY < y + height;
+		}
+		return super.mouseClicked(pMouseX, pMouseY, pButton);
 	}
 
 	@Override
 	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-		if (!active) {
+		if (!active || !contentType.isNumeric()) {
 			return false;
 		}
-		scrolledValue += pDelta * step;
-		float f = getFloat();
-		float f1 = f + scrolledValue;
-		if (snap.getAsBoolean())
-			f1 = Math.round(f1 / step) * step;
-		if (f != f1) {
-			scrolledValue = 0;
-			setter.accept(f1);
+		float scrolledValue = (float) pDelta * getStep();
+		if (scrolledValue != 0) {
+			setter.accept(getFloat() + scrolledValue);
 			setValue(getter.get());
 		}
 		return true;
+	}
+
+	public float getStep() {
+		return 1;
 	}
 
 	@Override
@@ -78,17 +76,6 @@ public class AxisEditBox extends KEditBox implements CursorChanger {
 		int bgColor = active ? 0x66000000 : 0x66555555;
 		float alpha = isFocused() ? this.alpha : this.alpha * 0.6F;
 		fill(pMatrixStack, x, y, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
-		if (active) {
-			int borderColor;
-			if (axis == Axis.X) {
-				borderColor = 0xFF1242;
-			} else if (axis == Axis.Y) {
-				borderColor = 0x23D400;
-			} else {
-				borderColor = 0x0894ED;
-			}
-			fill(pMatrixStack, x - 1, y, x, y + height, KaleidoUtil.applyAlpha(borderColor, alpha));
-		}
 
 		int textColor = isEditable() ? this.textColor : textColorUneditable;
 		int j = getCursorPosition() - displayPos;
@@ -137,6 +124,17 @@ public class AxisEditBox extends KEditBox implements CursorChanger {
 	}
 
 	@Override
+	public void setFocus(boolean pIsFocused) {
+		setFocused(pIsFocused);
+	}
+
+	@Override
+	protected void setFocused(boolean pFocused) {
+		super.setFocused(pFocused);
+		onFocusedChanged(pFocused);
+	}
+
+	@Override
 	protected void onFocusedChanged(boolean pFocused) {
 		if (pFocused) {
 			frame = 0;
@@ -146,14 +144,29 @@ public class AxisEditBox extends KEditBox implements CursorChanger {
 		}
 	}
 
-	@Override
-	public ITextComponent getMessage() {
-		return new TranslationTextComponent("%s %s", super.getMessage(), axis);
+	public ContentType getContentType() {
+		return contentType;
 	}
 
-	@Override
-	public Cursor getCursor(int pMouseX, int pMouseY, float pPartialTicks) {
-		return visible && active && !isFocused() ? StandardCursor.H_RESIZE : StandardCursor.ARROW;
+	public void setContentType(ContentType contentType) {
+		this.contentType = contentType;
+		setFilter(contentType.filter);
+	}
+
+	public enum ContentType {
+		Text(Objects::nonNull),
+		Number(s -> s != null && s.matches("[0-9.+-]*")),
+		Int(s -> s != null && s.matches("[0-9+-]*"));
+
+		public final Predicate<String> filter;
+
+		ContentType(Predicate<String> filter) {
+			this.filter = filter;
+		}
+
+		public boolean isNumeric() {
+			return this == Number || this == Int;
+		}
 	}
 
 }

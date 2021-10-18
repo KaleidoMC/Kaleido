@@ -55,12 +55,22 @@ public abstract class ColorCache<T> {
 		return constants.computeIfAbsent(color, $ -> loadConstant($));
 	}
 
+	public void ensureCache(String key) {
+		if (key.isEmpty() || cache.getIfPresent(key) != null) {
+			return;
+		}
+		if (key.charAt(0) == '#' || key.charAt(key.length() - 1) == ')' || key.indexOf(':') == -1) {
+			Color color = Color.fromString(key);
+			if (color != null) {
+				cache.put(key, createConstant(color.toInt()));
+			}
+		}
+	}
+
 	private T _loadColor(String key) {
-		T itemColor = null;
-		Color color = Color.fromString(key);
-		if (color == null) {
-			itemColor = loadColor(key);
-		} else {
+		T itemColor = loadColor(key);
+		if (itemColor == null) {
+			Color color = Color.fromString(key);
 			int i = color.toInt();
 			T constant = constants.get(i);
 			itemColor = constant == null ? loadConstant(i) : constant;

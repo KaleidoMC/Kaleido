@@ -6,11 +6,11 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.client.gui.KaleidoButton;
+import snownee.kaleido.core.client.gui.KButton;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class CheckboxButton extends KaleidoButton {
+public class CheckboxButton extends KButton {
 
 	public boolean selected;
 

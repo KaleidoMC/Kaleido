@@ -43,7 +43,7 @@ import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.util.KaleidoTemplate;
 
@@ -93,7 +93,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 		@Nullable
 		@Override
 		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld worldIn, @Nullable LivingEntity entityIn) {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			ModelInfo info = KaleidoBlock.getInfo(stack);
 			if (info == null || Minecraft.getInstance().overlay != null) {
 				return null;
 			}

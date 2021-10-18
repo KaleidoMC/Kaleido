@@ -1,0 +1,28 @@
+{
+  "type": "crafting_shaped",
+  "conditions": [
+    {
+      "type": "kiwi:is_loaded",
+      "module": "kaleido:hammer"
+    }
+  ],
+  "pattern": [
+    "CAC",
+    " B ",
+    " B "
+  ],
+  "key": {
+    "A": {
+      "tag": "forge:nuggets/gold"
+    },
+    "B": {
+      "tag": "forge:rods/wooden"
+    },
+    "C": {
+      "tag": "forge:cobblestone"
+    }
+  },
+  "result": {
+    "item": "kaleido:hammer"
+  }
+}

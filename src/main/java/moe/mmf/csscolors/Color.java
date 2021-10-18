@@ -1,5 +1,6 @@
 package moe.mmf.csscolors;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,12 +66,16 @@ public class Color {
 
 	public static Color fromString(String color) {
 		color = color.trim();
+		if (color.isEmpty()) {
+			return null;
+		}
 		// Hex
 		if (color.charAt(0) == '#') {
 			return fromHex(color);
 		}
 
-		if (color.charAt(color.length() - 1) == ')') {
+		color = color.toLowerCase(Locale.ENGLISH);
+		if (color.charAt(color.length() - 1) == ')' && color.contains("(")) {
 			boolean isRGB, alpha = false;
 			if (color.length() < 10) {
 				// rgb(r,g,b)
@@ -86,7 +91,7 @@ public class Color {
 			if (color.charAt(4) == 'a') {
 				alpha = true;
 			}
-			color = color.substring(color.indexOf("(") + 1, color.indexOf(")"));
+			color = color.substring(color.indexOf('(') + 1, color.length() - 1);
 			if (isRGB) {
 				return fromRGB(color, alpha);
 			} else {

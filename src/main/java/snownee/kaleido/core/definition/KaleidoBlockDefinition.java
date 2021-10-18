@@ -36,7 +36,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kiwi.util.NBTHelper;
@@ -69,7 +69,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 
 		@Override
 		public KaleidoBlockDefinition fromItem(ItemStack stack, BlockItemUseContext context) {
-			ModelInfo info = KaleidoBlocks.getInfo(stack);
+			ModelInfo info = KaleidoBlock.getInfo(stack);
 			if (info == null)
 				return null;
 			BlockState state = info.template.bloc.getStateForPlacement(context);

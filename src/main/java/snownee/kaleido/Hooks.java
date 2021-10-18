@@ -45,7 +45,7 @@ import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.block.KaleidoBlocks;
+import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeStack;
@@ -120,8 +120,8 @@ public final class Hooks {
 		BlockPos blockpos = pos.relative(direction);
 		BlockState blockstate = level.getBlockState(blockpos);
 		if (state.is(blockstate.getBlock())) {
-			ModelInfo info1 = KaleidoBlocks.getInfo(level, pos);
-			ModelInfo info2 = KaleidoBlocks.getInfo(level, blockpos);
+			ModelInfo info1 = KaleidoBlock.getInfo(level, pos);
+			ModelInfo info2 = KaleidoBlock.getInfo(level, blockpos);
 			if (info1 != null && info1 == info2 && info1.glass) {
 				return true;
 			}
