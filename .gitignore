@@ -1,0 +1,43 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+#*.jar
+!gradle-wrapper.jar
+/Projects/
+
+/.factorypath
+/logs/
+/scripts/*/data/
+/scripts/*/models/
+/scripts/*/resources/
+/scripts/*/lang/
+/scripts/*/original_lang/
+
+/src/main/resources/assets/cocricot/
+/src/main/resources/data/cocricot/
+
+run/*
+!run/config
+run/config/*
+!run/config/worldedit
+kaleido-mappings.json
+/scripts/*/blockstates
+yuushya/
