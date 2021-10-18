@@ -135,7 +135,7 @@ public enum KaleidoTemplate {
 		return this == none || this == leaves || this == plant;
 	}
 
-	public VoxelShape getShape() {
+	public VoxelShape getShape(BlockState state) {
 		return VoxelShapes.block();
 	}
 

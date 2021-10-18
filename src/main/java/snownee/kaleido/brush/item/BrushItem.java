@@ -2,6 +2,8 @@ package snownee.kaleido.brush.item;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Objects;
+
 import moe.mmf.csscolors.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -26,6 +29,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.brush.network.CConfigureBrushPacket;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.mixin.MixinBlockColors;
 import snownee.kiwi.item.ModItem;
@@ -42,47 +46,61 @@ public class BrushItem extends ModItem {
 		if (!event.isPickBlock())
 			return;
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null || mc.level == null || mc.hitResult == null || mc.hitResult.getType() != Type.BLOCK)
+		if (mc.player == null || mc.level == null || mc.hitResult == null || mc.hitResult.getType() == Type.ENTITY)
 			return;
 		ClientPlayerEntity player = mc.player;
 		ItemStack stack = player.getItemInHand(event.getHand());
 		if (!(stack.getItem() instanceof BrushItem))
 			return;
 		event.setCanceled(true);
-		BlockRayTraceResult hitResult = (BlockRayTraceResult) mc.hitResult;
-		BlockPos pos = hitResult.getBlockPos();
-		BlockState state = player.level.getBlockState(pos);
 		String oldKey = getTint(stack);
 		String key;
-		IBlockColor blockColor = ((MixinBlockColors) mc.getBlockColors()).getBlockColors().get(state.getBlock().delegate);
-		if (blockColor == null || Kaleido.isKaleidoBlock(state)) {
-			TileEntity blockEntity = player.level.getBlockEntity(pos);
-			if (blockEntity instanceof MasterBlockEntity) {
-				MasterBlockEntity master = (MasterBlockEntity) blockEntity;
-				ModelInfo info = master.getModelInfo();
-				if (info == null || info.tint == null) {
-					return;
-				}
-				int index = getIndex(stack);
-				index = MathHelper.clamp(index, 0, info.tint.length - 1);
-				if (master.tint != null && master.tint.length == info.tint.length && master.tint[index] != null) {
-					key = master.tint[index];
+		if (mc.hitResult.getType() == Type.BLOCK) {
+			BlockRayTraceResult hitResult = (BlockRayTraceResult) mc.hitResult;
+			BlockPos pos = hitResult.getBlockPos();
+			BlockState state = player.level.getBlockState(pos);
+			Color color = null;
+			IBlockColor blockColor = ((MixinBlockColors) mc.getBlockColors()).getBlockColors().get(state.getBlock().delegate);
+			if (blockColor == null || Kaleido.isKaleidoBlock(state)) {
+				TileEntity blockEntity = player.level.getBlockEntity(pos);
+				if (blockEntity instanceof MasterBlockEntity) {
+					MasterBlockEntity master = (MasterBlockEntity) blockEntity;
+					ModelInfo info = master.getModelInfo();
+					if (info == null || info.tint == null) {
+						return;
+					}
+					int index = getIndex(stack);
+					index = MathHelper.clamp(index, 0, info.tint.length - 1);
+					if (master.tint != null && master.tint.length == info.tint.length && master.tint[index] != null) {
+						key = master.tint[index];
+					} else {
+						key = info.tint[index];
+					}
 				} else {
-					key = info.tint[index];
+					BlockDefinition definition = BlockDefinition.fromBlock(state, blockEntity, player.level, pos);
+					int col = BlockDefinition.getCamo(definition).getBlockState().getMapColor(player.level, pos).col;
+					color = fromInt(col);
+					key = color.toHex();
+					KaleidoClient.ITEM_COLORS.ensureCache(key);
 				}
 			} else {
-				BlockDefinition definition = BlockDefinition.fromBlock(state, blockEntity, player.level, pos);
-				int col = BlockDefinition.getCamo(definition).getBlockState().getMapColor(player.level, pos).col;
-				byte r = (byte) (col >> 16 & 255);
-				byte g = (byte) (col >> 8 & 255);
-				byte b = (byte) (col & 255);
-				key = Color.fromRGB(r, g, b).toHex();
+				key = state.getBlock().getRegistryName().toString();
 			}
-		} else {
-			key = state.getBlock().getRegistryName().toString();
+			if (oldKey != null) {
+				if (color == null) {
+					color = fromInt(KaleidoClient.ITEM_COLORS.getColor(key, stack, 0));
+				}
+				int oldColor = KaleidoClient.ITEM_COLORS.getColor(oldKey, stack, 0);
+				color = mix(fromInt(oldColor), color);
+				key = color.toHex();
+				KaleidoClient.ITEM_COLORS.ensureCache(key);
+			}
+		} else { // MISS
+			key = null;
 		}
-		if (!key.equals(oldKey)) {
-			player.level.playSound(player, player.getX(), player.getY() + 0.5, player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+		if (!Objects.equal(oldKey, key)) {
+			SoundEvent sound = key == null ? SoundEvents.BUCKET_EMPTY : SoundEvents.ITEM_PICKUP;
+			player.level.playSound(player, player.getX(), player.getY() + 0.5, player.getZ(), sound, SoundCategory.PLAYERS, 0.2F, ((player.level.random.nextFloat() - player.level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 			new CConfigureBrushPacket(event.getHand(), key).send();
 		}
 	}
@@ -113,6 +131,30 @@ public class BrushItem extends ModItem {
 			}
 		}
 		return index;
+	}
+
+	public static Color mix(Color color1, Color color2) {
+		float aR = (color1.R() + color2.R()) / 2;
+		float aG = (color1.G() + color2.G()) / 2;
+		float aB = (color1.B() + color2.B()) / 2;
+		float aMaximum = (max(color1.R(), color1.G(), color1.B()) + max(color2.R(), color2.G(), color2.B())) / 2;
+		float maximumOfAverage = max(aR, aG, aB);
+		float factor = aMaximum / maximumOfAverage;
+		byte R = (byte) (aR * factor);
+		byte G = (byte) (aG * factor);
+		byte B = (byte) (aB * factor);
+		return Color.fromRGB(R, G, B);
+	}
+
+	public static float max(float r, float g, float b) {
+		return Math.max(r, Math.max(g, b));
+	}
+
+	public static Color fromInt(int col) {
+		byte r = (byte) (col >> 16 & 255);
+		byte g = (byte) (col >> 8 & 255);
+		byte b = (byte) (col & 255);
+		return Color.fromRGB(r, g, b);
 	}
 
 }

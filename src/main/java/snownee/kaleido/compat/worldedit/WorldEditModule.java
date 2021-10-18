@@ -31,6 +31,13 @@ public class WorldEditModule extends AbstractModule {
 
 	private static boolean worldLoaded;
 
+	private final String link = "https://cdn.jsdelivr.net/gh/KaleidoMC/Kaleido@worldedit-scripts/1.16.js";
+
+	@Override
+	protected void postInit() {
+		//TODO
+	}
+
 	@SubscribeEvent
 	public void onWorldLoad(WorldEvent.Load event) {
 		IWorld level = event.getWorld();

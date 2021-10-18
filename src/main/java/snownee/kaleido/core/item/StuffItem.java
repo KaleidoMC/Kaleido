@@ -72,7 +72,7 @@ public class StuffItem extends ModBlockItem {
 			if (info.noCollision)
 				return true;
 			BlockPos pos = ctx.getClickedPos();
-			VoxelShape shape = info.getShape(ctx.getHorizontalDirection(), pos);
+			VoxelShape shape = info.getShape(state, pos);
 			return ctx.getLevel().isUnobstructed(null, shape.move(pos.getX(), pos.getY(), pos.getZ()));
 		}
 		return super.canPlace(ctx, state);

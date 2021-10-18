@@ -37,7 +37,8 @@ import snownee.kaleido.core.client.cursor.CursorChanger;
 import snownee.kaleido.core.client.cursor.StandardCursor;
 import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KButton;
-import snownee.kaleido.core.client.gui.Label;
+import snownee.kaleido.core.client.gui.KCheckbox;
+import snownee.kaleido.core.client.gui.KLabel;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
@@ -104,14 +105,14 @@ public class ScopeScreen extends Screen {
 	private final AxisEditBox[] editBoxes = new AxisEditBox[9];
 	@Nullable
 	private StackInfo activeInfo;
-	private CheckboxButton snapCheckbox;
+	private KCheckbox snapCheckbox;
 	private KButton resetButton;
 	private boolean canceled;
 	private KButton cancelButton;
 	private KButton confirmButton;
-	private Label positionLabel;
-	private Label sizeLabel;
-	private Label rotationLabel;
+	private KLabel positionLabel;
+	private KLabel sizeLabel;
+	private KLabel rotationLabel;
 	private int existedStacks;
 
 	public ScopeScreen(ScopeBlockEntity blockEntity) {
@@ -160,7 +161,7 @@ public class ScopeScreen extends Screen {
 			++i;
 		}
 
-		snapCheckbox = new CheckboxButton(0, 5, 30, 18, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
+		snapCheckbox = new KCheckbox(0, 5, 30, 18, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
 		});
 		snapCheckbox.selected = snap;
 		addButton(snapCheckbox);
@@ -172,11 +173,11 @@ public class ScopeScreen extends Screen {
 		ITextComponent scaleTitle = new TranslationTextComponent("gui.kaleido.scale");
 		ITextComponent rotationTitle = new TranslationTextComponent("gui.kaleido.rotation");
 
-		positionLabel = new Label(0, 30, 100, 0, translationTitle);
+		positionLabel = new KLabel(0, 30, 100, 0, translationTitle);
 		addButton(positionLabel);
-		sizeLabel = new Label(0, 60, 100, 0, scaleTitle);
+		sizeLabel = new KLabel(0, 60, 100, 0, scaleTitle);
 		addButton(sizeLabel);
-		rotationLabel = new Label(0, 90, 100, 0, rotationTitle);
+		rotationLabel = new KLabel(0, 90, 100, 0, rotationTitle);
 		addButton(rotationLabel);
 
 		DecimalFormat dfCommas = new DecimalFormat("##.###");
@@ -230,7 +231,7 @@ public class ScopeScreen extends Screen {
 		confirmButton.lineColor = 0x0894ED;
 		addButton(confirmButton);
 
-		Label inDevLabel = new Label(5, height - 11, 100, 15, new StringTextComponent("In Development"));
+		KLabel inDevLabel = new KLabel(5, height - 11, 100, 15, new StringTextComponent("In Development"));
 		inDevLabel.active = false;
 		addButton(inDevLabel);
 

@@ -17,7 +17,7 @@ public class CConfigureBrushPacket extends ClientPacket {
 
 	public CConfigureBrushPacket(Hand hand, String key) {
 		this.hand = hand;
-		this.key = key;
+		this.key = key == null ? "" : key;
 	}
 
 	public static class Handler extends PacketHandler<CConfigureBrushPacket> {
@@ -39,7 +39,16 @@ public class CConfigureBrushPacket extends ClientPacket {
 				ServerPlayerEntity player = ctx.get().getSender();
 				ItemStack stack = player.getItemInHand(pkt.hand);
 				if (stack.getItem() instanceof BrushItem) {
-					stack.getOrCreateTag().putString("Tint", pkt.key);
+					if (pkt.key.isEmpty()) {
+						if (stack.hasTag()) {
+							stack.getTag().remove("Tint");
+							if (stack.getTag().isEmpty()) {
+								stack.setTag(null);
+							}
+						}
+					} else {
+						stack.getOrCreateTag().putString("Tint", pkt.key);
+					}
 				}
 			});
 			ctx.get().setPacketHandled(true);

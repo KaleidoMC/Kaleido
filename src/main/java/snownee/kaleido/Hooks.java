@@ -57,6 +57,7 @@ public final class Hooks {
 	public static boolean carpentryEnabled;
 	public static boolean chiselEnabled;
 	public static boolean scopeEnabled;
+	public static boolean brushEnabled;
 
 	@OnlyIn(Dist.CLIENT)
 	private static ResourceLocation DEFAULT_PARENT;

@@ -8,9 +8,9 @@ import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
 import snownee.kaleido.util.KaleidoUtil;
 
-public class Label extends Widget {
+public class KLabel extends Widget {
 
-	public Label(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage) {
+	public KLabel(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage) {
 		super(pX, pY, pWidth, pHeight, pMessage);
 	}
 

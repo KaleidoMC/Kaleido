@@ -7,6 +7,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.brush.item.BrushItem;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kiwi.AbstractModule;
@@ -22,6 +23,7 @@ public class BrushModule extends AbstractModule {
 
 	@Override
 	protected void init(FMLCommonSetupEvent event) {
+		Hooks.brushEnabled = true;
 		MinecraftForge.EVENT_BUS.register(BrushItem.class);
 	}
 

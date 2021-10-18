@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
@@ -152,11 +151,11 @@ public interface KaleidoBlock extends IForgeBlock {
 	static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
 		if (!template.allowsCustomShape()) {
-			return template.getShape();
+			return template.getShape(state);
 		}
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null) {
-			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
+			VoxelShape shape = info.getShape(state, pos);
 			if (!shape.isEmpty()) {
 				return shape;
 			}
@@ -167,11 +166,11 @@ public interface KaleidoBlock extends IForgeBlock {
 	static VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
 		if (!template.allowsCustomShape()) {
-			return template.getShape();
+			return template.getShape(state);
 		}
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null && !info.noCollision) {
-			VoxelShape shape = info.getShape(state.getValue(HorizontalBlock.FACING), pos);
+			VoxelShape shape = info.getShape(state, pos);
 			if (info.outOfBlock()) {
 				shape = VoxelShapes.join(shape, VoxelShapes.block(), IBooleanFunction.AND);
 			}

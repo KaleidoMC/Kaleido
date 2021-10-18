@@ -19,6 +19,8 @@ import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -292,11 +294,17 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return info;
 	}
 
-	public VoxelShape getShape(Direction direction, BlockPos pos) {
+	public VoxelShape getShape(BlockState state, BlockPos pos) {
 		if (!template.allowsCustomShape())
-			return template.getShape();
-		if (direction == null)
+			return template.getShape(state);
+		Direction direction = null;
+		if (state.hasProperty(HorizontalBlock.FACING)) {
+			direction = state.getValue(HorizontalBlock.FACING);
+		} else if (state.hasProperty(DirectionalBlock.FACING)) {
+			direction = state.getValue(DirectionalBlock.FACING);
+		} else {
 			direction = Direction.NORTH;
+		}
 
 		VoxelShape shape = shapes.get(direction);
 		if (!shape.isEmpty() && offset != OffsetType.NONE) {
