@@ -132,7 +132,7 @@ public enum KaleidoTemplate {
 	}
 
 	public boolean allowsCustomShape() {
-		return this == none || this == leaves;
+		return this == none || this == leaves || this == plant;
 	}
 
 	public VoxelShape getShape() {
@@ -140,7 +140,7 @@ public enum KaleidoTemplate {
 	}
 
 	public SoundTypeEnum defaultSoundType() {
-		if (this == leaves)
+		if (this == leaves || this == plant)
 			return SoundTypeEnum.grass;
 		return SoundTypeEnum.wood;
 	}

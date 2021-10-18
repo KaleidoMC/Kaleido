@@ -14,6 +14,7 @@ import net.minecraft.block.GlazedTerracottaBlock;
 import net.minecraft.block.HugeMushroomBlock;
 import net.minecraft.block.PaneBlock;
 import net.minecraft.block.RotatedPillarBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.TrapDoorBlock;
 import net.minecraft.block.VineBlock;
@@ -38,6 +39,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.block.LayersBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.mallet.MalletModule;
 import snownee.kaleido.util.KaleidoUtil;
@@ -82,6 +84,8 @@ public class MalletItem extends ModItem {
 		StateContainer<Block, BlockState> statecontainer = block.getStateDefinition();
 		Collection<Property<?>> collection = Lists.newArrayList(statecontainer.getProperties());
 		collection.remove(BlockStateProperties.WATERLOGGED);
+		collection.remove(LayersBlock.LAYERS);
+		collection.remove(SlabBlock.TYPE);
 		@SuppressWarnings("deprecation")
 		String s = Registry.BLOCK.getKey(block).toString();
 		if (collection.isEmpty()) {

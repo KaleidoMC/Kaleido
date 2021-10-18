@@ -53,8 +53,8 @@ public class NewModelToast implements IToast {
 			toastGui.getMinecraft().getTextureManager().bind(TEXTURE);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			toastGui.blit(matrix, 0, 0, 0, 32, 160, 32);
-			toastGui.getMinecraft().font.draw(matrix, I18n.get("kaleido.toast.title"), 30.0F, 7.0F, -11534256);
-			toastGui.getMinecraft().font.draw(matrix, I18n.get("kaleido.toast.description"), 30.0F, 18.0F, -16777216);
+			toastGui.getMinecraft().font.draw(matrix, I18n.get("toast.kaleido.title"), 30.0F, 7.0F, -11534256);
+			toastGui.getMinecraft().font.draw(matrix, I18n.get("toast.kaleido.description"), 30.0F, 18.0F, -16777216);
 			ItemStack stack = stacks.get((int) ((delta * stacks.size() / 5000L) % stacks.size())); //Forge: fix math so that it doesn't divide by 0 when there are more than 5000 recipes
 			toastGui.getMinecraft().getItemRenderer().renderAndDecorateItem((LivingEntity) null, stack, 8, 8);
 			return delta - firstDrawTime >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;

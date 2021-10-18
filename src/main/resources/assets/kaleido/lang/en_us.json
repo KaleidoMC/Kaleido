@@ -11,8 +11,8 @@
 "entity.minecraft.villager.kaleido.collector": "Collector",
 "tip.kaleido.unlock": "Trade with collector to unlock a new decoration per day",
 "tip.kaleido.quickSelect": "Press %s on item to quick-select",
-"kaleido.toast.title": "New Decors Unlocked!",
-"kaleido.toast.description": "Check woodworking bench",
+"toast.kaleido.title": "New Decors Unlocked!",
+"toast.kaleido.description": "Check woodworking bench",
 
 "item.kaleido.chisel": "Chisel",
 "block.kaleido.chiseled": "%s - %s",
@@ -42,5 +42,7 @@
 "msg.kaleido.scopeReachStackLimit": "The number has reached the limit",
 
 "item.kaleido.mallet": "Mallet",
-"msg.kaleido.malletUnsupported": "Unsupported to use mallet on this block"
+"msg.kaleido.malletUnsupported": "Unsupported to use mallet on this block",
+
+"key.kaleido.togglePreview": "Toggle Preview"
 }
