@@ -155,13 +155,13 @@ public class KaleidoUtil {
 		to.set(from.x(), from.y(), from.z());
 	}
 
-	public static void displayClientMessage(@Nullable PlayerEntity player, String key, boolean client, Object... args) {
+	public static void displayClientMessage(@Nullable PlayerEntity player, boolean client, String key, Object... args) {
 		if (player == null) {
 			return;
 		}
 		if (client != player.level.isClientSide) {
 			return;
 		}
-		player.displayClientMessage(new TranslationTextComponent(key, args), client);
+		player.displayClientMessage(new TranslationTextComponent(key, args), true);
 	}
 }

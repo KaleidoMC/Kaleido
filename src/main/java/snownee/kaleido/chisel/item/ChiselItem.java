@@ -9,6 +9,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -20,7 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.chisel.ChiselModule;
@@ -33,10 +34,6 @@ import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 
 public class ChiselItem extends ModItem {
-
-	static {
-		MinecraftForge.EVENT_BUS.register(ChiselItem.class);
-	}
 
 	public ChiselItem(Properties builder) {
 		super(builder.stacksTo(1).tab(ItemGroup.TAB_TOOLS));
@@ -59,34 +56,52 @@ public class ChiselItem extends ModItem {
 				return false;
 			}
 		}
-		if (!level.isClientSide) {
-			ItemStack stack = player.getMainHandItem();
-			BlockRayTraceResult hitResult = getPlayerPOVHitResult(level, player, FluidMode.NONE);
-			if (hitResult.getType() == Type.MISS) {
+		ItemStack stack = player.getMainHandItem();
+		BlockRayTraceResult hitResult = getPlayerPOVHitResult(level, player, FluidMode.NONE);
+		if (hitResult.getType() == Type.MISS) {
+			return false;
+		}
+		ChiselPalette palette = palette(stack);
+		if (palette == ChiselPalette.NONE) {
+			palette = ChiselPalette.byBlock(state).next();
+			if (palette != ChiselPalette.NONE)
+				player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
+		}
+		BlockDefinition supplier;
+		BlockItemUseContext context = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, hitResult);
+		context.replaceClicked = true;
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (isChiseled) {
+			if (!(blockEntity instanceof ChiseledBlockEntity))
 				return false;
-			}
-			ChiselPalette palette = palette(stack);
-			if (palette == ChiselPalette.NONE) {
-				palette = ChiselPalette.byBlock(state).next();
-				if (palette != ChiselPalette.NONE)
-					player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
-			}
-			BlockDefinition supplier;
-			BlockItemUseContext context = new BlockItemUseContext(player, Hand.MAIN_HAND, stack, hitResult);
-			context.replaceClicked = true;
-			TileEntity blockEntity = level.getBlockEntity(pos);
-			if (isChiseled) {
-				if (!(blockEntity instanceof ChiseledBlockEntity))
-					return false;
-				supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
-			} else {
-				supplier = BlockDefinition.fromBlock(state, blockEntity, level, pos);
-			}
-			if (supplier != null) {
-				palette.place(supplier, level, pos, context);
-			}
+			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
+		} else {
+			supplier = BlockDefinition.fromBlock(state, blockEntity, level, pos);
+		}
+		if (supplier != null) {
+			palette.place(supplier, level, pos, context);
 		}
 		return false;
+	}
+
+	@SubscribeEvent
+	public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getPlayer().isCreative()) {
+			return;
+		}
+		ItemStack stack = event.getItemStack();
+		if (!(stack.getItem() instanceof ChiselItem))
+			return;
+		event.setCanceled(true);
+		CooldownTracker cooldowns = event.getPlayer().getCooldowns();
+		if (cooldowns.isOnCooldown(stack.getItem())) {
+			return;
+		}
+		World worldIn = event.getWorld();
+		BlockPos pos = event.getPos();
+		BlockState state = worldIn.getBlockState(pos);
+		stack.getItem().canAttackBlock(state, worldIn, pos, event.getPlayer());
+		cooldowns.addCooldown(stack.getItem(), 10);
 	}
 
 	@SubscribeEvent

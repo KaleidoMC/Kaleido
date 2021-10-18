@@ -28,6 +28,7 @@
 "msg.kaleido.brushNoColor": "You haven't picked any color yet",
 "msg.kaleido.brushBlockNotDyeable": "This block is not dyeable",
 
+"key.kaleido.scope": "Create Multipart",
 "block.kaleido.scope": "Stored Multipart",
 "gui.kaleido.scope": "Edit Multipart",
 "gui.kaleido.snap": "Snap",
@@ -38,5 +39,8 @@
 "gui.kaleido.scale": "Size",
 "gui.kaleido.confirm": "Confirm",
 "gui.kaleido.cancel": "Cancel",
-"msg.kaleido.scopeReachStackLimit": "The number has reached the limit"
+"msg.kaleido.scopeReachStackLimit": "The number has reached the limit",
+
+"item.kaleido.mallet": "Mallet",
+"msg.kaleido.malletUnsupported": "Unsupported to use mallet on this block"
 }

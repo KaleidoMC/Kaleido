@@ -1,6 +1,6 @@
 {
+"template": "plant",
 "renderType": "cutout",
 "offset": "XYZ",
-"sound": "grass",
 "tint": "rebeccapurple"
 }

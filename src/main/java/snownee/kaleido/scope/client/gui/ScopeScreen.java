@@ -497,4 +497,9 @@ public class ScopeScreen extends Screen {
 		}
 	}
 
+	@Override
+	public void removed() {
+		StandardCursor.ARROW.use();
+	}
+
 }

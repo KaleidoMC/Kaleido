@@ -300,6 +300,7 @@ public class CarpentryCraftingScreen extends Screen {
 				redeemed = true;
 			}
 		}));
+		confirmBtn.lineColor = 0x0894ED;
 		addButton(addBtn = new KButton(x + 20, y, 20, 20, new StringTextComponent("+"), btn -> {
 			addNum(1);
 		}));

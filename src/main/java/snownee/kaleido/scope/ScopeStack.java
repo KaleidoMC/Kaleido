@@ -70,7 +70,7 @@ public class ScopeStack {
 		boolean transformed = bTranslate || bRotate || bScale;
 
 		// fix z-fighting
-		int i = hashCode();
+		int i = blockDefinition.hashCode();
 		double ox = (((i & 15L) / 15.0D) - 0.5) * 0.002;
 		double oy = (((i >> 4 & 15L) / 15.0D) - 0.5) * 0.002;
 		double oz = (((i >> 8 & 15L) / 15.0D) - 0.5) * 0.002;

@@ -54,6 +54,7 @@ import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.KDirectionalBlock;
 import snownee.kaleido.core.block.KHorizontalBlock;
 import snownee.kaleido.core.block.KLeavesBlock;
+import snownee.kaleido.core.block.KPlantBlock;
 import snownee.kaleido.core.block.KRotatedPillarBlock;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
@@ -97,7 +98,10 @@ public class CoreModule extends AbstractModule {
 	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(HORIZONTAL));
 
 	@NoItem
-	public static final KLeavesBlock LEAVES = new KLeavesBlock(blockProp(Material.LEAVES).strength(0.2F).randomTicks().sound(SoundType.GRASS).noOcclusion().isValidSpawn(CoreModule::ocelotOrParrot).isSuffocating(CoreModule::never).isViewBlocking(CoreModule::never));
+	public static final KLeavesBlock LEAVES = new KLeavesBlock(blockProp(Material.LEAVES).strength(0.2F).sound(SoundType.GRASS).noOcclusion().dynamicShape().isValidSpawn(CoreModule::ocelotOrParrot).isSuffocating(CoreModule::never).isViewBlocking(CoreModule::never));
+
+	@NoItem
+	public static final KPlantBlock PLANT = new KPlantBlock(blockProp(Material.PLANT).strength(0.2F).sound(SoundType.GRASS).noOcclusion().dynamicShape());
 
 	public static final Set<Block> MASTER_BLOCKS = Sets.newHashSet();
 	public static final TileEntityType<MasterBlockEntity> MASTER = new TileEntityType<>(MasterBlockEntity::new, MASTER_BLOCKS, null);
@@ -131,6 +135,7 @@ public class CoreModule extends AbstractModule {
 
 		RenderTypeLookup.setRenderLayer(STUFF, KaleidoClient.blockRenderTypes::contains);
 		RenderTypeLookup.setRenderLayer(LEAVES, KaleidoClient.blockRenderTypes::contains);
+		RenderTypeLookup.setRenderLayer(PLANT, KaleidoClient.blockRenderTypes::contains);
 
 		KaleidoClient.init();
 		ModBlockItem.INSTANT_UPDATE_TILES.add(MASTER);

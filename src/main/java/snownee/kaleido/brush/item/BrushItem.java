@@ -21,7 +21,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.brush.network.CConfigureBrushPacket;
@@ -32,10 +31,6 @@ import snownee.kaleido.mixin.MixinBlockColors;
 import snownee.kiwi.item.ModItem;
 
 public class BrushItem extends ModItem {
-
-	static {
-		MinecraftForge.EVENT_BUS.register(BrushItem.class);
-	}
 
 	public BrushItem(Properties builder) {
 		super(builder.stacksTo(1).tab(ItemGroup.TAB_TOOLS));

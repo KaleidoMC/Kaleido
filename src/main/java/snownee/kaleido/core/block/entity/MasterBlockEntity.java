@@ -231,11 +231,11 @@ public class MasterBlockEntity extends BaseTile {
 		if (stack.getItem() instanceof BrushItem) {
 			String key = BrushItem.getTint(stack);
 			if (Strings.isNullOrEmpty(key)) {
-				KaleidoUtil.displayClientMessage(player, "msg.kaleido.brushNoColor", true);
+				KaleidoUtil.displayClientMessage(player, true, "msg.kaleido.brushNoColor");
 				return ActionResultType.FAIL;
 			}
 			if (modelInfo.tint == null) {
-				KaleidoUtil.displayClientMessage(player, "msg.kaleido.brushBlockNotDyeable", true);
+				KaleidoUtil.displayClientMessage(player, true, "msg.kaleido.brushBlockNotDyeable");
 				return ActionResultType.FAIL;
 			}
 			if (!worldIn.isClientSide) {

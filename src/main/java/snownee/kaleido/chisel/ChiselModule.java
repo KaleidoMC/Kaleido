@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -74,6 +75,7 @@ public class ChiselModule extends AbstractModule {
 	protected void init(FMLCommonSetupEvent event) {
 		Hooks.chiselEnabled = true;
 		ChiselPalette.init();
+		MinecraftForge.EVENT_BUS.register(ChiselItem.class);
 	}
 
 	@Override

@@ -75,7 +75,7 @@ public class ScopeBlockEntity extends BaseTile {
 
 	public ScopeStack addStack(BlockDefinition definition, @Nullable PlayerEntity player) {
 		if (stacks.size() >= KaleidoCommonConfig.scopeStackLimit) {
-			KaleidoUtil.displayClientMessage(player, "msg.kaleido.scopeReachStackLimit", true);
+			KaleidoUtil.displayClientMessage(player, true, "msg.kaleido.scopeReachStackLimit");
 			return null;
 		}
 		ScopeStack stack = new ScopeStack(definition);

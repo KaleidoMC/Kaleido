@@ -3,7 +3,7 @@
   "conditions": [
     {
       "type": "kiwi:is_loaded",
-      "module": "kaleido:hammer"
+      "module": "kaleido:mallet"
     }
   ],
   "pattern": [
@@ -23,6 +23,6 @@
     }
   },
   "result": {
-    "item": "kaleido:hammer"
+    "item": "kaleido:mallet"
   }
 }

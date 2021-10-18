@@ -28,6 +28,7 @@ public enum KaleidoTemplate {
 	directional(CoreModule.DIRECTIONAL, true, 6, 2), //TODO nonSolid
 	pillar(CoreModule.PILLAR, true, 3, 1),
 	leaves(CoreModule.LEAVES, false, 4, 2),
+	plant(CoreModule.PLANT, false, 4, 2),
 	item(Blocks.AIR, true, 1, 0);
 	/* on */
 
@@ -51,6 +52,7 @@ public enum KaleidoTemplate {
 		case none:
 		case horizontal:
 		case leaves:
+		case plant:
 			if (!state.hasProperty(HorizontalBlock.FACING))
 				break;
 			return state.getValue(HorizontalBlock.FACING).get2DDataValue();
@@ -78,6 +80,7 @@ public enum KaleidoTemplate {
 		case none:
 		case horizontal:
 		case leaves:
+		case plant:
 			return bloc.defaultBlockState().setValue(HorizontalBlock.FACING, Direction.from2DDataValue(meta));
 		case directional:
 			return bloc.defaultBlockState().setValue(DirectionalBlock.FACING, Direction.from3DDataValue(meta));
@@ -93,7 +96,7 @@ public enum KaleidoTemplate {
 	@Nullable
 	public IBakedModel loadModel(ModelLoader modelLoader, ModelInfo info, int variant) {
 		ModelRotation transform = ModelRotation.X0_Y0;
-		if (this == none || this == horizontal || this == leaves) {
+		if (this == none || this == horizontal || this == leaves || this == plant) {
 			if (variant == Direction.SOUTH.get2DDataValue()) {
 				transform = ModelRotation.X0_Y180;
 			} else if (variant == Direction.WEST.get2DDataValue()) {
