@@ -13,13 +13,16 @@ public final class KaleidoCommonConfig {
 
 	public static List<String> ignoredNamespaces = Collections.EMPTY_LIST;
 
-	@Comment(
-		"Disable generating advancements to accelerate loading and save memories. Only available if autoUnlock is true"
-	)
+	@Comment("Disable generating advancements to accelerate loading and save memories.")
 	public static boolean disableAdvancements = false;
 
 	@Path("carpentry.autoUnlock")
+	@Comment("Only available if disableAdvancements is false")
 	public static boolean autoUnlock = true; //TODO change to false
+
+	public static boolean autoUnlock() {
+		return !Hooks.carpentryEnabled || autoUnlock || disableAdvancements;
+	}
 
 	@Path("debugWorld.patch")
 	public static boolean patchDebugWorld = true;
@@ -30,9 +33,5 @@ public final class KaleidoCommonConfig {
 	@Path("scope.stackLimit")
 	@Range(min = 1)
 	public static int scopeStackLimit = 8;
-
-	public static boolean generateAdvancements() {
-		return !autoUnlock || !disableAdvancements;
-	}
 
 }

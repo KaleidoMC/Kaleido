@@ -16,7 +16,6 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button.IPressable;
 import net.minecraft.client.gui.widget.button.Button.ITooltip;
@@ -44,6 +43,8 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KButton;
+import snownee.kaleido.core.client.gui.KEditBox;
+import snownee.kaleido.core.client.gui.KEditBox.ContentType;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
@@ -148,7 +149,7 @@ public class CarpentryCraftingScreen extends Screen {
 				});
 			}
 
-			if (!KaleidoCommonConfig.autoUnlock) {
+			if (!KaleidoCommonConfig.autoUnlock()) {
 				matrix.pushPose();
 				matrix.scale(0.75f, 0.75f, 0.75f);
 				AbstractGui.drawCenteredString(matrix, parent.font, unlocked + "/" + size, (int) ((left + entryWidth - 18) * 1.33), (int) ((top + 5.5) * 1.33), 0xFFFFFF);
@@ -193,7 +194,7 @@ public class CarpentryCraftingScreen extends Screen {
 	private KButton addBtn;
 	private KButton shrinkBtn;
 	private KButton confirmBtn;
-	private TextFieldWidget textField;
+	private KEditBox editBox;
 	private int timer;
 	private float ticks;
 	private final DarkBackground background = new DarkBackground();
@@ -220,7 +221,7 @@ public class CarpentryCraftingScreen extends Screen {
 		} else {
 			cur = Math.max(cur + n, 1);
 		}
-		textField.setValue(Integer.toString(cur));
+		editBox.setValue(Integer.toString(cur));
 	}
 
 	public int getRedeemAmount() {
@@ -228,7 +229,7 @@ public class CarpentryCraftingScreen extends Screen {
 			return 0;
 		}
 		try {
-			return Integer.parseInt(textField.getValue());
+			return Integer.parseInt(editBox.getValue());
 		} catch (Exception e) {
 			return 0;
 		}
@@ -242,7 +243,7 @@ public class CarpentryCraftingScreen extends Screen {
 		ClientPlayerEntity player = minecraft.player;
 		if (tip == null) {
 			String s;
-			if (KaleidoCommonConfig.autoUnlock || player.isCreative()) {
+			if (KaleidoCommonConfig.autoUnlock() || player.isCreative()) {
 				s = I18n.get("tip.kaleido.quickSelect", minecraft.options.keyJump.getTranslatedKeyMessage().getString());
 			} else {
 				s = I18n.get("tip.kaleido.unlock");
@@ -266,8 +267,12 @@ public class CarpentryCraftingScreen extends Screen {
 
 		int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 125;
 		int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 50;
-		addButton(textField = new TextFieldWidget(font, x - 19, y + 1, 38, 18, new StringTextComponent("")));
-		textField.setFilter(str -> {
+		addButton(editBox = new KEditBox(x - 19, y + 1, 38, 18, new StringTextComponent("")));
+		editBox.setContentType(ContentType.Int);
+		editBox.setFilter(str -> {
+			if (str == null) {
+				return false;
+			}
 			if (str.isEmpty()) {
 				return true;
 			}
@@ -364,21 +369,23 @@ public class CarpentryCraftingScreen extends Screen {
 		}
 		list.setTop(top * height - height + 20);
 		list.render(matrix, mouseX, mouseY, pTicks);
+		int textColor = KaleidoUtil.applyAlpha(0xFFFFFF, background.alpha);
 		font.draw(matrix, getTitle(), list.x0 + 4, list.y0 - 14, 0xFFFFFF);
 
 		itemRenderer.renderAndDecorateItem(coinStack, width - 20, (int) (top * 20 - 15));
 		String numText = Integer.toString(coins);
-		font.drawShadow(matrix, numText, width - 25 - font.width(numText), top * 20 - 11, 0xFFFFFFFF);
+		font.drawShadow(matrix, numText, width - 25 - font.width(numText), top * 20 - 11, textColor);
 
-		if (background.alpha < 0.5f) {
-			return;
-		}
 		for (Widget widget : buttons) {
+			widget.setAlpha(background.alpha);
 			widget.render(matrix, mouseX, mouseY, pTicks);
 		}
 		int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 85;
 		int y = minecraft.getWindow().getGuiScaledHeight() / 2 - 65;
 		if (selectedButton != null) {
+			if (background.alpha < 0.5f) {
+				return;
+			}
 			ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(x, y, 0);
@@ -389,7 +396,7 @@ public class CarpentryCraftingScreen extends Screen {
 			RenderSystem.popMatrix();
 			x += 40;
 			y += 40 - 62;
-			drawCenteredString(matrix, font, selectedButton.stack.getHoverName(), x, y, 0xFFFFFFFF);
+			drawCenteredString(matrix, font, selectedButton.stack.getHoverName(), x, y, textColor);
 			if (!selectedButton.info.isLocked()) {
 				itemRenderer.renderAndDecorateItem(coinStack, x + 45, y + 95);
 				int amount = getRedeemAmount();
@@ -402,7 +409,7 @@ public class CarpentryCraftingScreen extends Screen {
 			x += 40;
 			y += 40;
 			for (ITextProperties s : tip) {
-				drawCenteredString(matrix, font, s.getString(), x, y, 0xFFFFFFFF);
+				drawCenteredString(matrix, font, s.getString(), x, y, textColor);
 				y += 15;
 			}
 		}
@@ -420,22 +427,22 @@ public class CarpentryCraftingScreen extends Screen {
 			addBtn.visible = false;
 			shrinkBtn.visible = false;
 			confirmBtn.visible = false;
-			textField.visible = false;
+			editBox.visible = false;
 		} else {
-			if (textField.getValue().isEmpty()) {
-				textField.setValue("1");
+			if (editBox.getValue().isEmpty()) {
+				editBox.setValue("1");
 			}
 			confirmBtn.visible = true;
 			addBtn.visible = true;
 			shrinkBtn.visible = true;
 			confirmBtn.visible = true;
-			textField.visible = true;
+			editBox.visible = true;
 			boolean active = !selectedButton.info.isLocked();
 			confirmBtn.active = active;
 			addBtn.active = active;
 			shrinkBtn.active = active;
 			confirmBtn.active = active;
-			textField.active = active;
+			editBox.active = active;
 		}
 	}
 

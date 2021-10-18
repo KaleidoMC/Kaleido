@@ -141,14 +141,14 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	@OnlyIn(Dist.CLIENT)
 	public boolean isLocked() {
-		return !KaleidoCommonConfig.autoUnlock && locked;
+		return !KaleidoCommonConfig.autoUnlock() && locked;
 	}
 
 	public boolean isLockedServer(ServerPlayerEntity player) {
 		if (ServerLifecycleHooks.getCurrentServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
-			return !KaleidoCommonConfig.autoUnlock && !isAdvancementDone(player);
+			return !KaleidoCommonConfig.autoUnlock() && !isAdvancementDone(player);
 		}
 	}
 

@@ -83,7 +83,7 @@ public class StackButton extends Button {
 		originalX = x;
 		originalY = y;
 		alpha = 0;
-		if (!KaleidoCommonConfig.autoUnlock && info.reward) {
+		if (!KaleidoCommonConfig.autoUnlock() && info.reward) {
 			frameColor = 0xFFDF00;
 		}
 	}

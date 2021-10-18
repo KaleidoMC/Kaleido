@@ -57,8 +57,12 @@ public class KEditBox extends TextFieldWidget {
 		}
 		float scrolledValue = (float) pDelta * getStep();
 		if (scrolledValue != 0) {
-			setter.accept(getFloat() + scrolledValue);
-			setValue(getter.get());
+			if (getter != null && setter != null) {
+				setter.accept(getFloat() + scrolledValue);
+				setValue(getter.get());
+			} else {
+				setValue(String.valueOf((int) (getFloat() + scrolledValue))); //FIXME
+			}
 		}
 		return true;
 	}
@@ -73,11 +77,10 @@ public class KEditBox extends TextFieldWidget {
 			return;
 		}
 
-		int bgColor = active ? 0x66000000 : 0x66555555;
-		float alpha = isFocused() ? this.alpha : this.alpha * 0.6F;
-		fill(pMatrixStack, x, y, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
+		renderBg(pMatrixStack, Minecraft.getInstance(), pMouseX, pMouseY);
 
 		int textColor = isEditable() ? this.textColor : textColorUneditable;
+		textColor = KaleidoUtil.applyAlpha(textColor, alpha);
 		int j = getCursorPosition() - displayPos;
 		int k = highlightPos - displayPos;
 		String s = font.plainSubstrByWidth(getValue().substring(displayPos), getInnerWidth());
@@ -124,6 +127,33 @@ public class KEditBox extends TextFieldWidget {
 	}
 
 	@Override
+	protected void renderBg(MatrixStack pMatrixStack, Minecraft pMinecraft, int pMouseX, int pMouseY) {
+		int bgColor = active ? 0x66000000 : 0x66555555;
+		float alpha = isFocused() ? this.alpha : this.alpha * 0.6F;
+		fill(pMatrixStack, x, y, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
+		if (active) {
+			int borderColor = 0xDDDDDD;
+			borderColor = KaleidoUtil.applyAlpha(borderColor, alpha);
+			fill(pMatrixStack, x - 1, y, x, y + height, borderColor);
+			fill(pMatrixStack, x + width, y, x + width + 1, y + height, borderColor);
+			fill(pMatrixStack, x - 1, y - 1, x + width + 1, y, borderColor);
+			fill(pMatrixStack, x - 1, y + height, x + width + 1, y + height + 1, borderColor);
+		}
+	}
+
+	@Override
+	public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+		if (!this.canConsumeInput()) {
+			return false;
+		}
+		if (pKeyCode == 257) {
+			setFocus(false);
+			return true;
+		}
+		return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+	}
+
+	@Override
 	public void setFocus(boolean pIsFocused) {
 		setFocused(pIsFocused);
 	}
@@ -139,8 +169,10 @@ public class KEditBox extends TextFieldWidget {
 		if (pFocused) {
 			frame = 0;
 		} else if (active && visible) {
-			setter.accept(getFloat());
-			setValue(getter.get());
+			if (getter != null && setter != null) {
+				setter.accept(getFloat());
+				setValue(getter.get());
+			}
 		}
 	}
 

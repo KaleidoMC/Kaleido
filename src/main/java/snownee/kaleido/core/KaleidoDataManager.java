@@ -122,7 +122,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		}
 		allPacks.values().parallelStream().forEach(ModelPack::sort);
 		allGroups.values().parallelStream().forEach($ -> Collections.sort($.infos));
-		if (KaleidoCommonConfig.generateAdvancements()) {
+		if (!KaleidoCommonConfig.disableAdvancements) {
 			if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
 				for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
 					if (listener instanceof AdvancementManager) {
@@ -208,7 +208,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	public void syncAllLockInfo(ServerPlayerEntity player) {
-		if (!Hooks.carpentryEnabled || KaleidoCommonConfig.autoUnlock)
+		if (KaleidoCommonConfig.autoUnlock())
 			return;
 		/* off */
         List<ResourceLocation> list = allInfos.values().stream()
