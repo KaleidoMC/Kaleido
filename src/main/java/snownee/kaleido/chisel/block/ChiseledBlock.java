@@ -6,6 +6,7 @@ import java.util.Objects;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -14,6 +15,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
@@ -21,13 +23,17 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.extensions.IForgeBlock;
+import snownee.kaleido.chisel.ChiselModule;
+import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.util.NBTHelper;
 
-public final class ChiseledBlocks {
+public interface ChiseledBlock extends IForgeBlock {
 
-	public static ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
+	static ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
 		//		ItemStack stack = player.getItemInHand(hand);
 		//		if (!(stack.getItem() instanceof BlockItem)) {
 		//			return ActionResultType.PASS;
@@ -60,7 +66,7 @@ public final class ChiseledBlocks {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static void appendHoverText(ItemStack stack, IBlockReader level, List<ITextComponent> components, ITooltipFlag flag) {
+	static void appendHoverText(ItemStack stack, IBlockReader level, List<ITextComponent> components, ITooltipFlag flag) {
 		NBTHelper data = NBTHelper.of(stack);
 		CompoundNBT tag = data.getTag("BlockEntityTag.Overrides.0");
 		BlockDefinition supplier = BlockDefinition.fromNBT(tag);
@@ -71,15 +77,7 @@ public final class ChiseledBlocks {
 		}
 	}
 
-	public static SoundType getSoundType(IWorldReader level, BlockPos pos) {
-		BlockDefinition supplier = null;
-		TileEntity blockEntity = level.getBlockEntity(pos);
-		if (blockEntity instanceof ChiseledBlockEntity)
-			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
-		return supplier == null ? SoundType.STONE : supplier.getSoundType();
-	}
-
-	public static BlockDefinition getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
+	static BlockDefinition getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (!(blockEntity instanceof ChiseledBlockEntity))
 			return null;
@@ -87,4 +85,37 @@ public final class ChiseledBlocks {
 		BlockDefinition supplier1 = RetextureModel.OverrideList.overridesFromItem(stack).get("0");
 		return Objects.equals(supplier0, supplier1) ? supplier0 : null;
 	}
+
+	@Override
+	default boolean hasTileEntity(BlockState state) {
+		return true;
+	}
+
+	@Override
+	default TileEntity createTileEntity(BlockState state, IBlockReader world) {
+		return ChiselModule.CHISELED.create();
+	}
+
+	@Override
+	default ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return ModBlock.pickBlock(state, target, world, pos, player);
+	}
+
+	@Override
+	default SoundType getSoundType(BlockState state, IWorldReader level, BlockPos pos, Entity entity) {
+		BlockDefinition supplier = null;
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity instanceof ChiseledBlockEntity)
+			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
+		return supplier == null ? SoundType.WOOD : supplier.getSoundType();
+	}
+
+	@Override
+	default int getLightValue(BlockState state, IBlockReader level, BlockPos pos) {
+		TileEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity instanceof ChiseledBlockEntity)
+			return ((ChiseledBlockEntity) blockEntity).getLight();
+		return 0;
+	}
+
 }

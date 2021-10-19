@@ -64,11 +64,8 @@ public interface KaleidoBlock extends IForgeBlock {
 
 	@Override
 	default int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-		TileEntity tile = world.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			return ((MasterBlockEntity) tile).getLightValue();
-		}
-		return 0;
+		ModelInfo info = getInfo(world, pos);
+		return info == null ? 0 : info.lightEmission;
 	}
 
 	KaleidoTemplate getTemplate();

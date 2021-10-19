@@ -1,8 +1,9 @@
-package snownee.kaleido.chisel.block;
+package snownee.kaleido.chisel.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import snownee.kaleido.chisel.ChiselModule;
+import snownee.kaleido.core.block.entity.BELightManager;
 import snownee.kaleido.core.definition.BlockDefinition;
 
 public class ChiseledBlockEntity extends RetextureBlockEntity {
@@ -12,15 +13,22 @@ public class ChiseledBlockEntity extends RetextureBlockEntity {
 	}
 
 	@Override
-	public CompoundNBT save(CompoundNBT p_189515_1_) {
-		writePacketData(p_189515_1_);
-		return super.save(p_189515_1_);
+	public CompoundNBT save(CompoundNBT data) {
+		writePacketData(data);
+		return super.save(data);
 	}
 
 	@Override
-	public void load(BlockState p_230337_1_, CompoundNBT p_230337_2_) {
-		readPacketData(p_230337_2_);
-		super.load(p_230337_1_, p_230337_2_);
+	public void load(BlockState state, CompoundNBT data) {
+		readPacketData(data);
+		super.load(state, data);
+	}
+
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		lightManager = new BELightManager(level, worldPosition, this::getLightRaw);
+		lightManager.update();
 	}
 
 	public boolean canOcclude() {

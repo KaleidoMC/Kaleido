@@ -59,7 +59,7 @@ import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import snownee.kaleido.chisel.block.RetextureBlockEntity;
+import snownee.kaleido.chisel.block.entity.RetextureBlockEntity;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kiwi.util.NBTHelper;
 
@@ -67,7 +67,6 @@ import snownee.kiwi.util.NBTHelper;
 @OnlyIn(Dist.CLIENT)
 public class RetextureModel implements IDynamicBakedModel {
 	public static ModelProperty<Map<String, BlockDefinition>> TEXTURES = new ModelProperty<>();
-	public static Map<IBakedModel, RetextureModel> CACHES = Maps.newHashMap();
 
 	public static class ModelConfiguration implements IModelConfiguration {
 

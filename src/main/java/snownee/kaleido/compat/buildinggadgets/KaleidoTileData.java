@@ -23,7 +23,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.kaleido.Kaleido;
-import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.DynamicBlockDefinition;

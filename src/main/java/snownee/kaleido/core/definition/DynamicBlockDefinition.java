@@ -16,7 +16,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import snownee.kaleido.Hooks;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 

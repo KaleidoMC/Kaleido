@@ -121,6 +121,10 @@ public interface BlockDefinition {
 		return definition;
 	}
 
+	default int getLightValue(IBlockReader level, BlockPos pos) {
+		return getBlockState().getLightValue(level, pos);
+	}
+
 	SoundType getSoundType();
 
 	interface Factory<T extends BlockDefinition> {

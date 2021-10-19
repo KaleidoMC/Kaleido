@@ -209,7 +209,12 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 
 	@Override
 	public SoundType getSoundType() {
-		return SoundType.STONE;
+		return getModelInfo().soundType.soundType;
+	}
+
+	@Override
+	public int getLightValue(IBlockReader level, BlockPos pos) {
+		return getModelInfo().lightEmission;
 	}
 
 	public ModelInfo getModelInfo() {

@@ -47,6 +47,7 @@ public class MasterBlockEntity extends BaseTile {
 
 	public ImmutableList<Behavior> behaviors = ImmutableList.of();
 	private IModelData modelData = EmptyModelData.INSTANCE;
+	protected BELightManager lightManager;
 
 	private ResourceLocation modelId;
 	private ModelInfo modelInfo;
@@ -138,15 +139,21 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	@Override
-	public void onChunkUnloaded() {
-		invalidate();
-		super.onChunkUnloaded();
+	public void onLoad() {
+		super.onLoad();
+		lightManager = new BELightManager(level, worldPosition, this::getLightRaw);
+		lightManager.update();
+	}
+
+	protected int getLightRaw() {
+		return getModelInfo() == null ? 0 : getModelInfo().lightEmission;
 	}
 
 	@Override
-	public void setRemoved() {
+	protected void invalidateCaps() {
 		invalidate();
-		super.setRemoved();
+		super.invalidateCaps();
+		lightManager = null;
 	}
 
 	@Override
@@ -162,6 +169,8 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	public void setModelInfo(ModelInfo modelInfo) {
+		if (modelInfo == this.modelInfo)
+			return;
 		this.modelInfo = modelInfo;
 		modelId = modelInfo.id;
 		tint = null;
@@ -173,8 +182,8 @@ public class MasterBlockEntity extends BaseTile {
 				}
 				behaviors = list.build();
 			}
-			if (getLightValue() > 0) {
-				level.getLightEngine().checkBlock(worldPosition);
+			if (lightManager != null) {
+				lightManager.set(modelInfo.lightEmission);
 			}
 			if (level.isClientSide) {
 				if (modelData == EmptyModelData.INSTANCE)
@@ -218,10 +227,6 @@ public class MasterBlockEntity extends BaseTile {
 
 	public boolean isValid() {
 		return getModelInfo() != null;
-	}
-
-	public int getLightValue() {
-		return behaviors.stream().mapToInt(Behavior::getLightValue).max().orElse(0);
 	}
 
 	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {

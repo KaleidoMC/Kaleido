@@ -42,7 +42,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.chisel.ChiselModule;
-import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;

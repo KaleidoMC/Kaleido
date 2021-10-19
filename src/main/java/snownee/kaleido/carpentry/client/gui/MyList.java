@@ -107,10 +107,15 @@ public class MyList<E extends MyEntry<E>> extends FocusableGui implements IRende
 		this.x1 = widthIn;
 	}
 
+	public void setHeight(int height) {
+		this.height = height;
+		y1 = y0 + height - 40;
+	}
+
 	public void setTop(float topIn) {
 		int top = (int) topIn;
-		this.y0 = top;
-		this.y1 = top + height - 40;
+		y0 = top;
+		y1 = top + height - 40;
 	}
 
 	protected int addEntry(E entry) {

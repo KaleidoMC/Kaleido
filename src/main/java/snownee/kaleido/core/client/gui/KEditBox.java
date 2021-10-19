@@ -143,7 +143,7 @@ public class KEditBox extends TextFieldWidget {
 
 	@Override
 	public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
-		if (!this.canConsumeInput()) {
+		if (!canConsumeInput()) {
 			return false;
 		}
 		if (pKeyCode == 257) {

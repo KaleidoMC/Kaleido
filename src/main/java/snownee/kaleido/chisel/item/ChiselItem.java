@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
-import snownee.kaleido.chisel.block.ChiseledBlockEntity;
+import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.util.KaleidoUtil;

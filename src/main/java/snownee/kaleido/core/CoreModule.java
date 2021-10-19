@@ -44,7 +44,6 @@ import snownee.kaleido.core.action.CommandAction;
 import snownee.kaleido.core.action.TransformAction;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.ItemStorageBehavior;
-import snownee.kaleido.core.behavior.LightBehavior;
 import snownee.kaleido.core.behavior.OnAttackBlockBehavior;
 import snownee.kaleido.core.behavior.OnProjectileHitBehavior;
 import snownee.kaleido.core.behavior.OnUseBlockBehavior;
@@ -145,7 +144,6 @@ public class CoreModule extends AbstractModule {
 	protected void init(FMLCommonSetupEvent event) {
 		Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
 		Behavior.Deserializer.registerFactory("itemStorage", ItemStorageBehavior::create);
-		Behavior.Deserializer.registerFactory("light", LightBehavior::create);
 		Behavior.Deserializer.registerFactory("onUseBlock", OnUseBlockBehavior::create);
 		Behavior.Deserializer.registerFactory("onAttackBlock", OnAttackBlockBehavior::create);
 		Behavior.Deserializer.registerFactory("onProjectileHit", OnProjectileHitBehavior::create);

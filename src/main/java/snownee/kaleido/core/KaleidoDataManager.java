@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
@@ -174,7 +176,10 @@ public class KaleidoDataManager extends JsonReloadListener {
 		if (!Hooks.carpentryEnabled)
 			return;
 		ResourceLocation id = event.getAdvancement().getId();
-		if (id.getNamespace().equals(Kaleido.MODID) && !id.getPath().equals("root")) {
+		if (id.getNamespace().equals(Kaleido.MODID)) {
+			if (id.getPath().equals("_pack")) {
+				throw new NotImplementedException("Reserved word");
+			}
 			ResourceLocation realId = Util.RL(id.getPath().replace('/', ':'));
 			if (realId == null) {
 				return;

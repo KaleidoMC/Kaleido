@@ -76,6 +76,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
 	public SoundTypeEnum soundType;
+	public int lightEmission;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
@@ -174,6 +175,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		buf.writeEnum(template);
 		buf.writeEnum(soundType);
 		buf.writeBoolean(isLockedServer(player));
+		buf.writeByte(lightEmission);
 		buf.writeBoolean(reward);
 		buf.writeByte(price);
 		buf.writeNbt(nbt);
@@ -206,6 +208,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		info.template = buf.readEnum(KaleidoTemplate.class);
 		info.soundType = buf.readEnum(SoundTypeEnum.class);
 		info.setLocked(buf.readBoolean());
+		info.lightEmission = buf.readByte();
 		info.reward = buf.readBoolean();
 		info.price = buf.readByte();
 		info.nbt = buf.readNbt();
@@ -268,6 +271,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			}
 		}
 		info.behaviors = behaviors.build();
+		info.lightEmission = JSONUtils.getAsInt(json, "light", 0);
 		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 		info.price = JSONUtils.getAsInt(json, "price", 1);
 		info.nbt = JsonUtils.readNBT(json, "nbt");

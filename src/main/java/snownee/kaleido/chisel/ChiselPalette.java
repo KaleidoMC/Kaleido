@@ -16,8 +16,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import snownee.kaleido.chisel.block.LayersBlock;
-import snownee.kaleido.chisel.block.RetextureBlockEntity;
 import snownee.kaleido.chisel.block.VSlabBlock;
+import snownee.kaleido.chisel.block.entity.RetextureBlockEntity;
 import snownee.kaleido.core.definition.BlockDefinition;
 
 public class ChiselPalette {
@@ -55,7 +55,9 @@ public class ChiselPalette {
 	}
 
 	public void place(BlockDefinition supplier, World level, BlockPos pos, BlockItemUseContext context) {
-		level.destroyBlock(pos, false);
+		if (level.isClientSide) { // prevent sound played twice
+			level.destroyBlock(pos, false, context.getPlayer());
+		}
 		if (this == NONE) {
 			supplier.place(level, pos);
 			return;

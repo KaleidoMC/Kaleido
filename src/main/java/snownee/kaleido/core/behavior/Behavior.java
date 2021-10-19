@@ -75,8 +75,4 @@ public interface Behavior {
 		return data;
 	}
 
-	default int getLightValue() {
-		return 0;
-	}
-
 }

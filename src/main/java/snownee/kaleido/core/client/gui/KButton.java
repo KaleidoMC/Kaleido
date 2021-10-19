@@ -119,4 +119,9 @@ public class KButton extends Button {
 		}
 	}
 
+	public void setPos(float x, float y) {
+		pos.x.start(x);
+		pos.y.start(y);
+	}
+
 }

@@ -2,5 +2,6 @@
 "template": "plant",
 "renderType": "cutout",
 "offset": "XYZ",
-"tint": "rebeccapurple"
+"tint": "rebeccapurple",
+"light": 10
 }

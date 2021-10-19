@@ -15,7 +15,6 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button.IPressable;
 import net.minecraft.client.gui.widget.button.Button.ITooltip;
@@ -45,10 +44,11 @@ import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KButton;
 import snownee.kaleido.core.client.gui.KEditBox;
 import snownee.kaleido.core.client.gui.KEditBox.ContentType;
+import snownee.kaleido.core.client.gui.ResizeableScreen;
 import snownee.kaleido.util.KaleidoUtil;
 
 @OnlyIn(Dist.CLIENT)
-public class CarpentryCraftingScreen extends Screen {
+public class CarpentryCraftingScreen extends ResizeableScreen {
 
 	static class Entry extends MyList.MyEntry<Entry> implements INestedGuiEventHandler {
 
@@ -250,24 +250,21 @@ public class CarpentryCraftingScreen extends Screen {
 			}
 			tip = font.getSplitter().splitLines(s, 120, Style.EMPTY);
 		}
-		if (list == null) {
-			list = new List(minecraft, 238, height, 20);
-			list.setLeftPos(30);
-			/* off */
+		list = new List(minecraft, 238, height, 20);
+		list.setLeftPos(30);
+		/* off */
 			KaleidoDataManager.INSTANCE.allPacks.values().stream()
 					.map($ -> new Entry(this, $, foldEntries.contains($.id)))
 					.sorted((a,b)->Float.compare(b.progress, a.progress))
 					.forEachOrdered(list::addEntry);
-			/* on */
-			list.setScrollAmount(scrollAmount);
-		} else {
-			list.height = height;
-		}
+		/* on */
+		list.setScrollAmount(scrollAmount);
 		children.add(list);
 
-		int x = minecraft.getWindow().getGuiScaledWidth() / 2 + 125;
-		int y = minecraft.getWindow().getGuiScaledHeight() / 2 + 50;
-		addButton(editBox = new KEditBox(x - 19, y + 1, 38, 18, new StringTextComponent("")));
+		addButton(shrinkBtn = new KButton(0, 0, 20, 20, new StringTextComponent("-"), btn -> {
+			addNum(-1);
+		}));
+		addButton(editBox = new KEditBox(0, 0, 38, 18, new StringTextComponent("")));
 		editBox.setContentType(ContentType.Int);
 		editBox.setFilter(str -> {
 			if (str == null) {
@@ -290,7 +287,10 @@ public class CarpentryCraftingScreen extends Screen {
 			}
 			return true;
 		});
-		addButton(confirmBtn = new KButton(x + 40, y, 20, 20, new StringTextComponent("✓"), btn -> {
+		addButton(addBtn = new KButton(0, 0, 20, 20, new StringTextComponent("+"), btn -> {
+			addNum(1);
+		}));
+		addButton(confirmBtn = new KButton(0, 0, 20, 20, new StringTextComponent("✓"), btn -> {
 			if (cooldown > 0) {
 				return;
 			}
@@ -306,16 +306,23 @@ public class CarpentryCraftingScreen extends Screen {
 			}
 		}));
 		confirmBtn.lineColor = 0x0894ED;
-		addButton(addBtn = new KButton(x + 20, y, 20, 20, new StringTextComponent("+"), btn -> {
-			addNum(1);
-		}));
-		addButton(shrinkBtn = new KButton(x - 40, y, 20, 20, new StringTextComponent("-"), btn -> {
-			addNum(-1);
-		}));
 		if (selectedButton == null) {
 			setSelectedButton(null);
 		}
 		update();
+	}
+
+	@Override
+	public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
+		super.resize(pMinecraft, pWidth, pHeight);
+		list.setHeight(pHeight);
+		int x = width / 2 + 125;
+		int y = height / 2 + 50;
+		editBox.x = x - 19;
+		editBox.y = y + 1;
+		shrinkBtn.setPos(x - 40, y);
+		addBtn.setPos(x + 20, y);
+		confirmBtn.setPos(x + 40, y);
 	}
 
 	private void saveState() {
@@ -448,6 +455,7 @@ public class CarpentryCraftingScreen extends Screen {
 
 	@Override
 	public void tick() {
+		editBox.tick();
 		--cooldown;
 		if (!background.closing && ++timer == 20) {
 			timer = 0;

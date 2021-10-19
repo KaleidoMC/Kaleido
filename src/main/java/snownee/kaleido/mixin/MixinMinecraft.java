@@ -37,7 +37,7 @@ public class MixinMinecraft {
 
 	@Inject(at = @At("HEAD"), method = "pickBlock")
 	private void kaleido_pickBlock(CallbackInfo ci) {
-		if (Hooks.brushEnabled && this.hitResult != null && this.hitResult.getType() == RayTraceResult.Type.MISS) {
+		if (Hooks.brushEnabled && hitResult != null && hitResult.getType() == RayTraceResult.Type.MISS) {
 			BrushItem.pick(new ClickInputEvent(2, null, Hand.MAIN_HAND));
 		}
 	}

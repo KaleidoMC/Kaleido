@@ -3,7 +3,6 @@ package snownee.kaleido.scope.client.gui;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -14,7 +13,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockModelRenderer;
@@ -29,8 +27,6 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
-import net.minecraftforge.common.MinecraftForge;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.cursor.Cursor;
 import snownee.kaleido.core.client.cursor.CursorChanger;
@@ -39,6 +35,7 @@ import snownee.kaleido.core.client.gui.DarkBackground;
 import snownee.kaleido.core.client.gui.KButton;
 import snownee.kaleido.core.client.gui.KCheckbox;
 import snownee.kaleido.core.client.gui.KLabel;
+import snownee.kaleido.core.client.gui.ResizeableScreen;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
@@ -49,7 +46,7 @@ import snownee.kaleido.util.SimulationBlockReader;
 import snownee.kaleido.util.SmoothChasingValue;
 import snownee.kaleido.util.SmoothChasingVector;
 
-public class ScopeScreen extends Screen {
+public class ScopeScreen extends ResizeableScreen {
 
 	private static class StackInfo {
 		private final ScopeStack stack;
@@ -161,12 +158,12 @@ public class ScopeScreen extends Screen {
 			++i;
 		}
 
-		snapCheckbox = new KCheckbox(0, 5, 30, 18, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
+		snapCheckbox = new KCheckbox(0, 0, 30, 18, new TranslationTextComponent("gui.kaleido.snap"), $ -> {
 		});
 		snapCheckbox.selected = snap;
 		addButton(snapCheckbox);
 
-		resetButton = new KButton(0, 5, 35, 18, new TranslationTextComponent("gui.kaleido.reset"), $ -> reset());
+		resetButton = new KButton(0, 0, 35, 18, new TranslationTextComponent("gui.kaleido.reset"), $ -> reset());
 		addButton(resetButton);
 
 		ITextComponent translationTitle = new TranslationTextComponent("gui.kaleido.translation");
@@ -180,7 +177,7 @@ public class ScopeScreen extends Screen {
 		rotationLabel = new KLabel(0, 90, 100, 0, rotationTitle);
 		addButton(rotationLabel);
 
-		DecimalFormat dfCommas = new DecimalFormat("##.###");
+		DecimalFormat dfCommas = new DecimalFormat("##.##");
 		AxisEditBox editBox;
 		for (Axis axis0 : Axis.values()) {
 			Axis axis = axis0;
@@ -239,34 +236,8 @@ public class ScopeScreen extends Screen {
 	}
 
 	@Override
-	public void init(Minecraft pMinecraft, int pWidth, int pHeight) {
-		minecraft = pMinecraft;
-		itemRenderer = pMinecraft.getItemRenderer();
-		font = pMinecraft.font;
-		width = pWidth;
-		height = pHeight;
-		Consumer<Widget> remove = b -> {
-			buttons.remove(b);
-			children.remove(b);
-		};
-		if (!MinecraftForge.EVENT_BUS.post(new InitGuiEvent.Pre(this, buttons, this::addButton, remove))) {
-			buttons.clear();
-			children.clear();
-			setFocused((IGuiEventListener) null);
-			this.init();
-			resize(pMinecraft, pWidth, pHeight);
-		}
-		MinecraftForge.EVENT_BUS.post(new InitGuiEvent.Post(this, buttons, this::addButton, remove));
-	}
-
-	@Override
 	public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
-		minecraft = pMinecraft;
-		itemRenderer = pMinecraft.getItemRenderer();
-		font = pMinecraft.font;
-		width = pWidth;
-		height = pHeight;
-
+		super.resize(pMinecraft, pWidth, pHeight);
 		int y = 41;
 		int x = width - 127;
 		for (int i = 0; i < 3; i++) {
@@ -277,17 +248,15 @@ public class ScopeScreen extends Screen {
 			}
 		}
 
-		snapCheckbox.pos.x.start(x);
-		resetButton.pos.x.start(x + snapCheckbox.getWidth() + 2);
+		snapCheckbox.setPos(x, 5);
+		resetButton.setPos(x + snapCheckbox.getWidth() + 2, 5);
 		x += 2;
 		positionLabel.x = x;
 		sizeLabel.x = x;
 		rotationLabel.x = x;
 		x += 22;
-		cancelButton.pos.x.start(x);
-		cancelButton.pos.y.start(height - 25);
-		confirmButton.pos.x.start(x + 51);
-		confirmButton.pos.y.start(height - 25);
+		cancelButton.setPos(x, height - 25);
+		confirmButton.setPos(x + 51, height - 25);
 	}
 
 	public void sortStackButtons() {

@@ -1,4 +1,4 @@
-package snownee.kaleido.chisel.block;
+package snownee.kaleido.chisel.block.entity;
 
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +20,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import snownee.kaleido.chisel.client.model.RetextureModel;
+import snownee.kaleido.core.block.entity.BELightManager;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.SimpleBlockDefinition;
 import snownee.kiwi.tile.BaseTile;
@@ -30,6 +31,7 @@ public abstract class RetextureBlockEntity extends BaseTile {
 	@Nullable
 	protected Map<String, BlockDefinition> textures;
 	protected IModelData modelData = EmptyModelData.INSTANCE;
+	protected BELightManager lightManager;
 
 	public RetextureBlockEntity(TileEntityType<?> tileEntityTypeIn, String... textureKeys) {
 		super(tileEntityTypeIn);
@@ -53,7 +55,12 @@ public abstract class RetextureBlockEntity extends BaseTile {
 	public void setTexture(String key, BlockDefinition modelSupplier) {
 		if (modelSupplier != null && !isValidTexture(modelSupplier))
 			return;
+		if (Objects.equals(textures.get(key), modelSupplier))
+			return;
 		setTexture(textures, key, modelSupplier);
+		if (hasLevel() && lightManager != null) {
+			lightManager.add(modelSupplier.getLightValue(level, worldPosition));
+		}
 	}
 
 	public boolean isValidTexture(BlockDefinition modelSupplier) {
@@ -84,8 +91,27 @@ public abstract class RetextureBlockEntity extends BaseTile {
 	}
 
 	@Override
-	public void onLoad() {
-		super.requestModelDataUpdate();
+	protected void invalidateCaps() {
+		super.invalidateCaps();
+		lightManager = null;
+	}
+
+	protected int getLightRaw() {
+		int max = 0;
+		for (BlockDefinition definition : textures.values()) {
+			if (definition == null)
+				continue;
+			int light = definition.getLightValue(level, worldPosition);
+			if (light == 15)
+				return light;
+			if (light > max)
+				max = light;
+		}
+		return max;
+	}
+
+	public int getLight() {
+		return lightManager == null ? 0 : lightManager.light;
 	}
 
 	@Override
@@ -106,6 +132,8 @@ public abstract class RetextureBlockEntity extends BaseTile {
 		}
 		boolean shouldRefresh = readTextures(textures, data.getCompound("Overrides"), this::isValidTexture);
 		if (shouldRefresh) {
+			if (lightManager != null)
+				lightManager.update();
 			refresh();
 		}
 	}
