@@ -1,6 +1,5 @@
 package snownee.kaleido.core;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -80,8 +79,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public SoundTypeEnum soundType = template.defaultSoundType();
 	public int lightEmission;
 
-	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
-	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
+	public byte renderTypeFlags = 1; // only SOLID
 	public Food food;
 	private boolean simple;
 
@@ -182,10 +180,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		b = b << 1 | bit(simple);
 		b = b << 1 | bit(noCollision);
 		b = b << 1 | bit(glass);
-		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.solid));
-		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.cutout));
-		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.cutoutMipped));
-		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.translucent));
+		b = b << 4 | renderTypeFlags;
 		buf.writeByte(b);
 
 		if (simple) {
@@ -228,15 +223,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
 		int b = buf.readByte() & 0xFF;
+		info.renderTypeFlags = (byte) (b & 16);
 		info.setLocked(bool(b));
 		info.simple = bool(b = b << 1);
 		info.noCollision = bool(b = b << 1);
 		info.glass = bool(b = b << 1);
-		info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
-		for (int i = 0; i < 4; i++) {
-			if (bool(b = b << 1))
-				info.renderTypes.add(RenderTypeEnum.VALUES[i]);
-		}
 
 		if (info.simple) {
 			return info;
@@ -326,12 +317,12 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (!info.template.solid) {
 			info.glass = JSONUtils.getAsBoolean(json, "glass", false);
 			if (json.has("renderType")) {
-				info.renderTypes = EnumSet.of(RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")));
+				info.renderTypeFlags = (byte) (1 << RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")).ordinal());
 			} else if (json.has("renderTypes")) {
 				JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
-				info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
+				info.renderTypeFlags = 0;
 				for (JsonElement e : array) {
-					info.renderTypes.add(RenderTypeEnum.valueOf(e.getAsString()));
+					info.renderTypeFlags |= 1 << RenderTypeEnum.valueOf(e.getAsString()).ordinal();
 				}
 			}
 			if (json.has("offset"))
@@ -381,10 +372,19 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	@OnlyIn(Dist.CLIENT)
 	public boolean canRenderInLayer(RenderType layer) {
-		for (RenderTypeEnum e : renderTypes)
-			if (e.renderType.get().get() == layer)
-				return true;
-		return false;
+		int i;
+		if (layer == RenderType.solid()) {
+			i = 0;
+		} else if (layer == RenderType.cutout()) {
+			i = 1;
+		} else if (layer == RenderType.cutoutMipped()) {
+			i = 2;
+		} else if (layer == RenderType.translucent()) {
+			i = 3;
+		} else {
+			return false;
+		}
+		return (renderTypeFlags >> i & 1) == 1;
 	}
 
 	@OnlyIn(Dist.CLIENT)
