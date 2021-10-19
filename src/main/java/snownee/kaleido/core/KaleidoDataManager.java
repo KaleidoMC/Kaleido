@@ -53,11 +53,10 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.compat.worldedit.WorldEditModule;
-import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
-import snownee.kaleido.util.ShapeCache;
-import snownee.kaleido.util.ShapeSerializer;
+import snownee.kaleido.util.data.ShapeCache;
+import snownee.kaleido.util.data.ShapeSerializer;
 import snownee.kiwi.util.Util;
 
 public class KaleidoDataManager extends JsonReloadListener {
@@ -69,7 +68,6 @@ public class KaleidoDataManager extends JsonReloadListener {
             .enableComplexMapKeySerialization()
             .excludeFieldsWithoutExposeAnnotation()
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-            .registerTypeAdapter(Behavior.class, Behavior.Deserializer.INSTANCE)
             .create();
     /* on */
 

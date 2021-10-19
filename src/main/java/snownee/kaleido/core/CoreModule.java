@@ -39,17 +39,16 @@ import snownee.kaleido.brush.network.CConfigureBrushPacket;
 import snownee.kaleido.carpentry.network.CRedeemPacket;
 import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
-import snownee.kaleido.core.action.ActionDeserializer;
+import snownee.kaleido.core.action.Action;
 import snownee.kaleido.core.action.CommandAction;
+import snownee.kaleido.core.action.SitAction;
 import snownee.kaleido.core.action.TransformAction;
+import snownee.kaleido.core.action.seat.EmptyEntityRenderer;
+import snownee.kaleido.core.action.seat.SeatEntity;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.behavior.EventBehavior;
+import snownee.kaleido.core.behavior.FoodBehavior;
 import snownee.kaleido.core.behavior.ItemStorageBehavior;
-import snownee.kaleido.core.behavior.OnAttackBlockBehavior;
-import snownee.kaleido.core.behavior.OnProjectileHitBehavior;
-import snownee.kaleido.core.behavior.OnUseBlockBehavior;
-import snownee.kaleido.core.behavior.SeatBehavior;
-import snownee.kaleido.core.behavior.seat.EmptyEntityRenderer;
-import snownee.kaleido.core.behavior.seat.SeatEntity;
 import snownee.kaleido.core.block.KDirectionalBlock;
 import snownee.kaleido.core.block.KHorizontalBlock;
 import snownee.kaleido.core.block.KLeavesBlock;
@@ -67,15 +66,15 @@ import snownee.kaleido.core.item.StuffItem;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.core.util.KaleidoTemplate;
-import snownee.kaleido.data.KaleidoBlockLoot;
+import snownee.kaleido.datagen.KaleidoBlockLoot;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
+import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.Name;
 import snownee.kiwi.NoItem;
-import snownee.kiwi.data.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.network.NetworkChannel;
 
@@ -142,14 +141,15 @@ public class CoreModule extends AbstractModule {
 
 	@Override
 	protected void init(FMLCommonSetupEvent event) {
-		Behavior.Deserializer.registerFactory("seat", SeatBehavior::create);
-		Behavior.Deserializer.registerFactory("itemStorage", ItemStorageBehavior::create);
-		Behavior.Deserializer.registerFactory("onUseBlock", OnUseBlockBehavior::create);
-		Behavior.Deserializer.registerFactory("onAttackBlock", OnAttackBlockBehavior::create);
-		Behavior.Deserializer.registerFactory("onProjectileHit", OnProjectileHitBehavior::create);
+		Behavior.registerFactory("itemStorage", ItemStorageBehavior::new);
+		Behavior.registerFactory("food", FoodBehavior::new);
+		Behavior.registerFactory("event.useBlock", EventBehavior::new);
+		Behavior.registerFactory("event.attackBlock", EventBehavior::new);
+		Behavior.registerFactory("event.projectileHit", EventBehavior::new);
 
-		ActionDeserializer.registerFactory("transform", TransformAction::create);
-		ActionDeserializer.registerFactory("command", CommandAction::create);
+		Action.registerFactory("transform", TransformAction::new);
+		Action.registerFactory("command", CommandAction::new);
+		Action.registerFactory("seat", SitAction::new);
 
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 		BlockDefinition.registerFactory(DynamicBlockDefinition.Factory.INSTANCE);

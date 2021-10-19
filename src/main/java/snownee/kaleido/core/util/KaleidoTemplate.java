@@ -21,27 +21,27 @@ import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
 
 public enum KaleidoTemplate {
-	/* off */
-	none(CoreModule.STUFF, false, 4, 2),
-	block(CoreModule.HORIZONTAL, true, 1, 0),
-	horizontal(CoreModule.HORIZONTAL, true, 4, 2),
-	directional(CoreModule.DIRECTIONAL, true, 6, 2), //TODO nonSolid
-	pillar(CoreModule.PILLAR, true, 3, 1),
-	leaves(CoreModule.LEAVES, false, 4, 2),
-	plant(CoreModule.PLANT, false, 4, 2),
-	item(Blocks.AIR, true, 1, 0);
-	/* on */
+	none(CoreModule.STUFF, false, 4, 2, RenderTypeEnum.solid),
+	block(CoreModule.HORIZONTAL, true, 1, 0, RenderTypeEnum.solid),
+	horizontal(CoreModule.HORIZONTAL, true, 4, 2, RenderTypeEnum.solid),
+	directional(CoreModule.DIRECTIONAL, true, 6, 2, RenderTypeEnum.solid), //TODO nonSolid
+	pillar(CoreModule.PILLAR, true, 3, 1, RenderTypeEnum.solid),
+	leaves(CoreModule.LEAVES, false, 4, 2, RenderTypeEnum.cutoutMipped),
+	plant(CoreModule.PLANT, false, 4, 2, RenderTypeEnum.cutout),
+	item(Blocks.AIR, true, 1, 0, RenderTypeEnum.solid);
 
 	public final boolean solid;
 	public final Block bloc;
 	public final int metaCount;
 	public final int defaultMeta;
+	public final byte defaultRenderTypeFlags;
 
-	KaleidoTemplate(Block block, boolean solid, int metaCount, int defaultMeta) {
+	KaleidoTemplate(Block block, boolean solid, int metaCount, int defaultMeta, RenderTypeEnum defaultRenderType) {
 		bloc = block;
 		this.solid = solid;
 		this.metaCount = metaCount;
 		this.defaultMeta = defaultMeta;
+		this.defaultRenderTypeFlags = (byte) (1 << defaultRenderType.ordinal());
 		if (block != Blocks.AIR) {
 			CoreModule.MASTER_BLOCKS.add(block);
 		}
@@ -144,4 +144,5 @@ public enum KaleidoTemplate {
 			return SoundTypeEnum.grass;
 		return SoundTypeEnum.wood;
 	}
+
 }

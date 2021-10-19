@@ -1,4 +1,4 @@
-package snownee.kaleido.util;
+package snownee.kaleido.util.data;
 
 import java.util.Map;
 
@@ -11,6 +11,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import snownee.kaleido.util.VoxelUtil;
 
 public class ShapeCache {
 

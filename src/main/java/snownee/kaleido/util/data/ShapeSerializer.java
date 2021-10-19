@@ -1,4 +1,4 @@
-package snownee.kaleido.util;
+package snownee.kaleido.util.data;
 
 import java.util.List;
 import java.util.regex.Matcher;

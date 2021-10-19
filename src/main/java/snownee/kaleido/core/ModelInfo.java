@@ -1,15 +1,15 @@
 package snownee.kaleido.core;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.hash.HashCode;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -24,7 +24,6 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -56,7 +55,7 @@ import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
-import snownee.kaleido.util.ShapeCache;
+import snownee.kaleido.util.data.ShapeCache;
 import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo implements Comparable<ModelInfo> {
@@ -65,7 +64,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public ResourceLocation id;
 	public ModelGroup group;
 	public KaleidoTemplate template = KaleidoTemplate.none;
-	public ImmutableList<Behavior> behaviors = ImmutableList.of();
+	public SoundTypeEnum soundType = template.defaultSoundType();
+	public byte renderTypeFlags = template.defaultRenderTypeFlags;
+	public ImmutableMap<String, Behavior> behaviors = ImmutableMap.of();
 	private boolean locked = true;
 	public int price = 1;
 	public boolean reward;
@@ -76,11 +77,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public String[] tint;
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
-	public SoundTypeEnum soundType = template.defaultSoundType();
 	public int lightEmission;
-
-	public byte renderTypeFlags = 1; // only SOLID
-	public Food food;
 	private boolean simple;
 
 	public ResourceLocation getAdvancementId() {
@@ -268,66 +265,89 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			info.simple = true;
 			return info;
 		}
-		if (json.has("group")) {
-			info.group = KaleidoDataManager.getGroup(new ResourceLocation(JSONUtils.getAsString(json, "group")));
-			info.group.infos.add(info);
-		}
-		if (json.has("template"))
+		if (json.has("template")) {
 			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
-		if (json.has("sound"))
-			info.soundType = SoundTypeEnum.valueOf(JSONUtils.getAsString(json, "sound"));
-		else
 			info.soundType = info.template.defaultSoundType();
-		ImmutableList.Builder<Behavior> behaviors = ImmutableList.builder();
-		if (json.has("behavior")) {
-			behaviors.add(Behavior.fromJson(json.get("behavior")));
+			info.renderTypeFlags = info.template.defaultRenderTypeFlags;
 		}
-		if (json.has("behaviors")) {
-			for (JsonElement e : json.getAsJsonArray("behaviors")) {
-				behaviors.add(Behavior.fromJson(e));
-			}
-		}
-		if (json.has("tint")) {
-			JsonElement element = json.get("tint");
-			if (element.isJsonPrimitive()) {
-				info.tint = new String[] { element.getAsString() };
-			} else {
-				List<String> tint = Lists.newArrayList();
-				for (JsonElement e : element.getAsJsonArray()) {
-					tint.add(e.getAsString());
+		ImmutableMap.Builder<String, Behavior> behaviors = ImmutableMap.builder();
+		for (Entry<String, JsonElement> entry : json.entrySet()) {
+			JsonElement v = entry.getValue();
+			switch (entry.getKey()) {
+			case "template":
+				break;
+			case "group":
+				info.group = KaleidoDataManager.getGroup(new ResourceLocation(v.getAsString()));
+				info.group.infos.add(info);
+				break;
+			case "sound":
+				info.soundType = SoundTypeEnum.valueOf(v.getAsString());
+				break;
+			case "light":
+				info.lightEmission = v.getAsInt();
+				Preconditions.checkArgument(info.lightEmission >= 0 && info.lightEmission <= 15, "light");
+				break;
+			case "reward":
+				info.reward = v.getAsBoolean();
+				break;
+			case "price":
+				info.price = v.getAsInt();
+				Preconditions.checkArgument(info.price > 0 && info.price <= 128, "price");
+				break;
+			case "nbt":
+				info.nbt = JsonUtils.readNBT(json, "nbt");
+				break;
+			case "tint":
+				if (v.isJsonPrimitive()) {
+					info.tint = new String[] { v.getAsString() };
+				} else {
+					List<String> tint = Lists.newArrayList();
+					for (JsonElement e : v.getAsJsonArray()) {
+						tint.add(e.getAsString());
+					}
+					if (!tint.isEmpty()) {
+						info.tint = tint.toArray(new String[0]);
+					}
 				}
-				if (!tint.isEmpty()) {
-					info.tint = tint.toArray(new String[0]);
+				break;
+			case "shape":
+				Preconditions.checkArgument(info.template.allowsCustomShape(), "shape");
+				info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(v);
+				break;
+			case "noCollision":
+				Preconditions.checkArgument(info.template.allowsCustomShape(), "noCollision");
+				info.noCollision = v.getAsBoolean();
+				break;
+			case "glass":
+				Preconditions.checkArgument(!info.template.solid, "glass");
+				info.glass = v.getAsBoolean();
+				break;
+			case "renderType":
+				Preconditions.checkArgument(!info.template.solid, "renderType");
+				info.renderTypeFlags = (byte) (1 << RenderTypeEnum.valueOf(v.getAsString()).ordinal());
+				break;
+			case "renderTypes":
+				Preconditions.checkArgument(!info.template.solid, "renderTypes");
+				info.renderTypeFlags = 0;
+				for (JsonElement e : v.getAsJsonArray()) {
+					info.renderTypeFlags |= 1 << RenderTypeEnum.valueOf(e.getAsString()).ordinal();
 				}
+				break;
+			case "offset":
+				Preconditions.checkArgument(!info.template.solid, "offset");
+				info.offset = OffsetType.valueOf(v.getAsString());
+				break;
+			default:
+				String k = entry.getKey();
+				if (k.startsWith("_"))
+					break;
+				Behavior behavior = Behavior.fromJson(k, v);
+				if (behavior != null)
+					behaviors.put(k, behavior);
+				break;
 			}
 		}
 		info.behaviors = behaviors.build();
-		info.lightEmission = JSONUtils.getAsInt(json, "light", 0);
-		Preconditions.checkArgument(info.lightEmission >= 0 && info.lightEmission <= 15, "light");
-		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
-		info.price = JSONUtils.getAsInt(json, "price", 1);
-		Preconditions.checkArgument(info.price > 0 && info.price <= 128, "price");
-		info.nbt = JsonUtils.readNBT(json, "nbt");
-		if (info.template.allowsCustomShape()) {
-			if (json.has("shape")) {
-				info.shapes = KaleidoDataManager.INSTANCE.shapeSerializer.fromJson(json.get("shape"));
-			}
-			info.noCollision = JSONUtils.getAsBoolean(json, "noCollision", false);
-		}
-		if (!info.template.solid) {
-			info.glass = JSONUtils.getAsBoolean(json, "glass", false);
-			if (json.has("renderType")) {
-				info.renderTypeFlags = (byte) (1 << RenderTypeEnum.valueOf(JSONUtils.getAsString(json, "renderType")).ordinal());
-			} else if (json.has("renderTypes")) {
-				JsonArray array = JSONUtils.getAsJsonArray(json, "renderTypes");
-				info.renderTypeFlags = 0;
-				for (JsonElement e : array) {
-					info.renderTypeFlags |= 1 << RenderTypeEnum.valueOf(e.getAsString()).ordinal();
-				}
-			}
-			if (json.has("offset"))
-				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
-		}
 		info.simple = info.checkSimple();
 		return info;
 	}

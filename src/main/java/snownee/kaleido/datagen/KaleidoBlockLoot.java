@@ -1,4 +1,4 @@
-package snownee.kaleido.data;
+package snownee.kaleido.datagen;
 
 import java.util.stream.Collectors;
 

@@ -1,13 +1,14 @@
-package snownee.kaleido.core.behavior;
+package snownee.kaleido.core.action;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -15,59 +16,56 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.fml.LogicalSide;
-import snownee.kaleido.core.action.ActionContext;
-import snownee.kaleido.core.behavior.seat.SeatEntity;
-import snownee.kaleido.core.block.entity.MasterBlockEntity;
+import snownee.kaleido.core.action.seat.SeatEntity;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
-public class SeatBehavior implements Behavior {
+public class SitAction implements Consumer<ActionContext> {
 
-	public static SeatBehavior create(JsonObject obj) {
-		if (obj.has("seat")) {
-			return new SeatBehavior(new Vector3d[] { vecFromJson(obj.getAsJsonObject("seat")) });
+	public static Vector3d[] vecFromJson(JsonArray jsonArray) {
+		Vector3d[] seats = new Vector3d[jsonArray.size()];
+		int i = 0;
+		for (JsonElement e : jsonArray) {
+			JsonArray a = e.getAsJsonArray();
+			seats[i] = new Vector3d(a.get(0).getAsDouble(), a.get(1).getAsDouble(), a.get(2).getAsDouble());
+			++i;
 		}
-		return new SeatBehavior(new Vector3d[] { new Vector3d(0.5, 0.25, 0.5) });
-	}
-
-	public static Vector3d vecFromJson(JsonObject o) {
-		return new Vector3d(JSONUtils.getAsFloat(o, "x", 0.5f), JSONUtils.getAsFloat(o, "y", 0.5f), JSONUtils.getAsFloat(o, "z", 0.5f));
+		return seats;
 	}
 
 	private final Vector3d[] seats;
 
-	public SeatBehavior(Vector3d[] seats) {
-		this.seats = seats;
+	public SitAction(JsonObject obj) {
+		if (obj.has("seats")) {
+			seats = vecFromJson(obj.getAsJsonArray("seats"));
+		} else {
+			seats = new Vector3d[] { new Vector3d(0.5, 0.25, 0.5) };
+		}
 	}
 
 	@Override
-	public Behavior copy(MasterBlockEntity tile) {
-		return this;
-	}
-
-	@Override
-	public ActionResultType use(ActionContext context) {
+	public void accept(ActionContext context) { //TODO
 		PlayerEntity player = context.getPlayer();
 		BlockPos pos = context.getBlockPos();
 		if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
-			return ActionResultType.FAIL;
+			return;
 		World worldIn = context.getLevel();
 		ItemStack stack1 = player.getMainHandItem();
 		ItemStack stack2 = player.getOffhandItem();
 		if (!stack1.isEmpty() || !stack2.isEmpty())
-			return ActionResultType.FAIL;
+			return;
 		Vector3d vec = seats[0];
 		vec = vec.add(pos.getX(), pos.getY(), pos.getZ());
 
 		double maxDist = 2;
 		if ((vec.x - player.getX()) * (vec.x - player.getX()) + (vec.y - player.getY()) * (vec.y - player.getY()) + (vec.z - player.getZ()) * (vec.z - player.getZ()) > maxDist * maxDist)
-			return ActionResultType.FAIL;
+			return;
 
 		List<SeatEntity> seats = worldIn.getEntitiesOfClass(SeatEntity.class, new AxisAlignedBB(pos));
 
 		//FIXME
 		if (!seats.isEmpty()) {
-			return ActionResultType.FAIL;
+			return;
 		}
 		if (!worldIn.isClientSide) {
 			SeatEntity seat = new SeatEntity(worldIn, vec);
@@ -83,8 +81,6 @@ public class SeatBehavior implements Behavior {
 				return false;
 			}));
 		}
-		return ActionResultType.SUCCESS;
-
 	}
 
 }

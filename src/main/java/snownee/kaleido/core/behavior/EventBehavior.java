@@ -5,15 +5,15 @@ import java.util.function.Consumer;
 
 import com.google.gson.JsonObject;
 
+import snownee.kaleido.core.action.Action;
 import snownee.kaleido.core.action.ActionContext;
-import snownee.kaleido.core.action.ActionDeserializer;
 
-public abstract class EventBehavior implements Behavior {
+public class EventBehavior implements Behavior {
 
 	public final List<Consumer<ActionContext>> actions;
 
 	public EventBehavior(JsonObject obj) {
-		this(ActionDeserializer.INSTANCE.list(obj));
+		this(Action.list(obj));
 	}
 
 	public EventBehavior(List<Consumer<ActionContext>> actions) {

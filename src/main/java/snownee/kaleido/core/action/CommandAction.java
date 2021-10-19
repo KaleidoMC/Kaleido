@@ -16,11 +16,11 @@ import snownee.kaleido.core.ModelInfo;
 
 public class CommandAction implements Consumer<ActionContext> {
 
-	public static CommandAction create(JsonObject obj) {
-		return new CommandAction(JSONUtils.getAsString(obj, "command"));
-	}
-
 	private String command;
+
+	public CommandAction(JsonObject obj) {
+		this(JSONUtils.getAsString(obj, "command"));
+	}
 
 	public CommandAction(String command) {
 		this.command = command;
@@ -36,7 +36,7 @@ public class CommandAction implements Consumer<ActionContext> {
 		ModelInfo info = ctx.getModelInfo();
 		CommandSource source = new CommandSource(ICommandSource.NULL, Vector3d.atCenterOf(ctx.getBlockPos()), player.getRotationVector(), (ServerWorld) level, 2, info.id.toString(), info.getDescription(), server, player);
 		source = source.withSuppressedOutput();
-		server.getCommands().performCommand(source, command);
+		server.getCommands().performCommand(source, command); //TODO return value?
 	}
 
 }

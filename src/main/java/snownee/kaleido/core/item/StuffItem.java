@@ -29,6 +29,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.behavior.FoodBehavior;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.item.ModBlockItem;
@@ -102,7 +104,8 @@ public class StuffItem extends ModBlockItem {
 
 	public Food getFoodProperties(ItemStack stack) {
 		ModelInfo info = KaleidoBlock.getInfo(stack);
-		return info.food;
+		Behavior behavior = info.behaviors.get("food");
+		return behavior == null ? null : ((FoodBehavior) behavior).food;
 	}
 
 	public boolean isEdible(ItemStack stack) {

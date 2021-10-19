@@ -21,11 +21,11 @@ import snownee.kaleido.core.util.KaleidoTemplate;
 
 public class TransformAction implements Consumer<ActionContext> {
 
-	public static TransformAction create(JsonObject obj) {
-		return new TransformAction(new ResourceLocation(JSONUtils.getAsString(obj, "block")));
-	}
-
 	private ResourceLocation blockTo;
+
+	public TransformAction(JsonObject obj) {
+		this(new ResourceLocation(JSONUtils.getAsString(obj, "block")));
+	}
 
 	public TransformAction(ResourceLocation blockTo) {
 		this.blockTo = blockTo;

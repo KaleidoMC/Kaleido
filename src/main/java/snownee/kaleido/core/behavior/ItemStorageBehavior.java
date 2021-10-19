@@ -19,13 +19,13 @@ import snownee.kiwi.inventory.InvHandlerWrapper;
 
 public class ItemStorageBehavior implements Behavior {
 
-	public static ItemStorageBehavior create(JsonObject obj) {
-		return new ItemStorageBehavior(JSONUtils.getAsInt(obj, "rows", 3));
-	}
-
 	private LazyOptional<ItemStackHandler> handler = LazyOptional.empty();
 	private int rows;
 	private ITextComponent title;
+
+	public ItemStorageBehavior(JsonObject obj) {
+		this(JSONUtils.getAsInt(obj, "rows", 3));
+	}
 
 	public ItemStorageBehavior(int rows) {
 		this.rows = rows;
@@ -49,7 +49,6 @@ public class ItemStorageBehavior implements Behavior {
 		return LazyOptional.empty();
 	}
 
-	@Override
 	public ActionResultType use(ActionContext context) {
 		if (title != null && !context.getLevel().isClientSide) {
 			context.getPlayer().openMenu(new SimpleNamedContainerProvider((id, playerInventory, player2) -> {

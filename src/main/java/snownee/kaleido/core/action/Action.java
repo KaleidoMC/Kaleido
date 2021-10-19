@@ -14,17 +14,15 @@ import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.util.JSONUtils;
 
-public enum ActionDeserializer implements Function<JsonElement, Consumer<ActionContext>> {
-	INSTANCE;
+public interface Action {
 
-	private static final Map<String, Function<JsonObject, Consumer<ActionContext>>> factories = Maps.newHashMap();
+	static final Map<String, Function<JsonObject, Consumer<ActionContext>>> factories = Maps.newConcurrentMap();
 
-	public static synchronized void registerFactory(String name, Function<JsonObject, Consumer<ActionContext>> factory) {
+	static void registerFactory(String name, Function<JsonObject, Consumer<ActionContext>> factory) {
 		factories.put(name, factory);
 	}
 
-	@Override
-	public Consumer<ActionContext> apply(JsonElement json) {
+	static Consumer<ActionContext> fromJson(JsonElement json) {
 		if (json != null && json.isJsonObject()) {
 			JsonObject object = json.getAsJsonObject();
 			Function<JsonObject, Consumer<ActionContext>> factory = factories.get(JSONUtils.getAsString(object, "type"));
@@ -35,14 +33,14 @@ public enum ActionDeserializer implements Function<JsonElement, Consumer<ActionC
 		throw new JsonSyntaxException(Objects.toString(json));
 	}
 
-	public List<Consumer<ActionContext>> list(JsonObject json) {
+	static List<Consumer<ActionContext>> list(JsonObject json) {
 		ImmutableList.Builder<Consumer<ActionContext>> builder = ImmutableList.builder();
 		if (json.has("action")) {
-			builder.add(apply(json.get("action")));
+			builder.add(fromJson(json.get("action")));
 		}
 		if (json.has("actions")) {
 			for (JsonElement e : json.getAsJsonArray("actions")) {
-				builder.add(apply(e));
+				builder.add(fromJson(e));
 			}
 		}
 		return builder.build();

@@ -1,17 +1,17 @@
 package snownee.kaleido.core.block.entity;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ActionResultType;
@@ -21,7 +21,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
@@ -32,7 +31,6 @@ import snownee.kaleido.brush.item.BrushItem;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
@@ -45,7 +43,7 @@ import snownee.kiwi.util.Util;
 
 public class MasterBlockEntity extends BaseTile {
 
-	public ImmutableList<Behavior> behaviors = ImmutableList.of();
+	public ImmutableMap<String, Behavior> serializableBehaviors = ImmutableMap.of();
 	private IModelData modelData = EmptyModelData.INSTANCE;
 	protected BELightManager lightManager;
 
@@ -61,7 +59,7 @@ public class MasterBlockEntity extends BaseTile {
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
 		/* off */
-		return behaviors.stream()
+		return serializableBehaviors.values().stream()
 				.map($ -> $.getCapability(cap, side))
 				.filter(LazyOptional::isPresent)
 				.findFirst()
@@ -111,13 +109,12 @@ public class MasterBlockEntity extends BaseTile {
 			ModelInfo info = KaleidoDataManager.get(modelId);
 			if (info != null) {
 				setModelInfo(info);
-				int i = 0;
-				for (INBT nbt : data.getList("SubTiles", NBT.COMPOUND)) {
-					CompoundNBT subtile = (CompoundNBT) nbt;
-					if (behaviors.size() <= i)
-						break;
-					behaviors.get(i).load(subtile);
-					++i;
+				CompoundNBT subTiles = data.getCompound("SubTiles");
+				for (String k : subTiles.getAllKeys()) {
+					CompoundNBT subtile = subTiles.getCompound(k);
+					if (serializableBehaviors.containsKey(k)) {
+						serializableBehaviors.get(k).load(subtile);
+					}
 				}
 			}
 		}
@@ -176,11 +173,12 @@ public class MasterBlockEntity extends BaseTile {
 		tint = null;
 		if (level != null) {
 			if (!modelInfo.behaviors.isEmpty()) {
-				ImmutableList.Builder<Behavior> list = ImmutableList.builder();
-				for (Behavior behavior : modelInfo.behaviors) {
-					list.add(behavior.copy(this));
+				ImmutableMap.Builder<String, Behavior> list = ImmutableMap.builder();
+				for (Entry<String, Behavior> entry : modelInfo.behaviors.entrySet()) {
+					if (entry.getValue().isSerializable())
+						list.put(entry.getKey(), entry.getValue().copy(this));
 				}
-				behaviors = list.build();
+				serializableBehaviors = list.build();
 			}
 			if (lightManager != null) {
 				lightManager.set(modelInfo.lightEmission);
@@ -205,12 +203,12 @@ public class MasterBlockEntity extends BaseTile {
 	protected CompoundNBT writePacketData(CompoundNBT data) {
 		if (modelId != null) {
 			data.putString("Model", modelId.toString());
-			if (!behaviors.isEmpty()) {
-				ListNBT list = new ListNBT();
-				for (Behavior behavior : behaviors) {
-					list.add(behavior.save(new CompoundNBT()));
+			if (!serializableBehaviors.isEmpty()) {
+				CompoundNBT subTiles = new CompoundNBT();
+				for (String k : serializableBehaviors.keySet()) {
+					subTiles.put(k, serializableBehaviors.get(k).save(new CompoundNBT()));
 				}
-				data.put("SubTiles", list);
+				data.put("SubTiles", subTiles);
 			}
 		}
 		if (tint != null) {
@@ -256,13 +254,13 @@ public class MasterBlockEntity extends BaseTile {
 			}
 			return ActionResultType.SUCCESS;
 		}
-		ActionContext context = new ActionContext(player, handIn, stack, hit, modelInfo);
-		for (Behavior behavior : behaviors) {
-			ActionResultType resultType = behavior.use(context);
-			if (resultType.consumesAction()) {
-				return resultType;
-			}
-		}
+		//		ActionContext context = new ActionContext(player, handIn, stack, hit, modelInfo);
+		//		for (Behavior behavior : behaviors) {
+		//			ActionResultType resultType = behavior.use(context);
+		//			if (resultType.consumesAction()) {
+		//				return resultType;
+		//			}
+		//		}
 		if (stack.isEmpty() && modelInfo.group != null) {
 			if (cycleModels()) {
 				return ActionResultType.SUCCESS;
@@ -272,24 +270,24 @@ public class MasterBlockEntity extends BaseTile {
 	}
 
 	public void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity player) {
-		if (!isValid())
-			return;
-		ItemStack stack = player.getMainHandItem();
-		BlockRayTraceResult hit = new BlockRayTraceResult(Vector3d.ZERO, Direction.DOWN, pPos, false);
-		ActionContext context = new ActionContext(player, Hand.MAIN_HAND, stack, hit, modelInfo);
-		for (Behavior behavior : behaviors) {
-			behavior.attack(context);
-		}
+		//		if (!isValid())
+		//			return;
+		//		ItemStack stack = player.getMainHandItem();
+		//		BlockRayTraceResult hit = new BlockRayTraceResult(Vector3d.ZERO, Direction.DOWN, pPos, false);
+		//		ActionContext context = new ActionContext(player, Hand.MAIN_HAND, stack, hit, modelInfo);
+		//		for (Behavior behavior : behaviors) {
+		//			behavior.attack(context);
+		//		}
 	}
 
 	public void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
-		if (!isValid())
-			return;
-		ActionContext context = new ActionContext(pLevel, null, Hand.MAIN_HAND, ItemStack.EMPTY, pHit, modelInfo);
-		context.entity = pProjectile;
-		for (Behavior behavior : behaviors) {
-			behavior.onProjectileHit(context);
-		}
+		//		if (!isValid())
+		//			return;
+		//		ActionContext context = new ActionContext(pLevel, null, Hand.MAIN_HAND, ItemStack.EMPTY, pHit, modelInfo);
+		//		context.entity = pProjectile;
+		//		for (Behavior behavior : behaviors) {
+		//			behavior.onProjectileHit(context);
+		//		}
 	}
 
 	public boolean cycleModels() {

@@ -1,4 +1,4 @@
-package snownee.kaleido.core.behavior.seat;
+package snownee.kaleido.core.action.seat;
 
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
