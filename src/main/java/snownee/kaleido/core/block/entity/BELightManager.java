@@ -15,7 +15,7 @@ public class BELightManager {
 		this.level = level;
 		this.pos = pos;
 		this.lightSupplier = lightSupplier;
-		this.light = -1;
+		light = -1;
 	}
 
 	public void add(int l) {

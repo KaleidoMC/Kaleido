@@ -70,6 +70,10 @@ public class ShapeCache {
 			}
 		}
 
+		public boolean isEmpty() {
+			return shapes[Direction.NORTH.get2DDataValue()].isEmpty();
+		}
+
 		public VoxelShape get(Direction direction) {
 			int i = direction.get2DDataValue();
 			if (shapes[i] == null) {

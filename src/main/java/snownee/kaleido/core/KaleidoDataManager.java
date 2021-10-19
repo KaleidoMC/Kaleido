@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
@@ -20,6 +21,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.Advancement.Builder;
 import net.minecraft.advancements.AdvancementList;
@@ -28,6 +30,7 @@ import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IResourceManager;
@@ -43,6 +46,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import snownee.kaleido.Hooks;
 import snownee.kaleido.Kaleido;
@@ -108,8 +112,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 			if (KaleidoCommonConfig.ignoredNamespaces.contains(entry.getKey().getNamespace())) {
 				continue;
 			}
-			if (entry.getKey().getPath().equals("pack")) {
-				continue;
+			if ("_pack".equals(entry.getKey().getPath())) {
+				throw new NotImplementedException("Reserved word");
 			}
 			try {
 				JsonObject json = GSON.fromJson(entry.getValue(), JsonObject.class);
@@ -141,6 +145,17 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//                syncAllLockInfo(owner);
 		//            }
 		//        }
+
+		if (!FMLEnvironment.production) {
+			SSyncModelsPacket packet = new SSyncModelsPacket(allInfos.values());
+			SSyncModelsPacket.Handler handler = new SSyncModelsPacket.Handler();
+			PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
+			handler.encode(packet, buf);
+			int size = buf.writerIndex();
+			Kaleido.logger.info("Packet size: " + size);
+			packet = handler.decode(buf);
+			Preconditions.checkArgument(packet.infos.size() == allInfos.size());
+		}
 
 		if (ModList.get().isLoaded("worldedit"))
 			WorldEditModule.generateMappings(ServerLifecycleHooks.getCurrentServer());
@@ -176,10 +191,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		if (!Hooks.carpentryEnabled)
 			return;
 		ResourceLocation id = event.getAdvancement().getId();
-		if (id.getNamespace().equals(Kaleido.MODID)) {
-			if (id.getPath().equals("_pack")) {
-				throw new NotImplementedException("Reserved word");
-			}
+		if (Kaleido.MODID.equals(id.getNamespace())) {
 			ResourceLocation realId = Util.RL(id.getPath().replace('/', ':'));
 			if (realId == null) {
 				return;

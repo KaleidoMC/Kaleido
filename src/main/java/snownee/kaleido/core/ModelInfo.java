@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -24,6 +25,7 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -75,11 +77,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public String[] tint;
 	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
-	public SoundTypeEnum soundType;
+	public SoundTypeEnum soundType = template.defaultSoundType();
 	public int lightEmission;
 
 	private static final EnumSet<RenderTypeEnum> defaultRenderTypes = EnumSet.of(RenderTypeEnum.solid);
 	public EnumSet<RenderTypeEnum> renderTypes = defaultRenderTypes;
+	public Food food;
+	private boolean simple;
 
 	public ResourceLocation getAdvancementId() {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
@@ -146,7 +150,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public boolean isLockedServer(ServerPlayerEntity player) {
-		if (ServerLifecycleHooks.getCurrentServer().isSingleplayerOwner(player.getGameProfile())) {
+		if (player == null) {
+			return false;
+		} else if (ServerLifecycleHooks.getCurrentServer().isSingleplayerOwner(player.getGameProfile())) {
 			return locked;
 		} else {
 			return !KaleidoCommonConfig.autoUnlock() && !isAdvancementDone(player);
@@ -172,12 +178,30 @@ public class ModelInfo implements Comparable<ModelInfo> {
 
 	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player) {
 		buf.writeResourceLocation(id);
+		int b = bit(isLockedServer(player));
+		b = b << 1 | bit(simple);
+		b = b << 1 | bit(noCollision);
+		b = b << 1 | bit(glass);
+		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.solid));
+		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.cutout));
+		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.cutoutMipped));
+		b = b << 1 | bit(renderTypes.contains(RenderTypeEnum.translucent));
+		buf.writeByte(b);
+
+		if (simple) {
+			return;
+		}
+
 		buf.writeEnum(template);
 		buf.writeEnum(soundType);
-		buf.writeBoolean(isLockedServer(player));
 		buf.writeByte(lightEmission);
-		buf.writeBoolean(reward);
+
+		byte price = (byte) (this.price - 1);
+		if (reward) {
+			price |= 1 << 7;
+		}
 		buf.writeByte(price);
+
 		buf.writeNbt(nbt);
 		if (tint == null) {
 			buf.writeVarInt(0);
@@ -189,28 +213,43 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (template.allowsCustomShape()) {
 			buf.writeByteArray(shapes.hashCode.asBytes());
-			buf.writeBoolean(noCollision);
 		}
 		if (!template.solid) {
-			buf.writeBoolean(glass);
 			buf.writeEnum(offset);
-			buf.writeByte(renderTypes.size());
-			for (RenderTypeEnum renderType : renderTypes) {
-				buf.writeEnum(renderType);
-			}
 		}
+	}
+
+	private static int bit(boolean b) {
+		return b ? 1 : 0;
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	public static ModelInfo fromNetwork(PacketBuffer buf) {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
+		int b = buf.readByte() & 0xFF;
+		info.setLocked(bool(b));
+		info.simple = bool(b = b << 1);
+		info.noCollision = bool(b = b << 1);
+		info.glass = bool(b = b << 1);
+		info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
+		for (int i = 0; i < 4; i++) {
+			if (bool(b = b << 1))
+				info.renderTypes.add(RenderTypeEnum.VALUES[i]);
+		}
+
+		if (info.simple) {
+			return info;
+		}
+
 		info.template = buf.readEnum(KaleidoTemplate.class);
 		info.soundType = buf.readEnum(SoundTypeEnum.class);
-		info.setLocked(buf.readBoolean());
 		info.lightEmission = buf.readByte();
-		info.reward = buf.readBoolean();
-		info.price = buf.readByte();
+
+		byte price = buf.readByte();
+		info.price = price & 0xFFFFFFF + 1;
+		info.reward = price < 0;
+
 		info.nbt = buf.readNbt();
 		int l = buf.readVarInt();
 		if (l > 0) {
@@ -221,22 +260,23 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (info.template.allowsCustomShape()) {
 			info.shapes = KaleidoDataManager.INSTANCE.shapeCache.get(HashCode.fromBytes(buf.readByteArray()));
-			info.noCollision = buf.readBoolean();
 		}
 		if (!info.template.solid) {
-			info.glass = buf.readBoolean();
 			info.offset = buf.readEnum(OffsetType.class);
-			byte size = buf.readByte();
-			info.renderTypes = EnumSet.noneOf(RenderTypeEnum.class);
-			for (byte i = 0; i < size; i++) {
-				info.renderTypes.add(buf.readEnum(RenderTypeEnum.class));
-			}
 		}
 		return info;
 	}
 
+	private static boolean bool(int b) {
+		return (b >> 7 & 1) == 1;
+	}
+
 	public static ModelInfo fromJson(JsonObject json) {
 		ModelInfo info = new ModelInfo();
+		if (json.size() == 0) {
+			info.simple = true;
+			return info;
+		}
 		if (json.has("group")) {
 			info.group = KaleidoDataManager.getGroup(new ResourceLocation(JSONUtils.getAsString(json, "group")));
 			info.group.infos.add(info);
@@ -272,8 +312,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		info.behaviors = behaviors.build();
 		info.lightEmission = JSONUtils.getAsInt(json, "light", 0);
+		Preconditions.checkArgument(info.lightEmission >= 0 && info.lightEmission <= 15, "light");
 		info.reward = JSONUtils.getAsBoolean(json, "reward", false);
 		info.price = JSONUtils.getAsInt(json, "price", 1);
+		Preconditions.checkArgument(info.price > 0 && info.price <= 128, "price");
 		info.nbt = JsonUtils.readNBT(json, "nbt");
 		if (info.template.allowsCustomShape()) {
 			if (json.has("shape")) {
@@ -295,7 +337,21 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			if (json.has("offset"))
 				info.offset = OffsetType.valueOf(JSONUtils.getAsString(json, "offset"));
 		}
+		info.simple = info.checkSimple();
 		return info;
+	}
+
+	private boolean checkSimple() {
+		if (reward || price != 1 || lightEmission != 0 || soundType != SoundTypeEnum.wood) {
+			return false;
+		}
+		if (group != null || nbt != null || tint != null || offset != OffsetType.NONE || template != KaleidoTemplate.none) {
+			return false;
+		}
+		if (!behaviors.isEmpty() || !shapes.isEmpty()) {
+			return false;
+		}
+		return true;
 	}
 
 	public VoxelShape getShape(BlockState state, BlockPos pos) {

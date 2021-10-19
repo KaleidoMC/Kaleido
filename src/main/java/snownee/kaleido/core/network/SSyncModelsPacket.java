@@ -44,7 +44,7 @@ public class SSyncModelsPacket extends Packet {
 
 	}
 
-	private final Collection<ModelInfo> infos;
+	public final Collection<ModelInfo> infos;
 
 	private ServerPlayerEntity player;
 

@@ -56,7 +56,7 @@ public class KaleidoBlockLoot extends BlockLootTables {
 
 	@Override
 	protected Iterable<Block> getKnownBlocks() {
-		return ForgeRegistries.BLOCKS.getValues().stream().filter($ -> $.getRegistryName().getNamespace().equals(Kaleido.MODID)).collect(Collectors.toList());
+		return ForgeRegistries.BLOCKS.getValues().stream().filter($ -> Kaleido.MODID.equals($.getRegistryName().getNamespace())).collect(Collectors.toList());
 	}
 
 }
