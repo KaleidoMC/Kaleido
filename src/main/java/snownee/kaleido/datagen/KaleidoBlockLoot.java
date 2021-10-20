@@ -18,7 +18,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.carpentry.CarpentryModule;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.core.CoreModule;
-import snownee.kaleido.core.KaleidoLootFunction;
+import snownee.kaleido.core.data.KaleidoLootFunction;
 import snownee.kaleido.scope.ScopeModule;
 
 public class KaleidoBlockLoot extends BlockLootTables {

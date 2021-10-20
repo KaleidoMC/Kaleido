@@ -41,7 +41,7 @@ public enum KaleidoTemplate {
 		this.solid = solid;
 		this.metaCount = metaCount;
 		this.defaultMeta = defaultMeta;
-		this.defaultRenderTypeFlags = (byte) (1 << defaultRenderType.ordinal());
+		defaultRenderTypeFlags = (byte) (1 << defaultRenderType.ordinal());
 		if (block != Blocks.AIR) {
 			CoreModule.MASTER_BLOCKS.add(block);
 		}

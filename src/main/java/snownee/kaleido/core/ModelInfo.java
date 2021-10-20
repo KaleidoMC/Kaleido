@@ -1,8 +1,11 @@
 package snownee.kaleido.core;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -48,14 +51,16 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.behavior.EventBehavior;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
 import snownee.kaleido.util.KaleidoUtil;
-import snownee.kaleido.util.data.ShapeCache;
+import snownee.kaleido.util.data.RotatedShapeCache;
 import snownee.kiwi.util.NBTHelper;
 
 public class ModelInfo implements Comparable<ModelInfo> {
@@ -75,7 +80,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean noCollision;
 	public boolean glass;
 	public String[] tint;
-	private ShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
+	private RotatedShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
 	public int lightEmission;
 	private boolean simple;
@@ -159,9 +164,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public ItemStack makeItem(int size) {
+		return makeItemStack(size, id, this);
+	}
+
+	public static ItemStack makeItemStack(int size, ResourceLocation id, @Nullable ModelInfo info) {
 		ItemStack stack = new ItemStack(CoreModule.STUFF_ITEM, size);
-		if (nbt != null)
-			stack.setTag(nbt.copy());
+		if (info != null && info.nbt != null)
+			stack.setTag(info.nbt.copy());
 		NBTHelper data = NBTHelper.of(stack);
 		data.setString("Kaleido.Id", id.toString());
 		return data.getItem();
@@ -324,18 +333,14 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				break;
 			case "renderType":
 				Preconditions.checkArgument(!info.template.solid, "renderType");
-				info.renderTypeFlags = (byte) (1 << RenderTypeEnum.valueOf(v.getAsString()).ordinal());
-				break;
-			case "renderTypes":
-				Preconditions.checkArgument(!info.template.solid, "renderTypes");
 				info.renderTypeFlags = 0;
-				for (JsonElement e : v.getAsJsonArray()) {
-					info.renderTypeFlags |= 1 << RenderTypeEnum.valueOf(e.getAsString()).ordinal();
-				}
+				KaleidoUtil.jsonList(v, $ -> {
+					info.renderTypeFlags |= 1 << RenderTypeEnum.valueOf($.getAsString()).ordinal();
+				});
 				break;
 			case "offset":
 				Preconditions.checkArgument(!info.template.solid, "offset");
-				info.offset = OffsetType.valueOf(v.getAsString());
+				info.offset = OffsetType.valueOf(v.getAsString().toUpperCase(Locale.ENGLISH));
 				break;
 			default:
 				String k = entry.getKey();
@@ -459,6 +464,13 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			index = 0;
 		}
 		return KaleidoClient.BLOCK_COLORS.getColor(tint[index], state, level, pos, index);
+	}
+
+	public void fireEvent(String id, ActionContext ctx) {
+		Behavior behavior = behaviors.get(id);
+		if (behavior instanceof EventBehavior) {
+			((EventBehavior) behavior).run(ctx);
+		}
 	}
 
 }

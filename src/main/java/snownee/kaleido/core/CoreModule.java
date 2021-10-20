@@ -29,6 +29,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -58,6 +59,8 @@ import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
+import snownee.kaleido.core.data.KaleidoIngredient;
+import snownee.kaleido.core.data.KaleidoLootFunction;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.DynamicBlockDefinition;
 import snownee.kaleido.core.definition.KaleidoBlockDefinition;
@@ -72,9 +75,9 @@ import snownee.kaleido.scope.network.CCreateScopePacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.KiwiModule.Subscriber.Bus;
-import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.Name;
 import snownee.kiwi.NoItem;
+import snownee.kiwi.datagen.provider.KiwiLootTableProvider;
 import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.network.NetworkChannel;
 
@@ -143,7 +146,7 @@ public class CoreModule extends AbstractModule {
 	protected void init(FMLCommonSetupEvent event) {
 		Behavior.registerFactory("itemStorage", ItemStorageBehavior::new);
 		Behavior.registerFactory("food", FoodBehavior::new);
-		Behavior.registerFactory("event.useBlock", EventBehavior::new);
+		Behavior.registerFactory("event.useOnBlock", EventBehavior::new);
 		Behavior.registerFactory("event.attackBlock", EventBehavior::new);
 		Behavior.registerFactory("event.projectileHit", EventBehavior::new);
 
@@ -154,6 +157,8 @@ public class CoreModule extends AbstractModule {
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 		BlockDefinition.registerFactory(DynamicBlockDefinition.Factory.INSTANCE);
 		BlockDefinition.registerFactory(KaleidoBlockDefinition.Factory.INSTANCE);
+
+		CraftingHelper.register(new ResourceLocation(Kaleido.MODID), KaleidoIngredient.Serializer.INSTANCE);
 	}
 
 	@Override

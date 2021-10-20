@@ -1,3 +1,6 @@
 {
-  "parent": "kaleido:block/scope"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "kaleido:item/pouch"
+  }
 }

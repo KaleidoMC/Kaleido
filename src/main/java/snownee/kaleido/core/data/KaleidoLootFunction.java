@@ -1,4 +1,4 @@
-package snownee.kaleido.core;
+package snownee.kaleido.core.data;
 
 import java.util.Set;
 
@@ -15,6 +15,8 @@ import net.minecraft.loot.LootParameter;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.tileentity.TileEntity;
+import snownee.kaleido.core.CoreModule;
+import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kiwi.util.NBTHelper;
 

@@ -13,10 +13,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.util.JSONUtils;
+import snownee.kaleido.util.KaleidoUtil;
 
 public interface Action {
 
-	static final Map<String, Function<JsonObject, Consumer<ActionContext>>> factories = Maps.newConcurrentMap();
+	Map<String, Function<JsonObject, Consumer<ActionContext>>> factories = Maps.newConcurrentMap();
 
 	static void registerFactory(String name, Function<JsonObject, Consumer<ActionContext>> factory) {
 		factories.put(name, factory);
@@ -35,14 +36,7 @@ public interface Action {
 
 	static List<Consumer<ActionContext>> list(JsonObject json) {
 		ImmutableList.Builder<Consumer<ActionContext>> builder = ImmutableList.builder();
-		if (json.has("action")) {
-			builder.add(fromJson(json.get("action")));
-		}
-		if (json.has("actions")) {
-			for (JsonElement e : json.getAsJsonArray("actions")) {
-				builder.add(fromJson(e));
-			}
-		}
+		KaleidoUtil.jsonList(json.get("action"), $ -> builder.add(fromJson($)));
 		return builder.build();
 	}
 }

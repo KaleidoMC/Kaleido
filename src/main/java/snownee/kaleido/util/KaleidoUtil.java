@@ -1,10 +1,12 @@
 package snownee.kaleido.util;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Iterables;
+import com.google.gson.JsonElement;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -164,4 +166,15 @@ public class KaleidoUtil {
 		}
 		player.displayClientMessage(new TranslationTextComponent(key, args), true);
 	}
+
+	public static void jsonList(JsonElement json, Consumer<JsonElement> collector) {
+		if (json.isJsonArray()) {
+			for (JsonElement e : json.getAsJsonArray()) {
+				collector.accept(e);
+			}
+		} else {
+			collector.accept(json);
+		}
+	}
+
 }

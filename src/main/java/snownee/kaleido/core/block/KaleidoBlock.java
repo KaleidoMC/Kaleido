@@ -35,6 +35,7 @@ import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.ModelPack;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.util.KaleidoTemplate;
 import snownee.kiwi.util.NBTHelper;
@@ -121,27 +122,34 @@ public interface KaleidoBlock extends IForgeBlock {
 		}
 	}
 
-	static ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	static ActionResultType use(BlockState state, World pLevel, BlockPos pPos, PlayerEntity pPlayer, Hand handIn, BlockRayTraceResult hit) {
 		if (handIn == Hand.OFF_HAND)
 			return ActionResultType.PASS;
-		TileEntity tile = worldIn.getBlockEntity(pos);
-		if (tile instanceof MasterBlockEntity) {
-			return ((MasterBlockEntity) tile).use(state, worldIn, pos, player, handIn, hit);
+		ModelInfo info = getInfo(pLevel, pPos);
+		if (info != null) {
+			ActionContext ctx = new ActionContext(pPlayer, info);
+			ctx.hitResult = hit;
+			ctx.hand = handIn;
+			info.fireEvent("event.useOnBlock", ctx);
 		}
 		return ActionResultType.PASS;
 	}
 
 	static void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
-		TileEntity tile = pLevel.getBlockEntity(pPos);
-		if (tile instanceof MasterBlockEntity) {
-			((MasterBlockEntity) tile).attack(pState, pLevel, pPos, pPlayer);
+		ModelInfo info = getInfo(pLevel, pPos);
+		if (info != null) {
+			ActionContext ctx = new ActionContext(pPlayer, info);
+			info.fireEvent("event.attackBlock", ctx);
 		}
 	}
 
 	static void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
-		TileEntity tile = pLevel.getBlockEntity(pHit.getBlockPos());
-		if (tile instanceof MasterBlockEntity) {
-			((MasterBlockEntity) tile).onProjectileHit(pLevel, pState, pHit, pProjectile);
+		ModelInfo info = getInfo(pLevel, pHit.getBlockPos());
+		if (info != null) {
+			ActionContext ctx = new ActionContext(pLevel, info);
+			ctx.hitResult = pHit;
+			ctx.entity = pProjectile;
+			info.fireEvent("event.projectileHit", ctx);
 		}
 	}
 

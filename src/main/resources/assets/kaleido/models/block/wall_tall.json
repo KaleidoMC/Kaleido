@@ -17,7 +17,7 @@
                 "up":    { "tintindex": 0, "texture": "#0_up", "cullface": "up"},
                 "north": { "tintindex": 0, "texture": "#0_north", "cullface": "north" },
                 "west":  { "tintindex": 0, "texture": "#0_west" },
-                "east":  { "tintindex": 0, "texture": "#0_east" }
+                "east":  { "tintindex": 0, "texture": "#0_west" }
             }
         }
     ]

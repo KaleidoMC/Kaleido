@@ -6,7 +6,9 @@
   "mixins": [
     "MixinBlockState",
     "MixinDebugChunkGenerator",
-    "MixinSpreadableSnowyDirtBlock"
+    "MixinSpreadableSnowyDirtBlock",
+    "MixinLivingEntity",
+    "MixinFoodStats"
   ],
   "client": [
     "MixinModelBakery",

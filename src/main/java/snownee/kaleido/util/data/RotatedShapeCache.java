@@ -1,5 +1,6 @@
 package snownee.kaleido.util.data;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -13,14 +14,14 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import snownee.kaleido.util.VoxelUtil;
 
-public class ShapeCache {
+public class RotatedShapeCache {
 
 	private Instance block;
 	private Instance empty;
 	private final HashFunction hashFunction;
 	private final Map<HashCode, Instance> map = Maps.newConcurrentMap();
 
-	public ShapeCache(HashFunction hashFunction) {
+	public RotatedShapeCache(HashFunction hashFunction) {
 		this.hashFunction = hashFunction;
 		empty = put(newHasher().hash(), VoxelShapes.empty());
 		Hasher hasher = newHasher();
@@ -59,28 +60,39 @@ public class ShapeCache {
 	}
 
 	public static class Instance {
-		public final VoxelShape[] shapes = new VoxelShape[4];
+		public VoxelShape[] shapes = new VoxelShape[4];
 		public final HashCode hashCode;
-		public boolean outOfBlock;
+		public boolean outOfBlock; // if random offset applies to this shape, it will out of box
 
 		private Instance(HashCode hashCode, VoxelShape shape) {
 			this.hashCode = hashCode;
-			shapes[Direction.NORTH.get2DDataValue()] = shape;
+			shapes[index(Direction.NORTH)] = shape;
 			if (shape.max(Axis.X) > 0.75 || shape.max(Axis.Z) > 0.75 || shape.min(Axis.X) > 0.25 || shape.min(Axis.Z) > 0.25) {
 				outOfBlock = true;
 			}
 		}
 
 		public boolean isEmpty() {
-			return shapes[Direction.NORTH.get2DDataValue()].isEmpty();
+			return shapes[index(Direction.NORTH)].isEmpty();
 		}
 
 		public VoxelShape get(Direction direction) {
-			int i = direction.get2DDataValue();
+			int i = index(direction);
+			if (i >= shapes.length) {
+				shapes = Arrays.copyOf(shapes, 6);
+			}
 			if (shapes[i] == null) {
-				shapes[i] = VoxelUtil.rotateHorizontal(shapes[Direction.NORTH.get2DDataValue()], direction);
+				shapes[i] = VoxelUtil.rotateHorizontal(shapes[index(Direction.NORTH)], direction);
 			}
 			return shapes[i];
+		}
+
+		public int index(Direction direction) {
+			if (direction == Direction.UP)
+				return 4;
+			if (direction == Direction.DOWN)
+				return 5;
+			return direction.get2DDataValue();
 		}
 	}
 

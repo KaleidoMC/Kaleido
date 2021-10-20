@@ -23,13 +23,13 @@ import snownee.kaleido.core.KaleidoDataManager;
 
 public class ShapeSerializer {
 
-	private final ShapeCache shapeCache;
+	private final RotatedShapeCache shapeCache;
 
-	public ShapeSerializer(ShapeCache shapeCache) {
+	public ShapeSerializer(RotatedShapeCache shapeCache) {
 		this.shapeCache = shapeCache;
 	}
 
-	public ShapeCache.Instance fromJson(JsonElement json) {
+	public RotatedShapeCache.Instance fromJson(JsonElement json) {
 		String s = json.getAsString();
 		if ("empty".equals(s))
 			return shapeCache.empty();

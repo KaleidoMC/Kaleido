@@ -55,7 +55,7 @@ import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.compat.worldedit.WorldEditModule;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
-import snownee.kaleido.util.data.ShapeCache;
+import snownee.kaleido.util.data.RotatedShapeCache;
 import snownee.kaleido.util.data.ShapeSerializer;
 import snownee.kiwi.util.Util;
 
@@ -78,7 +78,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	public final Map<String, ModelPack> allPacks = Maps.newLinkedHashMap();
 	public final Multimap<PlayerEntity, ResourceLocation> deferredIds = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 	public final ShapeSerializer shapeSerializer;
-	public final ShapeCache shapeCache;
+	public final RotatedShapeCache shapeCache;
 	private boolean skip;
 
 	private KaleidoDataManager() {
@@ -87,7 +87,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		MinecraftForge.EVENT_BUS.addListener(this::tick);
 		MinecraftForge.EVENT_BUS.addListener(this::serverInit);
 		MinecraftForge.EVENT_BUS.addListener(this::onSyncDatapack);
-		shapeCache = new ShapeCache(Hashing.md5());
+		shapeCache = new RotatedShapeCache(Hashing.md5());
 		shapeSerializer = new ShapeSerializer(shapeCache);
 	}
 

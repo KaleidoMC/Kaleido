@@ -118,8 +118,10 @@ public class StuffItem extends ModBlockItem {
 	}
 
 	@Override
-	public UseAction getUseAnimation(ItemStack pStack) {
-		return isEdible(pStack) ? UseAction.EAT : UseAction.NONE;
+	public UseAction getUseAnimation(ItemStack stack) {
+		ModelInfo info = KaleidoBlock.getInfo(stack);
+		Behavior behavior = info.behaviors.get("food");
+		return behavior != null ? ((FoodBehavior) behavior).animation : UseAction.NONE;
 	}
 
 	@Override

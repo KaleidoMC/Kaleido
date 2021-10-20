@@ -1,7 +1,12 @@
 {
 "template": "plant",
-"renderType": "cutout",
-"offset": "XYZ",
+"offset": "xyz",
 "tint": "rebeccapurple",
-"light": 10
+"light": 10,
+"food": {
+  "animation": "drink",
+  "nutrition": 2,
+  "saturation": 0.5,
+  "fast": true
+}
 }

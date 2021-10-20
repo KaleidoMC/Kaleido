@@ -7,9 +7,9 @@ import com.google.common.hash.HashCode;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
-import snownee.kaleido.util.data.ShapeCache;
+import snownee.kaleido.util.data.RotatedShapeCache;
+import snownee.kaleido.util.data.RotatedShapeCache.Instance;
 import snownee.kaleido.util.data.ShapeSerializer;
-import snownee.kaleido.util.data.ShapeCache.Instance;
 import snownee.kiwi.network.Packet;
 
 public class SSyncShapesPacket extends Packet {
@@ -18,9 +18,9 @@ public class SSyncShapesPacket extends Packet {
 
 	public static class Handler extends PacketHandler<SSyncShapesPacket> {
 
-		private final ShapeCache shapeCache;
+		private final RotatedShapeCache shapeCache;
 
-		public Handler(ShapeCache shapeCache) {
+		public Handler(RotatedShapeCache shapeCache) {
 			this.shapeCache = shapeCache;
 		}
 

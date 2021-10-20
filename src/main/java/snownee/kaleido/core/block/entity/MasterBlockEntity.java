@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -254,40 +253,12 @@ public class MasterBlockEntity extends BaseTile {
 			}
 			return ActionResultType.SUCCESS;
 		}
-		//		ActionContext context = new ActionContext(player, handIn, stack, hit, modelInfo);
-		//		for (Behavior behavior : behaviors) {
-		//			ActionResultType resultType = behavior.use(context);
-		//			if (resultType.consumesAction()) {
-		//				return resultType;
-		//			}
-		//		}
 		if (stack.isEmpty() && modelInfo.group != null) {
 			if (cycleModels()) {
 				return ActionResultType.SUCCESS;
 			}
 		}
 		return ActionResultType.PASS;
-	}
-
-	public void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity player) {
-		//		if (!isValid())
-		//			return;
-		//		ItemStack stack = player.getMainHandItem();
-		//		BlockRayTraceResult hit = new BlockRayTraceResult(Vector3d.ZERO, Direction.DOWN, pPos, false);
-		//		ActionContext context = new ActionContext(player, Hand.MAIN_HAND, stack, hit, modelInfo);
-		//		for (Behavior behavior : behaviors) {
-		//			behavior.attack(context);
-		//		}
-	}
-
-	public void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
-		//		if (!isValid())
-		//			return;
-		//		ActionContext context = new ActionContext(pLevel, null, Hand.MAIN_HAND, ItemStack.EMPTY, pHit, modelInfo);
-		//		context.entity = pProjectile;
-		//		for (Behavior behavior : behaviors) {
-		//			behavior.onProjectileHit(context);
-		//		}
 	}
 
 	public boolean cycleModels() {

@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -15,7 +16,7 @@ import snownee.kaleido.core.block.entity.MasterBlockEntity;
 
 public interface Behavior {
 
-	static final Map<String, Function<JsonObject, Behavior>> factories = Maps.newConcurrentMap();
+	Map<String, Function<JsonObject, Behavior>> factories = Maps.newConcurrentMap();
 
 	static void registerFactory(String name, Function<JsonObject, Behavior> factory) {
 		factories.put(name, factory);
@@ -50,6 +51,18 @@ public interface Behavior {
 	// need to override isSerializable()
 	default CompoundNBT save(CompoundNBT data) {
 		return data;
+	}
+
+	default boolean syncClient() {
+		return false;
+	}
+
+	// need to override syncClient()
+	default void toNetwork(PacketBuffer buf) {
+	}
+
+	// need to override syncClient()
+	default void fromNetwork(PacketBuffer buf) {
 	}
 
 }

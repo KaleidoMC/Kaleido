@@ -31,6 +31,7 @@ public class WorldEditModule extends AbstractModule {
 
 	private static boolean worldLoaded;
 
+	@SuppressWarnings("unused")
 	private final String link = "https://cdn.jsdelivr.net/gh/KaleidoMC/Kaleido@worldedit-scripts/1.16.js";
 
 	@Override
