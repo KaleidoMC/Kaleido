@@ -30,6 +30,7 @@ import snownee.kaleido.brush.item.BrushItem;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
@@ -253,6 +254,12 @@ public class MasterBlockEntity extends BaseTile {
 			}
 			return ActionResultType.SUCCESS;
 		}
+		ActionContext ctx = new ActionContext(player, modelInfo);
+		ctx.hitResult = hit;
+		ctx.hand = handIn;
+		ActionResultType resultType = modelInfo.fireEvent("event.useOnBlock", ctx);
+		if (resultType.consumesAction())
+			return resultType;
 		if (stack.isEmpty() && modelInfo.group != null) {
 			if (cycleModels()) {
 				return ActionResultType.SUCCESS;

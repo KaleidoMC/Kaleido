@@ -125,13 +125,9 @@ public interface KaleidoBlock extends IForgeBlock {
 	static ActionResultType use(BlockState state, World pLevel, BlockPos pPos, PlayerEntity pPlayer, Hand handIn, BlockRayTraceResult hit) {
 		if (handIn == Hand.OFF_HAND)
 			return ActionResultType.PASS;
-		ModelInfo info = getInfo(pLevel, pPos);
-		if (info != null) {
-			ActionContext ctx = new ActionContext(pPlayer, info);
-			ctx.hitResult = hit;
-			ctx.hand = handIn;
-			info.fireEvent("event.useOnBlock", ctx);
-		}
+		TileEntity tile = pLevel.getBlockEntity(pPos);
+		if (tile instanceof MasterBlockEntity)
+			return ((MasterBlockEntity) tile).use(state, pLevel, pPos, pPlayer, handIn, hit);
 		return ActionResultType.PASS;
 	}
 

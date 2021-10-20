@@ -30,6 +30,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -466,11 +467,12 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return KaleidoClient.BLOCK_COLORS.getColor(tint[index], state, level, pos, index);
 	}
 
-	public void fireEvent(String id, ActionContext ctx) {
+	public ActionResultType fireEvent(String id, ActionContext ctx) {
 		Behavior behavior = behaviors.get(id);
 		if (behavior instanceof EventBehavior) {
-			((EventBehavior) behavior).run(ctx);
+			return ((EventBehavior) behavior).run(ctx);
 		}
+		return ActionResultType.PASS;
 	}
 
 }

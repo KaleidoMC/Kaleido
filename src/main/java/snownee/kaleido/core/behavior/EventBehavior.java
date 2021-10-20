@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import com.google.gson.JsonObject;
 
+import net.minecraft.util.ActionResultType;
 import snownee.kaleido.core.action.Action;
 import snownee.kaleido.core.action.ActionContext;
 
@@ -20,8 +21,11 @@ public class EventBehavior implements Behavior {
 		this.actions = actions;
 	}
 
-	public void run(ActionContext context) {
+	public ActionResultType run(ActionContext context) {
+		if (actions.isEmpty())
+			return ActionResultType.PASS;
 		actions.forEach($ -> $.accept(context));
+		return ActionResultType.SUCCESS;
 	}
 
 }
