@@ -152,7 +152,7 @@ public class CoreModule extends AbstractModule {
 
 		Action.registerFactory("transform", TransformAction::new);
 		Action.registerFactory("command", CommandAction::new);
-		Action.registerFactory("seat", SitAction::new);
+		Action.registerFactory("sit", SitAction::new);
 
 		BlockDefinition.registerFactory(SimpleBlockDefinition.Factory.INSTANCE);
 		BlockDefinition.registerFactory(DynamicBlockDefinition.Factory.INSTANCE);

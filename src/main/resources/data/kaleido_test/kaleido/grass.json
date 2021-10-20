@@ -4,9 +4,16 @@
 "tint": "rebeccapurple",
 "light": 10,
 "food": {
-  "animation": "drink",
   "nutrition": 2,
   "saturation": 0.5,
+  "animation": "drink",
   "fast": true
+},
+"event.useOnBlock": {
+  "action": [
+    {
+      "type": "seat"
+    }
+  ]
 }
 }

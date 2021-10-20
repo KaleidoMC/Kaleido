@@ -24,11 +24,19 @@ public interface Action {
 	}
 
 	static Consumer<ActionContext> fromJson(JsonElement json) {
-		if (json != null && json.isJsonObject()) {
-			JsonObject object = json.getAsJsonObject();
-			Function<JsonObject, Consumer<ActionContext>> factory = factories.get(JSONUtils.getAsString(object, "type"));
-			if (factory != null) {
-				return factory.apply(object);
+		if (json != null) {
+			if (json.isJsonObject()) {
+				JsonObject object = json.getAsJsonObject();
+				Function<JsonObject, Consumer<ActionContext>> factory = factories.get(JSONUtils.getAsString(object, "type"));
+				if (factory != null) {
+					return factory.apply(object);
+				}
+			} else if (json.isJsonPrimitive()) {
+				String s = json.getAsString();
+				Function<JsonObject, Consumer<ActionContext>> factory = factories.get(s);
+				if (factory != null) {
+					return factory.apply(new JsonObject());
+				}
 			}
 		}
 		throw new JsonSyntaxException(Objects.toString(json));
