@@ -10,10 +10,6 @@
   "fast": true
 },
 "event.useOnBlock": {
-  "action": [
-    {
-      "type": "seat"
-    }
-  ]
+  "action": "sit"
 }
 }

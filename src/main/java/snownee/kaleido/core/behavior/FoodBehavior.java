@@ -31,10 +31,14 @@ public class FoodBehavior implements Behavior {
 
 	@Override
 	public void fromNetwork(PacketBuffer buf) {
+		food = FoodSerializer.fromNetwork(buf);
+		animation = buf.readEnum(UseAction.class);
 	}
 
 	@Override
 	public void toNetwork(PacketBuffer buf) {
+		FoodSerializer.toNetwork(food, buf);
+		buf.writeEnum(animation);
 	}
 
 }

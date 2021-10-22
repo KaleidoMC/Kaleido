@@ -87,17 +87,18 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	}
 
 	public static final String TYPE = "Kaleido";
-	public static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoBlockDefinition> MAP = Maps.newHashMap();
+	private static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoBlockDefinition> simpleDefs = Maps.newHashMap();
 
 	public static KaleidoBlockDefinition of(ModelInfo info, int state) {
 		Int2ObjectMap.Entry<ModelInfo> entry = new AbstractInt2ObjectMap.BasicEntry<>(state, info);
-		return MAP.computeIfAbsent(entry, KaleidoBlockDefinition::new);
+		return simpleDefs.computeIfAbsent(entry, KaleidoBlockDefinition::new);
 	}
 
 	private final Int2ObjectMap.Entry<ModelInfo> entry;
 	private ModelInfo modelInfo;
 	@OnlyIn(Dist.CLIENT)
 	private IModelData modelData;
+	private String[] tint;
 
 	private KaleidoBlockDefinition(Int2ObjectMap.Entry<ModelInfo> entry) {
 		this.entry = entry;
@@ -228,7 +229,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	}
 
 	public static void reload() {
-		MAP.clear();
+		simpleDefs.clear();
 	}
 
 }

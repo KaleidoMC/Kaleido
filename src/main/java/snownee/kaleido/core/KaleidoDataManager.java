@@ -53,6 +53,8 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
 import snownee.kaleido.compat.worldedit.WorldEditModule;
+import snownee.kaleido.core.behavior.Behavior;
+import snownee.kaleido.core.network.SSyncBehaviorsPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
 import snownee.kaleido.util.data.RotatedShapeCache;
@@ -80,6 +82,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 	public final ShapeSerializer shapeSerializer;
 	public final RotatedShapeCache shapeCache;
 	private boolean skip;
+	private int clientBehaviorModelsCount;
+	public boolean isClientSide = true;
 
 	private KaleidoDataManager() {
 		super(GSON, "kaleido");
@@ -95,6 +99,14 @@ public class KaleidoDataManager extends JsonReloadListener {
 		allInfos.put(info.id, info);
 		ModelPack pack = getPack(info.id.getNamespace());
 		pack.add(info);
+		if (!isClientSide && !info.behaviors.isEmpty()) {
+			for (Behavior behavior : info.behaviors.values()) {
+				if (behavior.syncClient()) {
+					++clientBehaviorModelsCount;
+					break;
+				}
+			}
+		}
 	}
 
 	@Override
@@ -104,6 +116,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 			skip = false;
 			return;
 		}
+		isClientSide = false;
 		Stopwatch stopWatch = Stopwatch.createStarted();
 		invalidate();
 		for (Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
@@ -214,6 +227,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	private void invalidate() {
+		isClientSide = true;
+		clientBehaviorModelsCount = 0;
 		shapeCache.getMap().clear();
 		ModelInfo.cache.invalidateAll();
 		allInfos.values().forEach($ -> $.expired = true);
@@ -237,7 +252,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	private void tick(TickEvent.ServerTickEvent event) {
-		if (event.phase == Phase.START || deferredIds.isEmpty()) {
+		if (isClientSide || event.phase == Phase.START || deferredIds.isEmpty()) {
 			return;
 		}
 		for (Entry<PlayerEntity, Collection<ResourceLocation>> entry : deferredIds.asMap().entrySet()) {
@@ -261,10 +276,11 @@ public class KaleidoDataManager extends JsonReloadListener {
 	private static void sync(ServerPlayerEntity player, MinecraftServer server) {
 		if (!player.level.isClientSide && server != null && !INSTANCE.allInfos.isEmpty()) {
 			if (server.isSingleplayerOwner(player.getGameProfile())) {
-				KaleidoDataManager.INSTANCE.syncAllLockInfo(player);
+				INSTANCE.syncAllLockInfo(player);
 			} else {
 				new SSyncShapesPacket().send(player);
-				new SSyncModelsPacket(KaleidoDataManager.INSTANCE.allInfos.values()).setPlayer(player).send();
+				new SSyncModelsPacket(INSTANCE.allInfos.values()).setPlayer(player).send();
+				new SSyncBehaviorsPacket(INSTANCE.clientBehaviorModelsCount, INSTANCE.allInfos.values()).setPlayer(player).send();
 			}
 		}
 	}

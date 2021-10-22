@@ -35,7 +35,7 @@ public class SimulationBlockReader extends WrappedBlockReader {
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		if (globalLight != -1 && simulatedPos != pos) {
+		if (globalLight != -1 && !pos.equals(simulatedPos)) {
 			return Blocks.AIR.defaultBlockState();
 		}
 		if (useSelfLight && simulatedPos != null) {

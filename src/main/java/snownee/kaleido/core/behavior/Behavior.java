@@ -3,6 +3,7 @@ package snownee.kaleido.core.behavior;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,6 +20,7 @@ public interface Behavior {
 	Map<String, Function<JsonObject, Behavior>> factories = Maps.newConcurrentMap();
 
 	static void registerFactory(String name, Function<JsonObject, Behavior> factory) {
+		Preconditions.checkArgument(name.length() <= 32);
 		factories.put(name, factory);
 	}
 
@@ -26,7 +28,7 @@ public interface Behavior {
 		Function<JsonObject, Behavior> factory = factories.get(type);
 		if (factory == null)
 			return null;
-		JsonObject o = json.isJsonObject() ? json.getAsJsonObject() : new JsonObject();
+		JsonObject o = json.isJsonNull() ? null : json.isJsonObject() ? json.getAsJsonObject() : new JsonObject();
 		return factory.apply(o);
 	}
 

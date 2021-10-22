@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
@@ -20,6 +21,7 @@ public interface Action {
 	Map<String, Function<JsonObject, Consumer<ActionContext>>> factories = Maps.newConcurrentMap();
 
 	static void registerFactory(String name, Function<JsonObject, Consumer<ActionContext>> factory) {
+		Preconditions.checkArgument(name.length() <= 32);
 		factories.put(name, factory);
 	}
 
