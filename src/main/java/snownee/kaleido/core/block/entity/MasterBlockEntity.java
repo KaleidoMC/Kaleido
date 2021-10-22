@@ -11,8 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -38,7 +36,6 @@ import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.core.definition.KaleidoBlockDefinition;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.tile.BaseTile;
-import snownee.kiwi.util.NBTHelper.NBT;
 import snownee.kiwi.util.Util;
 
 public class MasterBlockEntity extends BaseTile {
@@ -118,20 +115,10 @@ public class MasterBlockEntity extends BaseTile {
 				}
 			}
 		}
-		if (data.contains("Tint")) {
-			ListNBT list = data.getList("Tint", NBT.STRING);
-			if (!list.isEmpty()) {
-				tint = new String[list.size()]; //TODO don't always create new array
-				for (int i = 0; i < tint.length; i++) {
-					String s = list.getString(i);
-					if (!s.isEmpty()) {
-						tint[i] = s;
-						KaleidoClient.BLOCK_COLORS.ensureCache(s);
-					}
-				}
-			}
-		} else {
-			tint = null;
+		tint = KaleidoUtil.readNBTStrings(data, "Tint", tint);
+		if (tint != null) {
+			for (String s : tint)
+				KaleidoClient.BLOCK_COLORS.ensureCache(s);
 		}
 	}
 
@@ -211,15 +198,7 @@ public class MasterBlockEntity extends BaseTile {
 				data.put("SubTiles", subTiles);
 			}
 		}
-		if (tint != null) {
-			ListNBT list = new ListNBT();
-			for (String s : tint) {
-				if (s == null)
-					s = "";
-				list.add(StringNBT.valueOf(s));
-			}
-			data.put("Tint", list);
-		}
+		KaleidoUtil.writeNBTStrings(data, "Tint", tint);
 		return data;
 	}
 

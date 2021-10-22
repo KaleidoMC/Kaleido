@@ -39,6 +39,7 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
+import snownee.kaleido.util.KaleidoUtil;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
 
@@ -53,7 +54,8 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 			ModelInfo info = KaleidoDataManager.get(id);
 			if (info == null)
 				return null;
-			return of(info, tag.getInt("State"));
+			String[] tint = KaleidoUtil.readNBTStrings(tag, "Tint", null);
+			return of(info, tag.getInt("State"), tint);
 		}
 
 		@Override
@@ -61,10 +63,14 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 			ModelInfo info = null;
 			if (blockEntity instanceof MasterBlockEntity) {
 				info = ((MasterBlockEntity) blockEntity).getModelInfo();
+				if (info != null) {
+					String[] tint = ((MasterBlockEntity) blockEntity).tint;
+					if (tint != null)
+						tint = tint.clone();
+					return of(info, info.template.toMeta(state), tint);
+				}
 			}
-			if (info == null)
-				return null;
-			return of(info, info.template.toMeta(state));
+			return null;
 		}
 
 		@Override
@@ -76,7 +82,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 			if (state == null) {
 				return null;
 			}
-			return of(info, info.template.toMeta(state));
+			return of(info, info.template.toMeta(state), null);
 		}
 
 		@Override
@@ -89,20 +95,29 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	public static final String TYPE = "Kaleido";
 	private static final Map<Int2ObjectMap.Entry<ModelInfo>, KaleidoBlockDefinition> simpleDefs = Maps.newHashMap();
 
-	public static KaleidoBlockDefinition of(ModelInfo info, int state) {
+	public static KaleidoBlockDefinition of(ModelInfo info, int state, String[] tint) {
 		Int2ObjectMap.Entry<ModelInfo> entry = new AbstractInt2ObjectMap.BasicEntry<>(state, info);
-		return simpleDefs.computeIfAbsent(entry, KaleidoBlockDefinition::new);
+		if (tint == null) {
+			return simpleDefs.computeIfAbsent(entry, KaleidoBlockDefinition::new);
+		} else {
+			return new KaleidoBlockDefinition(entry, tint);
+		}
 	}
 
 	private final Int2ObjectMap.Entry<ModelInfo> entry;
 	private ModelInfo modelInfo;
 	@OnlyIn(Dist.CLIENT)
 	private IModelData modelData;
-	private String[] tint;
+	public String[] tint;
 
 	private KaleidoBlockDefinition(Int2ObjectMap.Entry<ModelInfo> entry) {
+		this(entry, null);
+	}
+
+	private KaleidoBlockDefinition(Int2ObjectMap.Entry<ModelInfo> entry, String[] tint) {
 		this.entry = entry;
 		modelInfo = entry.getValue();
+		this.tint = tint;
 	}
 
 	@Override
@@ -164,17 +179,27 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 	public void save(CompoundNBT tag) {
 		tag.putString("Id", getModelInfo().id.toString());
 		tag.putInt("State", entry.getIntKey());
+		KaleidoUtil.writeNBTStrings(tag, "Tint", tint);
 	}
 
 	@Override
 	public String toString() {
-		return getModelInfo().id + "#" + entry.getIntKey();
+		String s = getModelInfo().id + "#" + entry.getIntKey();
+		if (tint == null)
+			s += "#simple";
+		return s;
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public int getColor(BlockState blockState, IBlockDisplayReader level, BlockPos worldPosition, int index) {
-		return getModelInfo().getBlockColor(blockState, level, worldPosition, index);
+	public int getColor(BlockState blockState, IBlockDisplayReader level, BlockPos worldPosition, int i) {
+		if (tint != null) {
+			if (i < 0 || i >= tint.length) {
+				i = 0;
+			}
+			return KaleidoClient.BLOCK_COLORS.getColor(tint[i], blockState, level, worldPosition, i);
+		}
+		return getModelInfo().getBlockColor(blockState, level, worldPosition, i);
 	}
 
 	@Override
@@ -190,6 +215,8 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 			TileEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof MasterBlockEntity) {
 				((MasterBlockEntity) blockEntity).setModelInfo(getModelInfo());
+				if (tint != null)
+					((MasterBlockEntity) blockEntity).tint = tint.clone();
 				return true;
 			}
 		}

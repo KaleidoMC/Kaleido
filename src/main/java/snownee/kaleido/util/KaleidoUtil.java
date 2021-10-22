@@ -12,6 +12,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -23,6 +26,7 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 import snownee.kaleido.core.CoreModule;
+import snownee.kiwi.util.NBTHelper.NBT;
 
 public class KaleidoUtil {
 
@@ -177,4 +181,33 @@ public class KaleidoUtil {
 		}
 	}
 
+	@Nullable
+	public static String[] readNBTStrings(CompoundNBT tag, String key, @Nullable String[] strings) {
+		if (!tag.contains(key, NBT.LIST)) {
+			return null;
+		}
+		ListNBT list = tag.getList(key, NBT.STRING);
+		if (list.isEmpty()) {
+			return null;
+		}
+		if (strings == null || strings.length != list.size()) {
+			strings = new String[list.size()];
+		}
+		for (int i = 0; i < strings.length; i++) {
+			String s = list.getString(i);
+			strings[i] = s;
+		}
+		return strings;
+	}
+
+	public static void writeNBTStrings(CompoundNBT tag, String key, @Nullable String[] strings) {
+		if (strings == null || strings.length == 0) {
+			return;
+		}
+		ListNBT list = new ListNBT();
+		for (String s : strings) {
+			list.add(StringNBT.valueOf(s));
+		}
+		tag.put(key, list);
+	}
 }

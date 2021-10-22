@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -86,6 +87,27 @@ public class ScopeStack {
 			oy += translation.y() * 0.0625;
 			oz += translation.z() * 0.0625;
 		}
+
+		world.useSelfLight(transformed);
+		world.setPos(posIn);
+		if (blockDefinition.getClass() == DynamicBlockDefinition.class) {
+			world.setBlockEntity(((DynamicBlockDefinition) blockDefinition).blockEntity);
+		} else if (blockDefinition.getClass() == KaleidoBlockDefinition.class) {
+			if (dummyMasterTile == null) {
+				dummyMasterTile = new MasterBlockEntity();
+			}
+			KaleidoBlockDefinition definition = (KaleidoBlockDefinition) blockDefinition;
+			dummyMasterTile.setModelInfo(definition.getModelInfo());
+			dummyMasterTile.tint = definition.tint;
+			world.setBlockEntity(dummyMasterTile);
+			Vector3d offset = definition.getModelInfo().getOffset(posIn);
+			ox += offset.x;
+			oy += offset.y;
+			oz += offset.z;
+		} else {
+			world.setBlockEntity(null);
+		}
+
 		matrixIn.translate(ox, oy, oz);
 		if (bRotate) {
 			matrixIn.mulPose(quaternion);
@@ -97,20 +119,6 @@ public class ScopeStack {
 			matrixIn.translate(-0.5, -0.5, -0.5);
 		}
 
-		world.useSelfLight(transformed);
-
-		world.setPos(posIn);
-		if (blockDefinition.getClass() == DynamicBlockDefinition.class) {
-			world.setBlockEntity(((DynamicBlockDefinition) blockDefinition).blockEntity);
-		} else if (blockDefinition.getClass() == KaleidoBlockDefinition.class) {
-			if (dummyMasterTile == null) {
-				dummyMasterTile = new MasterBlockEntity();
-			}
-			dummyMasterTile.setModelInfo(((KaleidoBlockDefinition) blockDefinition).getModelInfo());
-			world.setBlockEntity(dummyMasterTile);
-		} else {
-			world.setBlockEntity(null);
-		}
 		BlockState blockState = blockDefinition.getBlockState();
 		modelRenderer.renderModel(world, blockDefinition.model(), blockState, posIn, matrixIn, buffer, checkSides && !transformed, randomIn, rand, combinedOverlayIn, blockDefinition.modelData());
 

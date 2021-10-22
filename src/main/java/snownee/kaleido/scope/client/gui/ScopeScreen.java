@@ -469,6 +469,7 @@ public class ScopeScreen extends ResizeableScreen {
 
 	@Override
 	public void removed() {
+		super.removed();
 		StandardCursor.ARROW.use();
 	}
 
