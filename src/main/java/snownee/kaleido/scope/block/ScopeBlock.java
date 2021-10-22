@@ -28,6 +28,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.scope.ScopeModule;
@@ -59,7 +61,7 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 		}
 		if (player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()) {
 			if (level.isClientSide) {
-				Minecraft.getInstance().setScreen(new ScopeScreen((ScopeBlockEntity) blockEntity));
+				openScreen((ScopeBlockEntity) blockEntity);
 			}
 			return ActionResultType.SUCCESS;
 		}
@@ -81,6 +83,11 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 			((ScopeBlockEntity) blockEntity).addStack(definition, player);
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	private static void openScreen(ScopeBlockEntity blockEntity) {
+		Minecraft.getInstance().setScreen(new ScopeScreen(blockEntity));
 	}
 
 	@Override

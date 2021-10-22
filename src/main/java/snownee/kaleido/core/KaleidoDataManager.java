@@ -157,7 +157,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//            }
 		//        }
 
-		if (!FMLEnvironment.production) {
+		if (FMLEnvironment.dist.isClient() && !FMLEnvironment.production) {
 			SSyncModelsPacket packet = new SSyncModelsPacket(allInfos.values());
 			SSyncModelsPacket.Handler handler = new SSyncModelsPacket.Handler();
 			PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
