@@ -55,7 +55,6 @@ public final class WorldColorPicker {
 		if (framebuffer.viewWidth != width || framebuffer.viewHeight != height) {
 			framebuffer.resize(width, height, Minecraft.ON_OSX);
 		}
-		framebuffer.clear(Minecraft.ON_OSX);
 		framebuffer.bindWrite(false);
 
 		Vector3d vector3d = mc.gameRenderer.getMainCamera().getPosition();
@@ -99,6 +98,8 @@ public final class WorldColorPicker {
 
 		int abgr = nativeimage.getPixelRGBA(width / 2, height / 2);
 		nativeimage.close();
+
+		framebuffer.clear(Minecraft.ON_OSX);
 
 		int a = abgr >> 24 & 255;
 		int b = abgr >> 16 & 255;
