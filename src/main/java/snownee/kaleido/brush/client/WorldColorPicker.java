@@ -79,9 +79,7 @@ public final class WorldColorPicker {
 		}
 		matrixStack.popPose();
 		renderType.setupRenderState();
-		RenderSystem.enableDepthTest();
 		buffer.endBatch(renderType);
-		RenderSystem.disableDepthTest();
 		renderType.clearRenderState();
 
 		mc.getMainRenderTarget().bindWrite(false);
