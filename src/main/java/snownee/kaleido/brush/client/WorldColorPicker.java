@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ScreenShotHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -42,7 +41,7 @@ public final class WorldColorPicker {
 	private static final SimulationBlockReader simulationLevel = new SimulationBlockReader();
 
 	static {
-		framebuffer = new Framebuffer(mc.getWindow().getWidth(), mc.getWindow().getHeight(), false, Minecraft.ON_OSX);
+		framebuffer = new Framebuffer(mc.getWindow().getWidth(), mc.getWindow().getHeight(), true, Minecraft.ON_OSX);
 		simulationLevel.setOverrideLight(15);
 		simulationLevel.useSelfLight(true);
 	}
@@ -94,11 +93,11 @@ public final class WorldColorPicker {
 		//nativeimage.flipY();
 
 		//test code to see if the result is correct
-		ScreenShotHelper.grab(mc.gameDirectory, width, height, framebuffer, $ -> {
-			mc.execute(() -> {
-				mc.gui.getChat().addMessage($);
-			});
-		});
+		//		ScreenShotHelper.grab(mc.gameDirectory, width, height, framebuffer, $ -> {
+		//			mc.execute(() -> {
+		//				mc.gui.getChat().addMessage($);
+		//			});
+		//		});
 
 		int abgr = nativeimage.getPixelRGBA(width / 2, height / 2);
 		nativeimage.close();
