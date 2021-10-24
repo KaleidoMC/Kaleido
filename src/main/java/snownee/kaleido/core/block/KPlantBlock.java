@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 
 public class KPlantBlock extends KHorizontalBlock implements KaleidoBlock {
 
@@ -14,7 +14,7 @@ public class KPlantBlock extends KHorizontalBlock implements KaleidoBlock {
 
 	@Override
 	public KaleidoTemplate getTemplate() {
-		return KaleidoTemplate.plant;
+		return KaleidoTemplate.PLANT;
 	}
 
 	@Override

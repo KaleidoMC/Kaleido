@@ -45,7 +45,6 @@ import net.minecraftforge.common.util.Lazy;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.util.KaleidoTemplate;
 
 @OnlyIn(Dist.CLIENT)
 public class KaleidoModel implements IDynamicBakedModel {
@@ -97,11 +96,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 			if (info == null || Minecraft.getInstance().overlay != null) {
 				return null;
 			}
-			if (KaleidoClient.ctm && info.template != KaleidoTemplate.item) {
-				return KaleidoClient.getModel(info, info.template.metaCount);
-			} else {
-				return KaleidoClient.getModel(info, null);
-			}
+			return KaleidoClient.getModel(info, null);
 		}
 	}
 

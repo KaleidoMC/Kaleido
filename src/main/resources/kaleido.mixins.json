@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "kaleido.refmap.json",
   "mixins": [
+    "MixinResourcePackLoader",
     "MixinBlockState",
     "MixinDebugChunkGenerator",
     "MixinSpreadableSnowyDirtBlock",
@@ -16,7 +17,6 @@
     "MixinBlock",
     "MixinMinecraft",
     "MixinItemRenderer",
-    "MixinClientModLoader",
     "MixinItemColors",
     "MixinBlockColors",
     "ctm.MixinCTMLogic",

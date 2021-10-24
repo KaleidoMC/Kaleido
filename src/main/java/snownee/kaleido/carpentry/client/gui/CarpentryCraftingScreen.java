@@ -1,11 +1,12 @@
 package snownee.kaleido.carpentry.client.gui;
 
-import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -69,8 +70,7 @@ public class CarpentryCraftingScreen extends ResizeableScreen {
 			id = pack.id;
 			name = I18n.get(pack.descriptionId);
 
-			LinkedList<ModelInfo> allInfos = Lists.newLinkedList(pack.normalInfos);
-			allInfos.addAll(pack.rewardInfos);
+			java.util.List<ModelInfo> allInfos = Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream()).filter($ -> !$.hide).collect(Collectors.toList());
 			int i = 0;
 			IPressable pressable = btn -> {
 				parent.setSelectedButton((StackButton) btn);

@@ -10,6 +10,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.util.BitBufferHelper;
 import snownee.kiwi.network.Packet;
 
 public class SSyncModelsPacket extends Packet {
@@ -20,8 +21,9 @@ public class SSyncModelsPacket extends Packet {
 		public SSyncModelsPacket decode(PacketBuffer buf) {
 			int size = buf.readVarInt();
 			ImmutableList.Builder<ModelInfo> builder = ImmutableList.builder();
+			BitBufferHelper bitHelper = new BitBufferHelper(buf, false);
 			for (int i = 0; i < size; i++) {
-				builder.add(ModelInfo.fromNetwork(buf));
+				builder.add(ModelInfo.fromNetwork(buf, bitHelper));
 			}
 			return new SSyncModelsPacket(builder.build());
 		}
@@ -29,8 +31,9 @@ public class SSyncModelsPacket extends Packet {
 		@Override
 		public void encode(SSyncModelsPacket pkt, PacketBuffer buf) {
 			buf.writeVarInt(pkt.infos.size());
+			BitBufferHelper bitHelper = new BitBufferHelper(buf, true);
 			for (ModelInfo info : pkt.infos) {
-				info.toNetwork(buf, pkt.player);
+				info.toNetwork(buf, pkt.player, bitHelper);
 			}
 		}
 

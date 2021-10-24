@@ -56,7 +56,7 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.util.GhostRenderType;
 import snownee.kaleido.util.SimulationBlockReader;
@@ -108,9 +108,11 @@ public final class PlacementPreview {
 		if (mc.overlay != null || mc.screen != null || mc.player == null || mc.options.hideGui || mc.options.keyAttack.isDown() || !(mc.hitResult instanceof BlockRayTraceResult) || mc.hitResult.getType() == RayTraceResult.Type.MISS/* || mc.level.isDebug()*/) {
 			return false;
 		}
+		if (mc.gameMode.getPlayerMode().isBlockPlacingRestricted())
+			return false;
 
 		ClientPlayerEntity player = mc.player;
-		if (mc.gameMode.getPlayerMode().isBlockPlacingRestricted())
+		if (player.getDeltaMovement().lengthSqr() > 0.01)
 			return false;
 		ItemStack held = player.getMainHandItem();
 		if (!(held.getItem() instanceof BlockItem)) {
@@ -123,7 +125,7 @@ public final class PlacementPreview {
 			BlockItem theBlockItem = (BlockItem) held.getItem();
 			ModelInfo info = KaleidoBlock.getInfo(held);
 			if (theBlockItem == CoreModule.STUFF_ITEM) {
-				if (info == null || info.template == KaleidoTemplate.item) {
+				if (info == null || info.template == KaleidoTemplate.ITEM) {
 					return false;
 				}
 				if (info.template.allowsCustomShape()) { // do not render if held model is simple and the same as target
@@ -166,7 +168,7 @@ public final class PlacementPreview {
 			} else {
 				transform.canRotate = false;
 			}
-			if (info != null && info.template == KaleidoTemplate.block) {
+			if (info != null && info.template == KaleidoTemplate.BLOCK) {
 				direction = null;
 			}
 			if (direction != null) {

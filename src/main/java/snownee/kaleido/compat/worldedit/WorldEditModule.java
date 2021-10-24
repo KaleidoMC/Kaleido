@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 import com.google.gson.JsonObject;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -16,10 +17,9 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import snownee.kaleido.Kaleido;
-import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.schedule.Scheduler;
@@ -72,13 +72,13 @@ public class WorldEditModule extends AbstractModule {
 
 			JsonObject json = new JsonObject();
 			for (ModelInfo info : KaleidoDataManager.INSTANCE.allInfos.values()) {
-				if (info.template == KaleidoTemplate.item)
+				if (info.template.getBlock() == Blocks.AIR)
 					continue;
 				String v;
-				if (info.template.bloc == CoreModule.STUFF)
+				if (info.template == KaleidoTemplate.NONE)
 					v = "";
 				else
-					v = info.template.bloc.getRegistryName().getPath();
+					v = info.template.getBlock().getRegistryName().getPath();
 				json.addProperty(info.id.toString(), v);
 			}
 			String s = KaleidoDataManager.GSON.toJson(json);

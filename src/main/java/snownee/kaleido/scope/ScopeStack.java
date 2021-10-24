@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
@@ -100,10 +101,12 @@ public class ScopeStack {
 			dummyMasterTile.setModelInfo(definition.getModelInfo());
 			dummyMasterTile.tint = definition.tint;
 			world.setBlockEntity(dummyMasterTile);
-			Vector3d offset = definition.getModelInfo().getOffset(posIn);
-			ox += offset.x;
-			oy += offset.y;
-			oz += offset.z;
+			if (definition.getModelInfo().offset != OffsetType.NONE) {
+				Vector3d offset = definition.getModelInfo().getOffset(posIn);
+				ox += offset.x;
+				oy += offset.y;
+				oz += offset.z;
+			}
 		} else {
 			world.setBlockEntity(null);
 		}

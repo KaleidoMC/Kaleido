@@ -3,6 +3,7 @@ package snownee.kaleido.util;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import net.minecraft.block.AbstractBlock.OffsetType;
 import net.minecraft.util.Direction;
 
 public class EnumUtil {
@@ -15,4 +16,6 @@ public class EnumUtil {
 	})).toArray($ -> {
 		return new Direction[$];
 	});
+
+	public static final OffsetType[] OFFSET_TYPES = OffsetType.values();
 }

@@ -23,7 +23,7 @@ import snownee.kaleido.KaleidoCommonConfig;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 
 @Mixin(DebugChunkGenerator.class)
 public class MixinDebugChunkGenerator {
@@ -64,14 +64,14 @@ public class MixinDebugChunkGenerator {
 			return;
 		ModelInfo info = getInfoFor(x, z);
 		if (info != null) {
-			ci.setReturnValue(info.template.bloc.defaultBlockState());
+			ci.setReturnValue(info.template.getBlock().defaultBlockState());
 		}
 	}
 
 	private static ModelInfo getInfoFor(int x, int z) {
 		if (ALL_INFOS.isEmpty() || ALL_INFOS.get(0).expired) {
 			ALL_INFOS.clear();
-			KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap($ -> Stream.concat($.normalInfos.stream(), $.rewardInfos.stream())).filter($ -> $.template != KaleidoTemplate.item).forEach(ALL_INFOS::add);
+			KaleidoDataManager.INSTANCE.allPacks.values().stream().flatMap($ -> Stream.concat($.normalInfos.stream(), $.rewardInfos.stream())).filter($ -> $.template != KaleidoTemplate.ITEM).forEach(ALL_INFOS::add);
 			GRID_WIDTH = MathHelper.ceil(ALL_INFOS.size() / 32F);
 		}
 		int spacing = KaleidoCommonConfig.debugWorldSpacing;

@@ -55,6 +55,7 @@ import snownee.kaleido.core.block.KHorizontalBlock;
 import snownee.kaleido.core.block.KLeavesBlock;
 import snownee.kaleido.core.block.KPlantBlock;
 import snownee.kaleido.core.block.KRotatedPillarBlock;
+import snownee.kaleido.core.block.KStairsBlock;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.client.KaleidoClient;
@@ -69,7 +70,7 @@ import snownee.kaleido.core.item.StuffItem;
 import snownee.kaleido.core.network.SSyncBehaviorsPacket;
 import snownee.kaleido.core.network.SSyncModelsPacket;
 import snownee.kaleido.core.network.SSyncShapesPacket;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 import snownee.kaleido.datagen.KaleidoBlockLoot;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CCreateScopePacket;
@@ -88,7 +89,7 @@ import snownee.kiwi.network.NetworkChannel;
 public class CoreModule extends AbstractModule {
 
 	@NoItem
-	public static final KHorizontalBlock HORIZONTAL = new KHorizontalBlock(blockProp(Material.STONE).strength(0.5F));
+	public static final KHorizontalBlock HORIZONTAL = new KHorizontalBlock(blockProp(Material.WOOD).strength(0.5F));
 
 	@NoItem
 	public static final KHorizontalBlock STUFF = new KHorizontalBlock(blockProp(HORIZONTAL).noOcclusion().dynamicShape());
@@ -98,6 +99,9 @@ public class CoreModule extends AbstractModule {
 
 	@NoItem
 	public static final KRotatedPillarBlock PILLAR = new KRotatedPillarBlock(blockProp(HORIZONTAL));
+
+	@NoItem
+	public static final KStairsBlock STAIRS = new KStairsBlock(blockProp(HORIZONTAL));
 
 	@NoItem
 	public static final KLeavesBlock LEAVES = new KLeavesBlock(blockProp(Material.LEAVES).strength(0.2F).sound(SoundType.GRASS).noOcclusion().dynamicShape().isValidSpawn(CoreModule::ocelotOrParrot).isSuffocating(CoreModule::never).isViewBlocking(CoreModule::never));
@@ -119,7 +123,7 @@ public class CoreModule extends AbstractModule {
 
 	public CoreModule() {
 		KaleidoDataManager.INSTANCE.hashCode();
-		KaleidoTemplate.none.hashCode();
+		KaleidoTemplate.NONE.hashCode();
 	}
 
 	private static Boolean ocelotOrParrot(BlockState p_235441_0_, IBlockReader p_235441_1_, BlockPos p_235441_2_, EntityType<?> p_235441_3_) {

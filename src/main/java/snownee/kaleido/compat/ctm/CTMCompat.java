@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
@@ -23,11 +24,11 @@ public class CTMCompat {
 	public static final Set<ResourceLocation> wrappedModels = Sets.newHashSet();
 
 	// TextureMetadataHandler
-	public static IBakedModel tryWrap(ModelInfo info, int variant, IBakedModel bakedModel, ModelLoader modelLoader) {
+	public static IBakedModel tryWrap(ModelInfo info, BlockState state, IBakedModel bakedModel, ModelLoader modelLoader) {
 		if (bakedModel instanceof AbstractCTMBakedModel || bakedModel.isCustomRenderer()) { // Nothing we can add to builtin models
 			return bakedModel;
 		}
-		ResourceLocation location = info.template.getModelLocation(info, variant);
+		ResourceLocation location = info.template.getModelLocation(info, state);
 		IUnbakedModel unbakedModel = modelLoader.getModel(location);
 		boolean shouldWrap = wrappedModels.contains(location);
 		// Breadth-first loop through dependencies, exiting as soon as a CTM texture is found, and skipping duplicates/cycles

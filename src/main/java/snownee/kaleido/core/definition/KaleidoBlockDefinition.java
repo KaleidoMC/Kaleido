@@ -78,7 +78,7 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 			ModelInfo info = KaleidoBlock.getInfo(stack);
 			if (info == null)
 				return null;
-			BlockState state = info.template.bloc.getStateForPlacement(context);
+			BlockState state = info.template.getBlock().getStateForPlacement(context);
 			if (state == null) {
 				return null;
 			}

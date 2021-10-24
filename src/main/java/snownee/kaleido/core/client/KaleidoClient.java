@@ -34,7 +34,7 @@ import snownee.kaleido.compat.ctm.CTMCompat;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.definition.KaleidoBlockDefinition;
 import snownee.kaleido.core.definition.SimpleBlockDefinition;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 
 @SuppressWarnings("deprecation")
 @OnlyIn(Dist.CLIENT)
@@ -53,49 +53,55 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 	}
 
 	@Nullable
-	public static synchronized void loadModel(IBakedModel[] models, ModelInfo info, int variant) {
+	public static synchronized void loadModel(IBakedModel[] models, ModelInfo info, BlockState state, int variant) {
 		ModelLoader modelLoader = ModelLoader.instance();
 		if (modelLoader == null) {
 			return;
 		}
-		if (info.template != KaleidoTemplate.item && ctm) {
+		if (info.template != KaleidoTemplate.ITEM && ctm) {
 			if (variant == info.template.metaCount) {
 				variant = info.template.defaultMeta;
 			}
 		}
-		IBakedModel bakedModel = info.template.loadModel(modelLoader, info, variant);
-		if (info.template != KaleidoTemplate.item && ctm) {
+		IBakedModel bakedModel = info.template.loadModel(modelLoader, info, state);
+		if (info.template != KaleidoTemplate.ITEM && ctm) {
 			if (info.template.defaultMeta == variant)
 				models[info.template.metaCount] = bakedModel;
-			bakedModel = CTMCompat.tryWrap(info, variant, bakedModel, modelLoader);
+			bakedModel = CTMCompat.tryWrap(info, state, bakedModel, modelLoader);
 		}
 		models[variant] = bakedModel;
 	}
 
 	@Nullable
 	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
-		int i = state == null ? info.template.defaultMeta : info.template.toMeta(state);
-		return getModel(info, i);
-	}
-
-	@Nullable
-	public static IBakedModel getModel(ModelInfo info, int i) {
-		if (i == -1) {
-			return null;
+		int i;
+		if (state == null) { // is from item
+			state = info.template.getBlock().defaultBlockState();
+			if (KaleidoClient.ctm && info.template != KaleidoTemplate.ITEM) {
+				i = info.template.metaCount;
+			} else {
+				i = info.template.defaultMeta;
+			}
+		} else {
+			if (state.getBlock() != info.template.getBlock()) {
+				state = info.template.fromMeta(info.template.defaultMeta);
+			}
+			i = info.template.toMeta(state);
 		}
 		int states = ctm ? info.template.metaCount + 1 : info.template.metaCount;
 		IBakedModel[] bakedModel = MODEL_MAP.computeIfAbsent(info, $ -> new IBakedModel[states]);
 		if (bakedModel[i] == null) {
-			loadModel(bakedModel, info, i);
+			loadModel(bakedModel, info, state, i);
 		}
 		return bakedModel[i];
 	}
 
+	@Nullable
+	public static IBakedModel getModel(ModelInfo info, int i) {
+		return getModel(info, info.template.fromMeta(i));
+	}
+
 	public static void registerModels(Consumer<ResourceLocation> consumer) {
-		if (ctm) {
-			CTMCompat.wrappedModels.clear();
-		}
-		MODEL_MAP.clear();
 		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		Collection<ResourceLocation> locations = resourceManager.listResources("models/kaleido", s -> s.endsWith(".json"));
 		/* off */
@@ -114,6 +120,10 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
+		if (ctm) {
+			CTMCompat.wrappedModels.clear();
+		}
+		MODEL_MAP.clear();
 		SimpleBlockDefinition.reload();
 		KaleidoBlockDefinition.reload();
 	}

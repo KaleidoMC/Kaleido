@@ -38,10 +38,12 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -57,9 +59,11 @@ import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.EventBehavior;
 import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 import snownee.kaleido.core.util.RenderTypeEnum;
 import snownee.kaleido.core.util.SoundTypeEnum;
+import snownee.kaleido.util.BitBufferHelper;
+import snownee.kaleido.util.EnumUtil;
 import snownee.kaleido.util.KaleidoUtil;
 import snownee.kaleido.util.data.RotatedShapeCache;
 import snownee.kiwi.util.NBTHelper;
@@ -69,8 +73,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public boolean expired;
 	public ResourceLocation id;
 	public ModelGroup group;
-	public KaleidoTemplate template = KaleidoTemplate.none;
-	public SoundTypeEnum soundType = template.defaultSoundType();
+	public KaleidoTemplate template = KaleidoTemplate.NONE;
+	public SoundTypeEnum soundType = template.defaultSound;
 	public byte renderTypeFlags = template.defaultRenderTypeFlags;
 	public ImmutableMap<String, Behavior> behaviors = ImmutableMap.of();
 	private boolean locked = true;
@@ -83,8 +87,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	public String[] tint;
 	private RotatedShapeCache.Instance shapes = KaleidoDataManager.INSTANCE.shapeCache.empty();
 	public CompoundNBT nbt;
-	public int lightEmission;
+	public byte lightEmission;
 	private boolean simple;
+	public boolean hide;
+	public boolean uvLock;
 
 	public ResourceLocation getAdvancementId() {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
@@ -181,28 +187,31 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		this.locked = locked;
 	}
 
-	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player) {
+	public void toNetwork(PacketBuffer buf, ServerPlayerEntity player, BitBufferHelper bitHelper) {
 		buf.writeResourceLocation(id);
-		int b = bit(isLockedServer(player));
-		b = b << 1 | bit(simple);
-		b = b << 1 | bit(noCollision);
-		b = b << 1 | bit(glass);
-		b = b << 4 | renderTypeFlags;
-		buf.writeByte(b);
+		bitHelper.writeBoolean(isLockedServer(player));
+		bitHelper.writeBoolean(simple);
+		bitHelper.writeBoolean(hide);
+		bitHelper.writeBoolean(uvLock);
+		bitHelper.writeBits(renderTypeFlags, 4);
+		bitHelper.end();
 
 		if (simple) {
 			return;
 		}
 
-		buf.writeEnum(template);
-		buf.writeEnum(soundType);
-		buf.writeByte(lightEmission);
+		bitHelper.writeBoolean(noCollision);
+		bitHelper.writeBoolean(glass);
+		bitHelper.writeBits(offset.ordinal(), 2);
+		bitHelper.writeBits(lightEmission, 4);
+		bitHelper.end();
 
-		byte price = (byte) (this.price - 1);
-		if (reward) {
-			price |= 1 << 7;
-		}
-		buf.writeByte(price);
+		bitHelper.writeBoolean(reward);
+		bitHelper.writeBits(price, 7);
+		bitHelper.end();
+
+		buf.writeVarInt(template.index);
+		buf.writeEnum(soundType);
 
 		buf.writeNbt(nbt);
 		if (tint == null) {
@@ -216,37 +225,35 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (template.allowsCustomShape()) {
 			buf.writeByteArray(shapes.hashCode.asBytes());
 		}
-		if (!template.solid) {
-			buf.writeEnum(offset);
-		}
-	}
-
-	private static int bit(boolean b) {
-		return b ? 1 : 0;
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static ModelInfo fromNetwork(PacketBuffer buf) {
+	public static ModelInfo fromNetwork(PacketBuffer buf, BitBufferHelper bitHelper) {
 		ModelInfo info = new ModelInfo();
 		info.id = buf.readResourceLocation();
-		int b = buf.readByte() & 0xFF;
-		info.renderTypeFlags = (byte) (b & 16);
-		info.setLocked(bool(b));
-		info.simple = bool(b = b << 1);
-		info.noCollision = bool(b = b << 1);
-		info.glass = bool(b = b << 1);
+		info.setLocked(bitHelper.readBoolean());
+		info.simple = bitHelper.readBoolean();
+		info.hide = bitHelper.readBoolean();
+		info.uvLock = bitHelper.readBoolean();
+		info.renderTypeFlags = (byte) bitHelper.readBits(4);
+		bitHelper.end();
 
 		if (info.simple) {
 			return info;
 		}
 
-		info.template = buf.readEnum(KaleidoTemplate.class);
-		info.soundType = buf.readEnum(SoundTypeEnum.class);
-		info.lightEmission = buf.readByte();
+		info.noCollision = bitHelper.readBoolean();
+		info.glass = bitHelper.readBoolean();
+		info.offset = EnumUtil.OFFSET_TYPES[bitHelper.readBits(2)];
+		info.lightEmission = (byte) bitHelper.readBits(4);
+		bitHelper.end();
 
-		byte price = buf.readByte();
-		info.price = price & 0xFFFFFFF + 1;
-		info.reward = price < 0;
+		info.reward = bitHelper.readBoolean();
+		info.price = bitHelper.readBits(7);
+		bitHelper.end();
+
+		info.template = KaleidoTemplate.VALUES.get(buf.readVarInt());
+		info.soundType = buf.readEnum(SoundTypeEnum.class);
 
 		info.nbt = buf.readNbt();
 		int l = buf.readVarInt();
@@ -259,14 +266,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (info.template.allowsCustomShape()) {
 			info.shapes = KaleidoDataManager.INSTANCE.shapeCache.get(HashCode.fromBytes(buf.readByteArray()));
 		}
-		if (!info.template.solid) {
-			info.offset = buf.readEnum(OffsetType.class);
-		}
 		return info;
-	}
-
-	private static boolean bool(int b) {
-		return (b >> 7 & 1) == 1;
 	}
 
 	public static ModelInfo fromJson(JsonObject json) {
@@ -277,7 +277,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (json.has("template")) {
 			info.template = KaleidoTemplate.valueOf(JSONUtils.getAsString(json, "template"));
-			info.soundType = info.template.defaultSoundType();
+			info.soundType = info.template.defaultSound;
 			info.renderTypeFlags = info.template.defaultRenderTypeFlags;
 		}
 		ImmutableMap.Builder<String, Behavior> behaviors = ImmutableMap.builder();
@@ -294,7 +294,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				info.soundType = SoundTypeEnum.valueOf(v.getAsString());
 				break;
 			case "light":
-				info.lightEmission = v.getAsInt();
+				info.lightEmission = (byte) v.getAsInt();
 				Preconditions.checkArgument(info.lightEmission >= 0 && info.lightEmission <= 15, "light");
 				break;
 			case "reward":
@@ -343,6 +343,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 				Preconditions.checkArgument(!info.template.solid, "offset");
 				info.offset = OffsetType.valueOf(v.getAsString().toUpperCase(Locale.ENGLISH));
 				break;
+			case "uvlock":
+				info.uvLock = v.getAsBoolean();
+				break;
 			default:
 				String k = entry.getKey();
 				if (k.startsWith("_"))
@@ -362,7 +365,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (reward || price != 1 || lightEmission != 0 || soundType != SoundTypeEnum.wood) {
 			return false;
 		}
-		if (group != null || nbt != null || tint != null || offset != OffsetType.NONE || template != KaleidoTemplate.none) {
+		if (group != null || nbt != null || tint != null || offset != OffsetType.NONE || template != KaleidoTemplate.NONE) {
 			return false;
 		}
 		if (!behaviors.isEmpty() || !shapes.isEmpty()) {
@@ -371,9 +374,10 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		return true;
 	}
 
-	public VoxelShape getShape(BlockState state, BlockPos pos) {
+	@SuppressWarnings("deprecation")
+	public VoxelShape getShape(IBlockReader level, BlockState state, BlockPos pos) {
 		if (!template.allowsCustomShape())
-			return template.getShape(state);
+			return template.getBlock().getShape(state, level, pos, ISelectionContext.empty());
 		Direction direction = null;
 		if (state.hasProperty(HorizontalBlock.FACING)) {
 			direction = state.getValue(HorizontalBlock.FACING);
@@ -425,6 +429,8 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	}
 
 	public Vector3d getOffset(BlockPos pos) {
+		if (offset == OffsetType.NONE)
+			return Vector3d.ZERO;
 		long i = MathHelper.getSeed(pos.getX(), 0, pos.getZ());
 		return new Vector3d(((i & 15L) / 15.0F - 0.5D) * 0.5D, offset == AbstractBlock.OffsetType.XYZ ? ((i >> 4 & 15L) / 15.0F - 1.0D) * 0.2D : 0.0D, ((i >> 8 & 15L) / 15.0F - 0.5D) * 0.5D);
 	}

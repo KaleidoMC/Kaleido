@@ -1,5 +1,6 @@
 package snownee.kaleido;
 
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -28,6 +29,8 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.resources.IPackNameDecorator;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -48,6 +51,8 @@ import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kaleido.resources.JarPackFinder;
+import snownee.kaleido.resources.RequiredFolderPackFinder;
 import snownee.kaleido.scope.ScopeStack;
 import snownee.kaleido.scope.client.model.ScopeModel;
 import snownee.kaleido.util.SimulationBlockReader;
@@ -58,6 +63,7 @@ public final class Hooks {
 	public static boolean chiselEnabled;
 	public static boolean scopeEnabled;
 	public static boolean brushEnabled;
+	public static boolean hubEnabled;
 
 	@OnlyIn(Dist.CLIENT)
 	private static ResourceLocation DEFAULT_PARENT;
@@ -197,5 +203,31 @@ public final class Hooks {
 			}
 		}
 		return MaterialColor.NONE;
+	}
+
+	public static void loadResourcePacks(ResourcePackList resourcePacks) {
+		if (FMLEnvironment.dist.isClient()) {
+			loadResourcePacksClient(resourcePacks);
+		} else {
+			addDataPackFinder(resourcePacks);
+		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static void loadResourcePacksClient(ResourcePackList resourcePacks) {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.getResourcePackRepository() == resourcePacks) {
+			resourcePacks.addPackFinder(new JarPackFinder(Minecraft.getInstance().getResourcePackDirectory(), IPackNameDecorator.DEFAULT));
+			File folder = new File("kaleido-loader");
+			if (!folder.isDirectory()) {
+				folder.mkdirs();
+			}
+		} else {
+			addDataPackFinder(resourcePacks);
+		}
+	}
+
+	public static void addDataPackFinder(ResourcePackList resourcePacks) {
+		resourcePacks.addPackFinder(new RequiredFolderPackFinder(new File("kaleido-loader"), IPackNameDecorator.DEFAULT));
 	}
 }

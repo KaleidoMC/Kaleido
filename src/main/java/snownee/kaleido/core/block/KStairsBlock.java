@@ -1,24 +1,37 @@
 package snownee.kaleido.core.block;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.RotatedPillarBlock;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import snownee.kaleido.core.template.KaleidoTemplate;
 
-public class KRotatedPillarBlock extends RotatedPillarBlock implements KaleidoBlock {
+public class KStairsBlock extends StairsBlock implements KaleidoBlock {
 
-	public KRotatedPillarBlock(Properties properties) {
-		super(properties);
+	public KStairsBlock(Properties pProperties) {
+		super(() -> Blocks.OAK_STAIRS.defaultBlockState(), pProperties);
+		registerDefaultState(defaultBlockState().setValue(FACING, Direction.EAST));
+	}
+
+	@Override
+	public KaleidoTemplate getTemplate() {
+		return KaleidoTemplate.STAIRS;
+	}
+
+	@Override
+	public void onRemove(BlockState pState, World pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+		if (pState.hasTileEntity() && (!pState.is(pNewState.getBlock()) || !pNewState.hasTileEntity())) {
+			pLevel.removeBlockEntity(pPos);
+		}
 	}
 
 	@Override
@@ -41,13 +54,4 @@ public class KRotatedPillarBlock extends RotatedPillarBlock implements KaleidoBl
 		KaleidoBlock.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
-	@Override
-	public boolean isPathfindable(BlockState pState, IBlockReader pLevel, BlockPos pPos, PathType pType) {
-		return false;
-	}
-
-	@Override
-	public KaleidoTemplate getTemplate() {
-		return KaleidoTemplate.PILLAR;
-	}
 }

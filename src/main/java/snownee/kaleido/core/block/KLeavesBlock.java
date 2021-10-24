@@ -12,7 +12,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 
 // LeavesBlock
 public class KLeavesBlock extends KHorizontalBlock {
@@ -23,7 +23,7 @@ public class KLeavesBlock extends KHorizontalBlock {
 
 	@Override
 	public KaleidoTemplate getTemplate() {
-		return KaleidoTemplate.leaves;
+		return KaleidoTemplate.LEAVES;
 	}
 
 	@Override

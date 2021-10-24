@@ -17,7 +17,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 
 public class TransformAction implements Consumer<ActionContext> {
 
@@ -38,9 +38,9 @@ public class TransformAction implements Consumer<ActionContext> {
 		BlockState state = level.getBlockState(pos);
 		if ("kaleido".equals(blockTo.getNamespace())) {
 			ModelInfo info = KaleidoDataManager.get(blockTo);
-			if (info == null || info.template == KaleidoTemplate.item)
+			if (info == null || info.template == KaleidoTemplate.ITEM)
 				return;
-			level.setBlockAndUpdate(pos, tryCopyBlockState(state, info.template.bloc.defaultBlockState()));
+			level.setBlockAndUpdate(pos, tryCopyBlockState(state, info.template.getBlock().defaultBlockState()));
 			TileEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof MasterBlockEntity) {
 				((MasterBlockEntity) blockEntity).setModelInfo(info);

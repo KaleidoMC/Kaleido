@@ -34,9 +34,9 @@ public class PreviewTransform {
 	}
 
 	public PreviewTransform pos(BlockPos pos) {
-		position.x.set(pos.getX());
-		position.y.set(pos.getY());
-		position.z.set(pos.getZ());
+		position.x.start(pos.getX());
+		position.y.start(pos.getY());
+		position.z.start(pos.getZ());
 		return this;
 	}
 

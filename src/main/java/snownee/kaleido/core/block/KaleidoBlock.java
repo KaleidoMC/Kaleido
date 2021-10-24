@@ -2,20 +2,20 @@ package snownee.kaleido.core.block;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.Streams;
+import com.google.common.base.Preconditions;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -34,10 +34,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.action.ActionContext;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
-import snownee.kaleido.core.util.KaleidoTemplate;
+import snownee.kaleido.core.template.KaleidoTemplate;
 import snownee.kiwi.util.NBTHelper;
 import snownee.kiwi.util.Util;
 
@@ -67,6 +66,12 @@ public interface KaleidoBlock extends IForgeBlock {
 	default int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
 		ModelInfo info = getInfo(world, pos);
 		return info == null ? 0 : info.lightEmission;
+	}
+
+	@Override
+	default SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, Entity entity) {
+		ModelInfo info = getInfo(world, pos);
+		return info == null ? SoundType.WOOD : info.soundType.soundType;
 	}
 
 	KaleidoTemplate getTemplate();
@@ -151,12 +156,10 @@ public interface KaleidoBlock extends IForgeBlock {
 
 	static VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
-		if (!template.allowsCustomShape()) {
-			return template.getShape(state);
-		}
+		Preconditions.checkArgument(template.allowsCustomShape());
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null) {
-			VoxelShape shape = info.getShape(state, pos);
+			VoxelShape shape = info.getShape(worldIn, state, pos);
 			if (!shape.isEmpty()) {
 				return shape;
 			}
@@ -166,12 +169,10 @@ public interface KaleidoBlock extends IForgeBlock {
 
 	static VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		KaleidoTemplate template = ((KaleidoBlock) state.getBlock()).getTemplate();
-		if (!template.allowsCustomShape()) {
-			return template.getShape(state);
-		}
+		Preconditions.checkArgument(template.allowsCustomShape());
 		ModelInfo info = getInfo(worldIn, pos);
 		if (info != null && !info.noCollision) {
-			VoxelShape shape = info.getShape(state, pos);
+			VoxelShape shape = info.getShape(worldIn, state, pos);
 			if (info.outOfBlock()) {
 				shape = VoxelShapes.join(shape, VoxelShapes.block(), IBooleanFunction.AND);
 			}
@@ -180,24 +181,9 @@ public interface KaleidoBlock extends IForgeBlock {
 		return VoxelShapes.empty();
 	}
 
-	static void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
-		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
-			fillEmpty(items);
-			Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream()).map(ModelInfo::makeItem).forEach(items::add);
-		}
-		if (!KaleidoDataManager.INSTANCE.allPacks.isEmpty()) {
-			fillEmpty(items);
-		}
+	@Override
+	default boolean isFlammable(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+		return false;
 	}
 
-	static void fillEmpty(NonNullList<ItemStack> items) {
-		while (items.size() % 9 != 0) {
-			items.add(ItemStack.EMPTY);
-		}
-	}
-
-	static SoundType getSoundType(IWorldReader world, BlockPos pos) {
-		ModelInfo info = getInfo(world, pos);
-		return info == null ? SoundType.WOOD : info.soundType.soundType;
-	}
 }
