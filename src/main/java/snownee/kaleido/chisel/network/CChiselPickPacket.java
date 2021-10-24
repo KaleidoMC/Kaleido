@@ -9,6 +9,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.util.KaleidoUtil;
@@ -45,6 +46,11 @@ public class CChiselPickPacket extends ClientPacket {
 				}
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_SERVER;
 		}
 
 	}

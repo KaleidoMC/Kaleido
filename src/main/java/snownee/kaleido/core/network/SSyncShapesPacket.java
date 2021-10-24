@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.google.common.hash.HashCode;
 
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.util.data.RotatedShapeCache;
 import snownee.kaleido.util.data.RotatedShapeCache.Instance;
@@ -51,6 +52,11 @@ public class SSyncShapesPacket extends Packet {
 				}
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_CLIENT;
 		}
 
 	}

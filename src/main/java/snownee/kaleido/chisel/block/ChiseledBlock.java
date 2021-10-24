@@ -1,11 +1,9 @@
 package snownee.kaleido.chisel.block;
 
-import java.util.List;
 import java.util.Objects;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -21,17 +19,16 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.extensions.IForgeBlock;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.client.model.RetextureModel;
 import snownee.kaleido.core.definition.BlockDefinition;
+import snownee.kiwi.block.IKiwiBlock;
 import snownee.kiwi.block.ModBlock;
 import snownee.kiwi.util.NBTHelper;
 
-public interface ChiseledBlock extends IForgeBlock {
+public interface ChiseledBlock extends IForgeBlock, IKiwiBlock {
 
 	static ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult) {
 		//		ItemStack stack = player.getItemInHand(hand);
@@ -63,18 +60,6 @@ public interface ChiseledBlock extends IForgeBlock {
 		//		}
 		//		return ActionResultType.sidedSuccess(level.isClientSide);
 		return ActionResultType.PASS;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	static void appendHoverText(ItemStack stack, IBlockReader level, List<ITextComponent> components, ITooltipFlag flag) {
-		NBTHelper data = NBTHelper.of(stack);
-		CompoundNBT tag = data.getTag("BlockEntityTag.Overrides.0");
-		BlockDefinition supplier = BlockDefinition.fromNBT(tag);
-		if (supplier != null) {
-			ITextComponent component = components.get(0);
-			component = new TranslationTextComponent("block.kaleido.chiseled", component, supplier.getDescription());
-			components.set(0, component);
-		}
 	}
 
 	static BlockDefinition getSupplierIfSame(World level, BlockPos pos, ItemStack stack) {
@@ -116,6 +101,17 @@ public interface ChiseledBlock extends IForgeBlock {
 		if (blockEntity instanceof ChiseledBlockEntity)
 			return ((ChiseledBlockEntity) blockEntity).getLight();
 		return 0;
+	}
+
+	@Override
+	default ITextComponent getName(ItemStack stack) {
+		NBTHelper data = NBTHelper.of(stack);
+		CompoundNBT tag = data.getTag("BlockEntityTag.Overrides.0");
+		BlockDefinition supplier = BlockDefinition.fromNBT(tag);
+		if (supplier != null) {
+			return new TranslationTextComponent("block.kaleido.chiseled", IKiwiBlock.super.getName(stack), supplier.getDescription());
+		}
+		return IKiwiBlock.super.getName(stack);
 	}
 
 }

@@ -174,7 +174,7 @@ dependencies {
     implementation fg.deobf("curse.maven:jei-238222:3438494")
     //compile fg.deobf("mezz.jei:jei-1.16.3:${jei_version}")
     
-    implementation fg.deobf("curse.maven:kiwi-303657:3377053")
+    implementation fg.deobf("curse.maven:kiwi-303657:3502662")
     //compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
     
     implementation fg.deobf("curse.maven:building-gadgets-298187:3205295")

@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
@@ -47,6 +48,11 @@ public class CRedeemPacket extends ClientPacket {
 				KaleidoUtil.giveItems(player, pkt.amount, pkt.info.makeItem());
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_SERVER;
 		}
 
 	}

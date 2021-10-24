@@ -3,6 +3,7 @@ package snownee.kaleido.hub.network;
 import java.util.function.Supplier;
 
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kiwi.network.Packet;
 
@@ -27,6 +28,11 @@ public class SHubSettingsPacket extends Packet {
 			// TODO Auto-generated method stub
 
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_CLIENT;
 		}
 
 	}

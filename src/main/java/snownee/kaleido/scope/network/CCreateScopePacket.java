@@ -15,6 +15,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.definition.BlockDefinition;
@@ -88,6 +89,11 @@ public class CCreateScopePacket extends ClientPacket {
 				}
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_SERVER;
 		}
 
 	}

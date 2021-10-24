@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.carpentry.client.gui.NewModelToast;
 import snownee.kaleido.core.KaleidoDataManager;
@@ -66,6 +67,11 @@ public class SUnlockModelsPacket extends Packet {
 				}
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_CLIENT;
 		}
 
 	}
