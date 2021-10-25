@@ -53,7 +53,7 @@ public class StuffItem extends ModBlockItem {
 		if (info != null) {
 			return info.getDescription().getKey();
 		}
-		return super.getDescriptionId(stack);
+		return "block.kaleido.stuff";
 	}
 
 	@Override

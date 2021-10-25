@@ -2,46 +2,89 @@
 
 https://github.com/KaleidoMC/Kaleido/wiki
 
-Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游戏的模组。目前支持Forge 1.16.5。
+Kaleido是一个支持将自定义模型以数据包+资源包的形式导入游戏的模组。
 
 ## 环境要求
 
  - Forge 1.16.5 最新版
  - Kiwi 1.16.5 最新版
- - 另外，为了方便安装数据包，推荐安装一个全局数据包模组，如[Open Loader](https://www.curseforge.com/minecraft/mc-mods/open-loader)
 
-## 导入模型
+## 导入方块
 
-目前提供有方块小镇-Yuushya包（作者几何Coco、Xiao2）以供测试。
-
-1. 启动游戏后会在主文件夹中生成一个`openloader`文件夹（视安装的模组而定），可将对应的数据包和资源包放入相应的文件夹；
-2. 进入世界；
-3. 在游戏中使用`/reload`命令重载数据包；
-4. 在游戏中按下`F3`+`T`重载资源包；
-5. 此时在创造模式装饰标签下可以看到新添加的方块。或使用模组中的木工台查看。
+1. 启动游戏后会在主文件夹中生成一个`kaleido-loader`文件夹。将数据包放入该文件夹，数据包将会被全局启用；
+2. 将资源包放入`resourcepacks`文件夹，并在选项中启用资源包；
+3. 进入世界；
+4. 此时在创造模式装饰标签下可以看到新添加的方块。或使用模组中的木工台查看。
 
 **注意：Kaleido不对因版本更新而导致的问题负责，更新前请先备份。**
 
-## Cocricot
+## 导入Cocricot Mod方块
 
 1. 从[Cocricot官网](https://cocricot.pics/)下载Java 1.12.2 - Resourcepack & Mod
-2. 从压缩文件中取出模组放入**resourcepacks**文件夹。如果想使用Cocricot提供的原版资源包，建议使用1.16.1版本的。
-3. 下载并安装Kaleido - Cocricot兼容包。方法同导入模型部分的步骤。
+2. 从压缩文件中取出模组放入**resourcepacks**文件夹并启用它。如果想使用Cocricot提供的原版资源包，建议使用1.16.1版本的。
+3. 下载并安装Kaleido - Cocricot兼容包（请在CurseForge页面内查找）。方法同**导入方块**部分的步骤。
 4. 大功告成！
 
-**注意：目前Cocricot支持仍存在很多问题，欢迎给[转换脚本](https://github.com/KaleidoMC/Kaleido/blob/1.16/scripts/compat.py)提交PR来修复问题。**
+## 导入Yuushya Townscape方块
 
-## 自定义模型
+1. 下载[Yuushya Townscape](https://www.curseforge.com/minecraft/mc-mods/yuushya-townscape-fabric)和[Yuushya 16x](https://www.curseforge.com/minecraft/texture-packs/yuushya-16x)
+2. 从压缩文件中取出模组放入**resourcepacks**文件夹并启用它。
+3. 下载并安装Kaleido - Yuushya兼容包（请在CurseForge页面内查找）。方法同**导入方块**部分的步骤。
+4. 大功告成！
 
-示例可参考方块小镇-Yuushya包（作者几何Coco&Xiao2）。
+**注意：目前Cocricot与Yuushya支持仍存在一些问题，欢迎给[转换脚本](https://github.com/KaleidoMC/BridgeBuilder)提交PR来修复问题。**
 
-添加自定义模型需要同时拥有数据包和资源包，两者中的条目一一对应。
+## 工具
+
+### 多方块
+
+多方块结构功能允许你在同一位置移动、旋转、缩放和堆叠方块。
+
+按下Ctrl+F可将指向的方块变为多方块结构。再次按下Ctrl+F或空手右击多方块结构可打开配置界面。
+
+手持方块右击多方块可将手中方块形状加入到多方块中。
+
+在多方块界面中，你可以拖拽和滑动鼠标滚轮来调整多方块显示的视角。
+
+你可以点击左侧的按钮来选择你想要调整的层次。点击叉号按钮可以删除该层次。
+
+点击取消按钮可以取消你的所有更改。否则离开界面后，所有更改将自动应用。
+
+### 凿子
+
+凿子允许你将完整方块雕凿为楼梯或台阶等形状。
+
+左击方块可以在所有可雕凿的形状间循环。鼠标中键单击方块可以选择你想要雕凿成的形状。
+
+### 画刷
+
+画刷是用来从世界中拾取和混合颜色的工具。鼠标中键单击方块可以拾取该方块的颜色。如果画刷已经拥有颜色，将会与新的颜色混合。
+
+按住Ctrl拾取可以禁用混色。
+
+按住Shift拾取可以禁用从游戏着色器中获取颜色，改为以默认方式直接获取屏幕上的颜色。
+
+鼠标中键单击空气可以清除画刷上的颜色。
+
+右击可被染色的方块可对方块染色。
+
+### 建筑师锤
+
+建筑师锤是[调试棒](https://minecraft.fandom.com/zh/wiki/%E8%B0%83%E8%AF%95%E6%A3%92)的安全版本，允许你在生存模式下轻松地调整方块的状态。
+
+来自Minecraft Wiki：
+
+> 调试棒能被用于调整方块状态。对方块点击可以指定你所想要更改的方块状态。比如，你可以为命令方块修改conditional与facing这两个方块状态。对方块使用将使你循环改变指定的方块状态。例如，如果要你指定了facing这个方块状态，你可以让命令方块朝向north、south、east或west。潜行点击将会使它反向循环。
+
+建筑师锤只能用于调整栅栏、玻璃板等建筑方块和来自Kaleido的方块。
+
+## 自定义
 
 ### 资源包
 
 Kaleido的资源包与标准资源包无异。
 
-https://minecraft.fandom.com/zh/wiki/%E8%B5%84%E6%BA%90%E5%8C%85
+[资源包介绍](https://minecraft.fandom.com/zh/wiki/%E8%B5%84%E6%BA%90%E5%8C%85)
 
 有几点需要注意：
 
@@ -49,9 +92,29 @@ https://minecraft.fandom.com/zh/wiki/%E8%B5%84%E6%BA%90%E5%8C%85
 2. 无需编写`(blockstate).json`。
 3. 方块的本地化key为"kaleido.decor.(命名空间).(Kaleido定义)"
 
+#### OBJ模型
+
+你需要编写一个额外的JSON文件来引用OBJ模型。JSON文件格式请参考[这篇教程](https://boson-english.v2mcdev.com/specialmodel/obj-model.html)。
+
+```json
+{
+  "loader": "forge:obj",
+  "model": "kaleido_test:models/kaleido/test.obj",
+  "flip-v": true,
+  "textures": {
+    "particle": "minecraft:block/dirt"
+  },
+  "detectCullableFaces": false,
+  "diffuseLighting": true,
+  "ambientToFullbright": false
+}
+```
+
+## 以下内容暂未更新，请参考英文版wiki
+
 ### 数据包
 
-https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
+[数据包介绍](https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85)
 
 (Kaleido定义).json
 
@@ -61,13 +124,11 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
 
  - template - 模板。目前支持的值："block", "horizontal", "directional", "pillar", "item"
  - renderType - 渲染类型。指定template后无效。目前支持的值："solid", "cutout", "cutoutMipped", "translucent"。默认为"solid"
- - renderTypes - 渲染类型。字符串数组。指定template后无效。提供同时指定多个渲染类型的能力
  - noCollision - 无碰撞体积。指定template后无效。目前支持的值：true, false。默认为false
  - shape - 碰撞形状。指定template后无效。目前支持的值："empty", "block", 或使用Blockbench插件VoxelShape Generators导出的结果。默认为"empty"
  - price - 魔法布匹兑换价格。整数。默认为1
  - reward - 是否为收集奖励。目前支持的值：true, false。默认为false
  - behavior - 行为。字符串或对象。可实现右键方块切换模型等功能。待补充
- - behaviors - 行为。字符串或对象数组。可实现右键方块切换模型等功能。待补充
  - offset - 随机偏移。目前支持的值："XZ", "XYZ"
 
 ### 示例
@@ -101,8 +162,7 @@ https://minecraft.fandom.com/zh/wiki/%E6%95%B0%E6%8D%AE%E5%8C%85
 ```json
 {
    "template":"directional",
-   "behavior":{
-      "type":"onUseBlock",
+   "event.onUseBlock":{
       "action":{
          "type":"transform",
          "block":"stone"

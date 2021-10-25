@@ -1,0 +1,46 @@
+{
+"block.kaleido.stuff": "Kaleido装饰",
+"tip.kaleido.group": "组：%s#%s",
+
+"item.kaleido.cloth": "魔法布匹",
+"item.kaleido.lucky_box": "幸运盒",
+"item.kaleido.lucky_box.tip": "解锁随机的装饰配方",
+"block.kaleido.woodworking_bench": "木工台",
+"entity.minecraft.villager.kaleido.collector": "收藏家",
+"tip.kaleido.unlock": "每天与收藏家交易都可以解锁一个新的装饰",
+"tip.kaleido.quickSelect": "在物品上按%s键可快速选取",
+"toast.kaleido.title": "新的装饰已解锁！",
+"toast.kaleido.description": "在木工台查看详情",
+
+"item.kaleido.chisel": "凿子",
+"block.kaleido.chiseled": "%s - %s",
+"block.kaleido.chiseled_stairs": "雕凿楼梯",
+"block.kaleido.chiseled_slab": "雕凿台阶",
+"block.kaleido.chiseled_vslab": "雕凿竖台阶",
+"block.kaleido.chiseled_layers": "雕凿薄层",
+"block.kaleido.chiseled_wall": "雕凿墙",
+"block.kaleido.chiseled_fence": "雕凿栅栏",
+"block.kaleido.chiseled_fence_gate": "雕凿栅栏门",
+
+"item.kaleido.brush": "画刷",
+"msg.kaleido.brushNoColor": "你还未拾取任何颜色",
+"msg.kaleido.brushBlockNotDyeable": "此方块不可染色",
+
+"key.kaleido.scope": "创建多方块",
+"block.kaleido.scope": "存储的多方块",
+"gui.kaleido.scope": "编辑多方块",
+"gui.kaleido.snap": "吸附",
+"gui.kaleido.reset": "重制",
+"gui.kaleido.hide": "隐藏",
+"gui.kaleido.translation": "位置",
+"gui.kaleido.rotation": "选择",
+"gui.kaleido.scale": "尺寸",
+"gui.kaleido.confirm": "确认",
+"gui.kaleido.cancel": "取消",
+"msg.kaleido.scopeReachStackLimit": "数量已到达上限",
+
+"item.kaleido.mallet": "建筑师锤",
+"msg.kaleido.malletUnsupported": "建筑师锤不支持用于此方块",
+
+"key.kaleido.togglePreview": "切换放置预览"
+}
