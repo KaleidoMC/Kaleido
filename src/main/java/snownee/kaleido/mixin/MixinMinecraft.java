@@ -42,4 +42,9 @@ public class MixinMinecraft {
 		}
 	}
 
+	@Inject(at = @At("TAIL"), method = "resizeDisplay")
+	private void kaleido_resizeDisplay(CallbackInfo ci) {
+		Hooks.resizeDisplay();
+	}
+
 }

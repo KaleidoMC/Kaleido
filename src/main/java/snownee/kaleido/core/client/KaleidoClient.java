@@ -45,11 +45,13 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 	public static final Set<RenderType> blockRenderTypes = ImmutableSet.of(RenderType.solid(), RenderType.cutout(), RenderType.cutoutMipped(), RenderType.translucent());
 	public static final ItemColorCache ITEM_COLORS = new ItemColorCache();
 	public static final BlockColorCache BLOCK_COLORS = new BlockColorCache();
+	public static final Canvas CANVAS = new Canvas();
 
 	public static int bgColor = 0xAA212429;
 
 	public static void init() {
 		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new KaleidoClient());
+		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(CANVAS);
 	}
 
 	@Nullable
@@ -129,7 +131,8 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 	}
 
 	public static void fill(MatrixStack pPoseStack, float pMinX, float pMinY, float pMaxX, float pMaxY, int pColor) {
-		innerFill(pPoseStack.last().pose(), pMinX, pMinY, pMaxX, pMaxY, pColor);
+		if (pColor != 0)
+			innerFill(pPoseStack.last().pose(), pMinX, pMinY, pMaxX, pMaxY, pColor);
 	}
 
 	private static void innerFill(Matrix4f pMatrix, float pMinX, float pMinY, float pMaxX, float pMaxY, int pColor) {
@@ -163,4 +166,5 @@ public class KaleidoClient implements IResourceManagerReloadListener {
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 	}
+
 }

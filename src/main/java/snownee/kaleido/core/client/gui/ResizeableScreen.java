@@ -49,4 +49,9 @@ public abstract class ResizeableScreen extends Screen {
 		height = pHeight;
 	}
 
+	@Override
+	public boolean isPauseScreen() {
+		return false;
+	}
+
 }

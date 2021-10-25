@@ -136,6 +136,7 @@ public class ScopeScreen extends ResizeableScreen {
 			KButton button = new KButton(0, 50 + i * 20, 90, 20, stack.blockDefinition.getDescription(), $ -> {
 				setActiveInfo(info);
 			});
+			button.blur = true;
 			button.yOffset = 1;
 			info.button = button;
 			addButton(button);
@@ -149,6 +150,7 @@ public class ScopeScreen extends ResizeableScreen {
 					--existedStacks;
 					sortStackButtons();
 				});
+				removeButton.blur = true;
 				removeButton.xOffset = 1;
 				removeButton.yOffset = 1;
 				removeButton.lineColor = 0xFF1242;
@@ -446,9 +448,10 @@ public class ScopeScreen extends ResizeableScreen {
 	@Override
 	public void renderBackground(MatrixStack matrix, int p_renderBackground_1_) {
 		background.renderBackground(this, matrix, minecraft.getDeltaFrameTime());
+		//		background.alpha += background.closing ? -minecraft.getDeltaFrameTime() * .004f : minecraft.getDeltaFrameTime() * .002f;
+		//		background.alpha = MathHelper.clamp(background.alpha, 0, 1);
 		int bgColor = KaleidoUtil.applyAlpha(KaleidoClient.bgColor, background.alpha);
-		//fill(matrix, 0, 0, 140, height, bgColor);
-		fill(matrix, width - 130, 0, width, height, bgColor);
+		KaleidoClient.CANVAS.fillBlur(matrix, width - 130, 0, width, height, bgColor, background.alpha * 5);
 	}
 
 	@Override

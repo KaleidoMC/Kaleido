@@ -81,6 +81,8 @@ public class KEditBox extends TextFieldWidget {
 
 		int textColor = isEditable() ? this.textColor : textColorUneditable;
 		textColor = KaleidoUtil.applyAlpha(textColor, alpha);
+		if (textColor == 0)
+			return;
 		int j = getCursorPosition() - displayPos;
 		int k = highlightPos - displayPos;
 		String s = font.plainSubstrByWidth(getValue().substring(displayPos), getInnerWidth());

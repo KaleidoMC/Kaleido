@@ -1,5 +1,7 @@
 package snownee.kaleido.core.block;
 
+import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -10,6 +12,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -20,10 +23,12 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.block.entity.MasterBlockEntity;
 import snownee.kaleido.core.template.KaleidoTemplate;
 
 public class KHorizontalBlock extends HorizontalBlock implements KaleidoBlock {
@@ -125,5 +130,23 @@ public class KHorizontalBlock extends HorizontalBlock implements KaleidoBlock {
 			return KaleidoTemplate.HORIZONTAL;
 		}
 		return KaleidoTemplate.NONE;
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void neighborChanged(BlockState pState, World pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+		super.neighborChanged(pState, pLevel, pPos, pBlock, pFromPos, pIsMoving);
+		TileEntity blockEntity = pLevel.getBlockEntity(pPos);
+		if (blockEntity instanceof MasterBlockEntity) {
+			((MasterBlockEntity) blockEntity).checkRedstone();
+		}
+	}
+
+	@Override
+	public void tick(BlockState pState, ServerWorld pLevel, BlockPos pPos, Random pRand) {
+		TileEntity blockEntity = pLevel.getBlockEntity(pPos);
+		if (blockEntity instanceof MasterBlockEntity) {
+			((MasterBlockEntity) blockEntity).tickRedstone();
+		}
 	}
 }

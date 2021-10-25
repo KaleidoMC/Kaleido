@@ -47,7 +47,7 @@ public class SitAction implements Consumer<ActionContext> {
 	public void accept(ActionContext context) { //TODO
 		PlayerEntity player = context.getPlayer();
 		BlockPos pos = context.getBlockPos();
-		if (seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
+		if (pos == null || seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
 			return;
 		World worldIn = context.getLevel();
 		ItemStack stack1 = player.getMainHandItem();

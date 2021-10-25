@@ -49,6 +49,7 @@ import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.item.ChiselItem;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.KaleidoBlock;
+import snownee.kaleido.core.client.KaleidoClient;
 import snownee.kaleido.core.client.model.KaleidoModel;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.resources.JarPackFinder;
@@ -64,6 +65,7 @@ public final class Hooks {
 	public static boolean scopeEnabled;
 	public static boolean brushEnabled;
 	public static boolean hubEnabled;
+	public static boolean coreEnabled;
 
 	@OnlyIn(Dist.CLIENT)
 	private static ResourceLocation DEFAULT_PARENT;
@@ -229,5 +231,11 @@ public final class Hooks {
 
 	public static void addDataPackFinder(ResourcePackList resourcePacks) {
 		resourcePacks.addPackFinder(new RequiredFolderPackFinder(new File("kaleido-loader"), IPackNameDecorator.DEFAULT));
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static void resizeDisplay() {
+		if (coreEnabled)
+			KaleidoClient.CANVAS.resize();
 	}
 }

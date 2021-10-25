@@ -264,6 +264,7 @@ public class CarpentryCraftingScreen extends ResizeableScreen {
 		addButton(shrinkBtn = new KButton(0, 0, 20, 20, new StringTextComponent("-"), btn -> {
 			addNum(-1);
 		}));
+		shrinkBtn.blur = true;
 		addButton(editBox = new KEditBox(0, 0, 38, 18, new StringTextComponent("")));
 		editBox.setContentType(ContentType.Int);
 		editBox.setFilter(str -> {
@@ -290,6 +291,7 @@ public class CarpentryCraftingScreen extends ResizeableScreen {
 		addButton(addBtn = new KButton(0, 0, 20, 20, new StringTextComponent("+"), btn -> {
 			addNum(1);
 		}));
+		addBtn.blur = true;
 		addButton(confirmBtn = new KButton(0, 0, 20, 20, new StringTextComponent("✓"), btn -> {
 			if (cooldown > 0) {
 				return;
@@ -305,6 +307,7 @@ public class CarpentryCraftingScreen extends ResizeableScreen {
 				redeemed = true;
 			}
 		}));
+		confirmBtn.blur = true;
 		confirmBtn.lineColor = 0x0894ED;
 		if (selectedButton == null) {
 			setSelectedButton(null);

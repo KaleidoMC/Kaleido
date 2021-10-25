@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -47,6 +48,7 @@ public class MasterBlockEntity extends BaseTile {
 	private ResourceLocation modelId;
 	private ModelInfo modelInfo;
 	public String[] tint;
+	private boolean redstone;
 
 	public MasterBlockEntity() {
 		super(CoreModule.MASTER);
@@ -82,6 +84,7 @@ public class MasterBlockEntity extends BaseTile {
 	@Override
 	public void load(BlockState state, CompoundNBT compound) {
 		loadInternal(compound);
+		redstone = compound.getBoolean("Redstone");
 		super.load(state, compound);
 	}
 
@@ -176,6 +179,8 @@ public class MasterBlockEntity extends BaseTile {
 				else
 					modelData.setData(KaleidoModel.MODEL, modelInfo);
 				requestModelDataUpdate();
+			} else {
+				checkRedstone();
 			}
 		}
 	}
@@ -183,6 +188,9 @@ public class MasterBlockEntity extends BaseTile {
 	@Override
 	public CompoundNBT save(CompoundNBT compound) {
 		writePacketData(compound);
+		if (redstone) {
+			compound.putBoolean("Redstone", true);
+		}
 		return super.save(compound);
 	}
 
@@ -206,7 +214,7 @@ public class MasterBlockEntity extends BaseTile {
 		return getModelInfo() != null;
 	}
 
-	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+	public ActionResultType use(BlockState state, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		if (!isValid())
 			return ActionResultType.PASS;
 		ItemStack stack = player.getItemInHand(handIn);
@@ -220,7 +228,7 @@ public class MasterBlockEntity extends BaseTile {
 				KaleidoUtil.displayClientMessage(player, true, "msg.kaleido.brushBlockNotDyeable");
 				return ActionResultType.FAIL;
 			}
-			if (!worldIn.isClientSide) {
+			if (!level.isClientSide) {
 				int i = BrushItem.getIndex(stack);
 				i = MathHelper.clamp(i, 0, modelInfo.tint.length - 1); //TODO select ui
 				if (tint == null) {
@@ -233,7 +241,7 @@ public class MasterBlockEntity extends BaseTile {
 			}
 			return ActionResultType.SUCCESS;
 		}
-		ActionContext ctx = new ActionContext(player, modelInfo);
+		ActionContext ctx = new ActionContext(modelInfo, player, worldPosition);
 		ctx.hitResult = hit;
 		ctx.hand = handIn;
 		ActionResultType resultType = modelInfo.fireEvent("event.useOnBlock", ctx);
@@ -275,6 +283,33 @@ public class MasterBlockEntity extends BaseTile {
 			return KaleidoClient.BLOCK_COLORS.getColor(tint[i], state, level, pos, i);
 		}
 		return info.getBlockColor(state, level, pos, i);
+	}
+
+	public void checkRedstone() {
+		if (!isValid() || level.isClientSide)
+			return;
+		boolean redstone = level.hasNeighborSignal(worldPosition);
+		if (this.redstone == redstone)
+			return;
+		if (modelInfo.behaviors.containsKey("event.redstoneOn") || modelInfo.behaviors.containsKey("event.redstoneOff")) {
+			if (level.getBlockTicks().hasScheduledTick(worldPosition, getBlockState().getBlock()))
+				return;
+			level.getBlockTicks().scheduleTick(worldPosition, getBlockState().getBlock(), 2, TickPriority.HIGH);
+		} else {
+			this.redstone = redstone;
+		}
+	}
+
+	public void tickRedstone() {
+		boolean redstone = level.hasNeighborSignal(worldPosition);
+		if (this.redstone == redstone)
+			return;
+		this.redstone = redstone;
+		String event = redstone ? "event.redstoneOn" : "event.redstoneOff";
+		if (modelInfo.behaviors.containsKey(event)) {
+			ActionContext ctx = new ActionContext(modelInfo, level, worldPosition);
+			modelInfo.fireEvent(event, ctx);
+		}
 	}
 
 }

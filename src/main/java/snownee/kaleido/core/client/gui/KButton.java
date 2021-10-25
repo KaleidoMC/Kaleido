@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.LanguageMap;
@@ -29,6 +28,7 @@ public class KButton extends Button {
 
 	public float textWidth;
 	public ITextProperties wrappedTitle;
+	public boolean blur;
 
 	public KButton(int pX, int pY, int pWidth, int pHeight, ITextComponent pMessage, IPressable pOnPress) {
 		this(pX, pY, pWidth, pHeight, pMessage, pOnPress, NO_TOOLTIP);
@@ -54,9 +54,13 @@ public class KButton extends Button {
 	public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
 
-		int bgColor = active ? 0xFF555555 : 0x66555555;
+		int bgColor = active ? 0xDD555555 : 0x66555555;
 		float alpha = this.alpha * (0.6F + hoverProgress.value * 0.4F);
-		KaleidoClient.fill(pMatrixStack, x + xOffset, y + yOffset, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
+		if (blur) {
+			KaleidoClient.CANVAS.fillBlur(pMatrixStack, x + xOffset, y + yOffset, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha), this.alpha * 5);
+		} else {
+			KaleidoClient.fill(pMatrixStack, x + xOffset, y + yOffset, x + width, y + height, KaleidoUtil.applyAlpha(bgColor, alpha));
+		}
 		drawUnderline(pMatrixStack, alpha, pPartialTicks);
 
 		renderBg(pMatrixStack, minecraft, pMouseX, pMouseY);
@@ -69,7 +73,9 @@ public class KButton extends Button {
 	public void drawText(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		FontRenderer font = Minecraft.getInstance().font;
 		int j = getFGColor();
-		int textColor = j | MathHelper.ceil(alpha * 255.0F) << 24;
+		int textColor = KaleidoUtil.applyAlpha(j, alpha);
+		if (textColor == 0)
+			return;
 		RenderSystem.disableDepthTest();
 		if (wrappedTitle != null) {
 			ITextProperties properties = isHovered ? getMessage() : wrappedTitle;

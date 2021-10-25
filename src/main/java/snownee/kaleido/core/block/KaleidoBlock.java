@@ -132,14 +132,14 @@ public interface KaleidoBlock extends IForgeBlock {
 			return ActionResultType.PASS;
 		TileEntity tile = pLevel.getBlockEntity(pPos);
 		if (tile instanceof MasterBlockEntity)
-			return ((MasterBlockEntity) tile).use(state, pLevel, pPos, pPlayer, handIn, hit);
+			return ((MasterBlockEntity) tile).use(state, pPlayer, handIn, hit);
 		return ActionResultType.PASS;
 	}
 
 	static void attack(BlockState pState, World pLevel, BlockPos pPos, PlayerEntity pPlayer) {
 		ModelInfo info = getInfo(pLevel, pPos);
 		if (info != null) {
-			ActionContext ctx = new ActionContext(pPlayer, info);
+			ActionContext ctx = new ActionContext(info, pPlayer, pPos);
 			info.fireEvent("event.attackBlock", ctx);
 		}
 	}
@@ -147,7 +147,7 @@ public interface KaleidoBlock extends IForgeBlock {
 	static void onProjectileHit(World pLevel, BlockState pState, BlockRayTraceResult pHit, ProjectileEntity pProjectile) {
 		ModelInfo info = getInfo(pLevel, pHit.getBlockPos());
 		if (info != null) {
-			ActionContext ctx = new ActionContext(pLevel, info);
+			ActionContext ctx = new ActionContext(info, pLevel, null);
 			ctx.hitResult = pHit;
 			ctx.entity = pProjectile;
 			info.fireEvent("event.projectileHit", ctx);

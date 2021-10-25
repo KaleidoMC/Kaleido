@@ -28,7 +28,6 @@ import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.kaleido.Kaleido;
-import snownee.kaleido.brush.client.WorldColorPicker;
 import snownee.kaleido.brush.network.CConfigureBrushPacket;
 import snownee.kaleido.core.ModelInfo;
 import snownee.kaleido.core.block.entity.MasterBlockEntity;
@@ -98,7 +97,7 @@ public class BrushItem extends ModItem {
 					}
 				}
 				if (key == null) {
-					int col = WorldColorPicker.pick(mc.level, pos, state, event.getMatrixStack());
+					int col = KaleidoClient.CANVAS.pickColor(mc.level, pos, state, event.getMatrixStack());
 					if (col == -1) {
 						BlockDefinition definition = BlockDefinition.fromBlock(state, blockEntity, player.level, pos);
 						col = BlockDefinition.getCamo(definition).getBlockState().getMapColor(player.level, pos).col;

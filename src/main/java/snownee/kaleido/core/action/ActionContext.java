@@ -21,16 +21,17 @@ public class ActionContext {
 	public PlayerEntity player;
 	public Hand hand = Hand.MAIN_HAND;
 	public ItemStack itemStack;
+	public BlockPos pos;
 	public BlockPos relativePos;
 	public boolean replaceClicked = true;
 
-	public ActionContext(World level, ModelInfo modelInfo) {
+	public ActionContext(ModelInfo modelInfo, World level, BlockPos pos) {
 		this.level = level;
 		this.modelInfo = modelInfo;
 	}
 
-	public ActionContext(PlayerEntity player, ModelInfo modelInfo) {
-		this(player.level, modelInfo);
+	public ActionContext(ModelInfo modelInfo, PlayerEntity player, BlockPos pos) {
+		this(modelInfo, player.level, pos);
 		this.player = player;
 	}
 
@@ -47,7 +48,7 @@ public class ActionContext {
 	}
 
 	public BlockPos getBlockPos() {
-		return hitResult.getBlockPos();
+		return hitResult == null ? pos : hitResult.getBlockPos();
 	}
 
 	public ModelInfo getModelInfo() {

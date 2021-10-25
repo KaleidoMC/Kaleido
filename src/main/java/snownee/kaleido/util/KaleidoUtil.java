@@ -149,6 +149,8 @@ public class KaleidoUtil {
 		if (prevAlphaChannel > 0)
 			alpha *= prevAlphaChannel / 256f;
 		int alphaChannel = (int) (0xFF * MathHelper.clamp(alpha, 0, 1));
+		if (alphaChannel < 5) // fix font renderer bug
+			return 0;
 		return (color & 0xFFFFFF) | alphaChannel << 24;
 	}
 

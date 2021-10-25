@@ -35,6 +35,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import snownee.kaleido.Hooks;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.brush.network.CConfigureBrushPacket;
 import snownee.kaleido.carpentry.network.CRedeemPacket;
@@ -149,11 +150,15 @@ public class CoreModule extends AbstractModule {
 
 	@Override
 	protected void init(FMLCommonSetupEvent event) {
+		Hooks.coreEnabled = true;
+
 		Behavior.registerFactory("itemStorage", ItemStorageBehavior::new);
 		Behavior.registerFactory("food", FoodBehavior::new);
 		Behavior.registerFactory("event.useOnBlock", EventBehavior::new);
 		Behavior.registerFactory("event.attackBlock", EventBehavior::new);
 		Behavior.registerFactory("event.projectileHit", EventBehavior::new);
+		Behavior.registerFactory("event.redstoneOn", EventBehavior::new);
+		Behavior.registerFactory("event.redstoneOff", EventBehavior::new);
 
 		Action.registerFactory("transform", TransformAction::new);
 		Action.registerFactory("command", CommandAction::new);
