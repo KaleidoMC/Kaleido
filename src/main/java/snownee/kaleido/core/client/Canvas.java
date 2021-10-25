@@ -35,6 +35,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.fml.ModList;
 import snownee.kaleido.Kaleido;
 import snownee.kaleido.util.SimulationBlockReader;
 
@@ -42,7 +43,8 @@ import snownee.kaleido.util.SimulationBlockReader;
 @OnlyIn(Dist.CLIENT)
 public final class Canvas implements IResourceManagerReloadListener {
 
-	private final Minecraft mc = Minecraft.getInstance();
+	private static final boolean hasBlurMod = ModList.get().isLoaded("blur");
+	private static final Minecraft mc = Minecraft.getInstance();
 	private final RenderState.AlphaState MIDWAY_ALPHA = new RenderState.AlphaState(0.5F);
 	private final RenderState.TextureState BLOCK_SHEET = new RenderState.TextureState(PlayerContainer.BLOCK_ATLAS, false, false);
 	private Framebuffer framebuffer;
@@ -122,7 +124,7 @@ public final class Canvas implements IResourceManagerReloadListener {
 	}
 
 	public void fillBlur(MatrixStack matrix, float mixX, float minY, float maxX, float maxY, int bgColor, float blurRadius) {
-		if (blurRadius > 0.1F && blur != null && Minecraft.useFancyGraphics()) {
+		if (!hasBlurMod && blurRadius > 0.1F && blur != null && Minecraft.useFancyGraphics()) {
 			int width = mc.getWindow().getGuiScaledWidth();
 			int height = mc.getWindow().getGuiScaledHeight();
 			float y1 = 1 - minY / height;

@@ -27,6 +27,7 @@ public class DarkBackground extends AbstractGui {
 			int textColor2 = (int) (alpha * 0x90) << 24;
 			int width = screen.width;
 			int height = screen.height;
+			//KaleidoClient.CANVAS.fillBlur(matrix, 0, 0, width, height, 0, alpha * 4);
 			fillGradient(matrix, 0, 0, width, (int) (height * 0.125), textColor1, textColor2);
 			fillGradient(matrix, 0, (int) (height * 0.125), width, (int) (height * 0.875), textColor2, textColor2);
 			fillGradient(matrix, 0, (int) (height * 0.875), width, height, textColor2, textColor1);

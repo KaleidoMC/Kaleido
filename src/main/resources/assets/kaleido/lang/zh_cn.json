@@ -30,7 +30,7 @@
 "block.kaleido.scope": "存储的多方块",
 "gui.kaleido.scope": "编辑多方块",
 "gui.kaleido.snap": "吸附",
-"gui.kaleido.reset": "重制",
+"gui.kaleido.reset": "重置",
 "gui.kaleido.hide": "隐藏",
 "gui.kaleido.translation": "位置",
 "gui.kaleido.rotation": "选择",
