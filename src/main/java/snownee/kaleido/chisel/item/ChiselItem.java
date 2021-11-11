@@ -64,7 +64,7 @@ public class ChiselItem extends ModItem {
 		ChiselPalette palette = palette(stack);
 		if (palette == ChiselPalette.NONE) {
 			palette = ChiselPalette.byBlock(state).next();
-			if (palette != ChiselPalette.NONE)
+			if (level.isClientSide && palette != ChiselPalette.NONE)
 				player.displayClientMessage(palette.chiseledBlock.getName(), true); //TODO better name
 		}
 		BlockDefinition supplier;

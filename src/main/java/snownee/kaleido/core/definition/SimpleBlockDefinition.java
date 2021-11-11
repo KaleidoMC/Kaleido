@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
@@ -173,7 +174,7 @@ public class SimpleBlockDefinition implements BlockDefinition {
 
 	@Override
 	public ITextComponent getDescription() {
-		return state.getBlock().getName();
+		return new TranslationTextComponent(state.getBlock().getDescriptionId());
 	}
 
 	@Override
