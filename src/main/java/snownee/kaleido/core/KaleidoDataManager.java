@@ -137,8 +137,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 				Kaleido.logger.catching(e);
 			}
 		}
-		allPacks.values().parallelStream().forEach(ModelPack::sort);
-		allGroups.values().parallelStream().forEach($ -> Collections.sort($.infos));
+		sort();
 		if (!KaleidoCommonConfig.disableAdvancements) {
 			if (resourceManagerIn instanceof SimpleReloadableResourceManager) {
 				for (IFutureReloadListener listener : ((SimpleReloadableResourceManager) resourceManagerIn).listeners) {
@@ -170,6 +169,11 @@ public class KaleidoDataManager extends JsonReloadListener {
 
 		if (ModList.get().isLoaded("worldedit"))
 			WorldEditModule.generateMappings(ServerLifecycleHooks.getCurrentServer());
+	}
+
+	private void sort() {
+		allPacks.values().parallelStream().forEach(ModelPack::sort);
+		allGroups.values().parallelStream().forEach($ -> Collections.sort($.infos));
 	}
 
 	public static ModelInfo get(ResourceLocation id) {
@@ -220,6 +224,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	public void read(Collection<ModelInfo> infos) {
 		invalidate();
 		infos.forEach(this::add);
+		sort();
 	}
 
 	private void serverInit(AddReloadListenerEvent event) {
@@ -229,7 +234,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 	private void invalidate() {
 		isClientSide = true;
 		clientBehaviorModelsCount = 0;
-		shapeCache.getMap().clear();
+		shapeCache.clear();
 		ModelInfo.cache.invalidateAll();
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();

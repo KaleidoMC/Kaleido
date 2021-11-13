@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.google.common.hash.HashCode;
 
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.util.data.RotatedShapeCache;
@@ -38,14 +39,14 @@ public class SSyncShapesPacket extends Packet {
 			buf.writeVarInt(shapes.size());
 			for (Instance shape : shapes) {
 				buf.writeByteArray(shape.hashCode.asBytes());
-				ShapeSerializer.toNetwork(buf, shape.shapes[0]);
+				ShapeSerializer.toNetwork(buf, shape.shapes[shape.index(Direction.NORTH)]);
 			}
 		}
 
 		@Override
 		public void handle(SSyncShapesPacket pkt, Supplier<Context> ctx) {
 			ctx.get().enqueueWork(() -> {
-				shapeCache.getMap().clear();
+				shapeCache.clear();
 				int size = pkt.buf.readVarInt();
 				for (int i = 0; i < size; i++) {
 					shapeCache.put(HashCode.fromBytes(pkt.buf.readByteArray()), ShapeSerializer.fromNetwork(pkt.buf));

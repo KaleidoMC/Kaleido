@@ -1,6 +1,7 @@
 package snownee.kaleido.util.data;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -23,16 +24,25 @@ public class RotatedShapeCache {
 
 	public RotatedShapeCache(HashFunction hashFunction) {
 		this.hashFunction = hashFunction;
-		empty = put(newHasher().hash(), VoxelShapes.empty());
-		Hasher hasher = newHasher();
-		double[] shape = new double[] { 0, 0, 0, 1, 1, 1 };
-		for (double d : shape)
-			hasher.putDouble(d);
-		block = put(hasher.hash(), VoxelShapes.block());
+		init();
 	}
 
 	public Instance put(HashCode hashCode, VoxelShape shape) {
 		return map.computeIfAbsent(hashCode, $ -> new Instance($, shape));
+	}
+	
+	public void init() {
+		empty = put(newHasher().hash(), VoxelShapes.empty());
+		Hasher hasher = newHasher();
+		double[] shape = new double[] { 0, 0, 0, 16, 16, 16 };
+		for (double d : shape)
+			hasher.putDouble(d);
+		block = put(hasher.hash(), VoxelShapes.block());
+	}
+	
+	public void clear(){
+		map.clear();
+		init();
 	}
 
 	public Hasher newHasher() {
@@ -40,7 +50,7 @@ public class RotatedShapeCache {
 	}
 
 	public Map<HashCode, Instance> getMap() {
-		return map;
+		return Collections.unmodifiableMap(map);
 	}
 
 	public Instance get(HashCode hashCode) {
