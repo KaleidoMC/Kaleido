@@ -124,7 +124,7 @@ public final class Canvas implements IResourceManagerReloadListener {
 	}
 
 	public void fillBlur(MatrixStack matrix, float mixX, float minY, float maxX, float maxY, int bgColor, float blurRadius) {
-		if (!hasBlurMod && blurRadius > 0.1F && blur != null && Minecraft.useFancyGraphics()) {
+		if (!hasBlurMod && blurRadius > 0.1F && blur != null && Minecraft.useShaderTransparency()) {
 			int width = mc.getWindow().getGuiScaledWidth();
 			int height = mc.getWindow().getGuiScaledHeight();
 			float y1 = 1 - minY / height;
