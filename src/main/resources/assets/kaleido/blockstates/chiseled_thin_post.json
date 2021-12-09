@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "kaleido:block/chiseled_thin_post",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=north": {
+      "model": "kaleido:block/chiseled_thin_post"
+    },
+    "facing=south": {
+      "model": "kaleido:block/chiseled_thin_post",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west": {
+      "model": "kaleido:block/chiseled_thin_post",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

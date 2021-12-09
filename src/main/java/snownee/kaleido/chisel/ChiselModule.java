@@ -6,6 +6,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -25,9 +26,9 @@ import snownee.kaleido.Hooks;
 import snownee.kaleido.chisel.block.ChiseledFenceBlock;
 import snownee.kaleido.chisel.block.ChiseledFenceGateBlock;
 import snownee.kaleido.chisel.block.ChiseledLayersBlock;
+import snownee.kaleido.chisel.block.ChiseledSideBlock;
 import snownee.kaleido.chisel.block.ChiseledSlabBlock;
 import snownee.kaleido.chisel.block.ChiseledStairsBlock;
-import snownee.kaleido.chisel.block.ChiseledVSlabBlock;
 import snownee.kaleido.chisel.block.ChiseledWallBlock;
 import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
 import snownee.kaleido.chisel.block.entity.RetextureBlockEntity;
@@ -60,9 +61,11 @@ public class ChiselModule extends AbstractModule {
 
 	public static final ChiseledSlabBlock CHISELED_SLAB = chisel(new ChiseledSlabBlock());
 
-	public static final ChiseledVSlabBlock CHISELED_VSLAB = chisel(new ChiseledVSlabBlock());
+	public static final ChiseledSideBlock CHISELED_VSLAB = chisel(new ChiseledSideBlock(Block.box(0, 0, 8, 16, 16, 16), blockProp(Blocks.STONE_SLAB)));
 
 	public static final ChiseledLayersBlock CHISELED_LAYERS = chisel(new ChiseledLayersBlock());
+
+	public static final ChiseledSideBlock CHISELED_THIN_POST = chisel(new ChiseledSideBlock(Block.box(6, 0, 12, 10, 16, 16), blockProp(Blocks.STONE_SLAB)));
 
 	public static final TileEntityType<ChiseledBlockEntity> CHISELED = new TileEntityType.Builder<>(ChiseledBlockEntity::new, CHISELED_BLOCKS).build(null);
 

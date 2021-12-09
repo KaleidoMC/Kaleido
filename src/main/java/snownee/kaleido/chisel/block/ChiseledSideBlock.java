@@ -1,19 +1,18 @@
 package snownee.kaleido.chisel.block;
 
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 
-public class ChiseledVSlabBlock extends VSlabBlock implements ChiseledBlock {
+public class ChiseledSideBlock extends SideBlock implements ChiseledBlock {
 
-	public ChiseledVSlabBlock() {
-		super(AbstractBlock.Properties.copy(Blocks.STONE_SLAB));
+	public ChiseledSideBlock(VoxelShape shape, Properties properties) {
+		super(shape, properties);
 	}
 
 	@Override

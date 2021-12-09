@@ -20,21 +20,18 @@ import net.minecraft.world.IWorld;
 import snownee.kaleido.util.VoxelUtil;
 
 @SuppressWarnings("deprecation")
-public class VSlabBlock extends HorizontalBlock implements IWaterLoggable {
+public class SideBlock extends HorizontalBlock implements IWaterLoggable {
 
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final VoxelShape[] SHAPES = new VoxelShape[4];
 
-	static {
-		SHAPES[0] = box(0, 0, 8, 16, 16, 16);
+	public SideBlock(VoxelShape shape, Properties properties) {
+		super(properties);
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
+		SHAPES[0] = shape;
 		SHAPES[1] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.EAST);
 		SHAPES[2] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.SOUTH);
 		SHAPES[3] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.WEST);
-	}
-
-	public VSlabBlock(Properties properties) {
-		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
 	}
 
 	@Override

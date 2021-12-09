@@ -8,7 +8,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -50,9 +52,7 @@ public class SitAction implements Consumer<ActionContext> {
 		if (pos == null || seats.length == 0 || player instanceof FakePlayer || player.getVehicle() != null)
 			return;
 		World worldIn = context.getLevel();
-		ItemStack stack1 = player.getMainHandItem();
-		ItemStack stack2 = player.getOffhandItem();
-		if (!stack1.isEmpty() || !stack2.isEmpty())
+		if (!checkHeld(player, Hand.MAIN_HAND) || !checkHeld(player, Hand.OFF_HAND))
 			return;
 		Vector3d vec = seats[0];
 		vec = vec.add(pos.getX(), pos.getY(), pos.getZ());
@@ -81,6 +81,11 @@ public class SitAction implements Consumer<ActionContext> {
 				return false;
 			}));
 		}
+	}
+
+	private static boolean checkHeld(PlayerEntity player, Hand hand) {
+		ItemStack stack = player.getItemInHand(hand);
+		return stack.isEmpty() || !(stack.getItem() instanceof BlockItem);
 	}
 
 }

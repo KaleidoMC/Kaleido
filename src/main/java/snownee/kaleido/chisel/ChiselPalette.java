@@ -16,7 +16,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import snownee.kaleido.chisel.block.LayersBlock;
-import snownee.kaleido.chisel.block.VSlabBlock;
 import snownee.kaleido.chisel.block.entity.RetextureBlockEntity;
 import snownee.kaleido.core.definition.BlockDefinition;
 
@@ -75,11 +74,12 @@ public class ChiselPalette {
 	public static void init() {
 		new ChiselPalette("Stairs", ChiselModule.CHISELED_STAIRS, state -> state.is(BlockTags.STAIRS));
 		new ChiselPalette("Slab", ChiselModule.CHISELED_SLAB, state -> state.is(BlockTags.SLABS));
-		new ChiselPalette("VSlab", ChiselModule.CHISELED_VSLAB, state -> state.getBlock() instanceof VSlabBlock);
+		new ChiselPalette("VSlab", ChiselModule.CHISELED_VSLAB, state -> state.is(ChiselModule.CHISELED_VSLAB));
 		new ChiselPalette("Wall", ChiselModule.CHISELED_WALL, state -> state.is(BlockTags.WALLS));
 		new ChiselPalette("Fence", ChiselModule.CHISELED_FENCE, state -> state.is(BlockTags.FENCES));
 		new ChiselPalette("FenceGate", ChiselModule.CHISELED_FENCE_GATE, state -> state.is(BlockTags.FENCE_GATES));
 		new ChiselPalette("Layers", ChiselModule.CHISELED_LAYERS, state -> state.getBlock() instanceof LayersBlock);
+		new ChiselPalette("SideThinPost", ChiselModule.CHISELED_THIN_POST, state -> state.is(ChiselModule.CHISELED_THIN_POST));
 	}
 
 	public static ChiselPalette byBlock(BlockState state) {
