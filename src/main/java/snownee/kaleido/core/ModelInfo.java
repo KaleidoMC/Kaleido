@@ -91,6 +91,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 	private boolean simple;
 	public boolean hide;
 	public boolean uvLock;
+	public ResourceLocation lootTable;
 
 	public ResourceLocation getAdvancementId() {
 		return new ResourceLocation(Kaleido.MODID, id.toString().replace(':', '/'));
@@ -225,6 +226,12 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (template.allowsCustomShape()) {
 			buf.writeByteArray(shapes.hashCode.asBytes());
 		}
+
+		if (lootTable == null) {
+			buf.writeUtf("");
+		} else {
+			buf.writeUtf(lootTable.toString());
+		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -265,6 +272,11 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		}
 		if (info.template.allowsCustomShape()) {
 			info.shapes = KaleidoDataManager.INSTANCE.shapeCache.get(HashCode.fromBytes(buf.readByteArray()));
+		}
+
+		String lootTable = buf.readUtf();
+		if (!lootTable.isEmpty()) {
+			info.lootTable = new ResourceLocation(lootTable);
 		}
 		return info;
 	}
@@ -346,6 +358,9 @@ public class ModelInfo implements Comparable<ModelInfo> {
 			case "uvlock":
 				info.uvLock = v.getAsBoolean();
 				break;
+			case "lootTable":
+				info.lootTable = new ResourceLocation(v.getAsString());
+				break;
 			default:
 				String k = entry.getKey();
 				if (k.startsWith("_"))
@@ -368,7 +383,7 @@ public class ModelInfo implements Comparable<ModelInfo> {
 		if (group != null || nbt != null || tint != null || offset != OffsetType.NONE || template != KaleidoTemplate.NONE) {
 			return false;
 		}
-		if (!behaviors.isEmpty() || !shapes.isEmpty()) {
+		if (!behaviors.isEmpty() || !shapes.isEmpty() || lootTable != null) {
 			return false;
 		}
 		return true;

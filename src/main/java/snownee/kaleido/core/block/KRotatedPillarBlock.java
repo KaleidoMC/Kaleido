@@ -1,11 +1,14 @@
 package snownee.kaleido.core.block;
 
+import java.util.List;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -49,5 +52,10 @@ public class KRotatedPillarBlock extends RotatedPillarBlock implements KaleidoBl
 	@Override
 	public KaleidoTemplate getTemplate() {
 		return KaleidoTemplate.PILLAR;
+	}
+
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		return KaleidoBlock.getDrops(pState, pBuilder);
 	}
 }

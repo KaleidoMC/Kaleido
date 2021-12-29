@@ -1,5 +1,8 @@
 package snownee.kaleido.core.block;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -12,6 +15,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTables;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -179,6 +187,25 @@ public interface KaleidoBlock extends IForgeBlock {
 			return shape;
 		}
 		return VoxelShapes.empty();
+	}
+
+	static List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		ResourceLocation resourcelocation = pState.getBlock().getLootTable();
+		TileEntity blockEntity = pBuilder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
+		if (blockEntity instanceof MasterBlockEntity) {
+			ModelInfo info = ((MasterBlockEntity) blockEntity).getModelInfo();
+			if (info != null && info.lootTable != null) {
+				resourcelocation = info.lootTable;
+			}
+		}
+		if (resourcelocation == LootTables.EMPTY) {
+			return Collections.emptyList();
+		} else {
+			LootContext lootcontext = pBuilder.withParameter(LootParameters.BLOCK_STATE, pState).create(LootParameterSets.BLOCK);
+			ServerWorld serverworld = lootcontext.getLevel();
+			LootTable loottable = serverworld.getServer().getLootTables().get(resourcelocation);
+			return loottable.getRandomItems(lootcontext);
+		}
 	}
 
 	@Override

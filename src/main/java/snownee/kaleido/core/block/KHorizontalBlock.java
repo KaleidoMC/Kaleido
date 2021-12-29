@@ -1,5 +1,6 @@
 package snownee.kaleido.core.block;
 
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -10,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -148,5 +150,10 @@ public class KHorizontalBlock extends HorizontalBlock implements KaleidoBlock {
 		if (blockEntity instanceof MasterBlockEntity) {
 			((MasterBlockEntity) blockEntity).tickRedstone();
 		}
+	}
+
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		return KaleidoBlock.getDrops(pState, pBuilder);
 	}
 }

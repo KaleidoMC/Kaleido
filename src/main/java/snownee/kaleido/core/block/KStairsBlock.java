@@ -1,5 +1,7 @@
 package snownee.kaleido.core.block;
 
+import java.util.List;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.StairsBlock;
@@ -7,6 +9,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -52,6 +55,11 @@ public class KStairsBlock extends StairsBlock implements KaleidoBlock {
 	@Override
 	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
 		KaleidoBlock.setPlacedBy(worldIn, pos, state, placer, stack);
+	}
+
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		return KaleidoBlock.getDrops(pState, pBuilder);
 	}
 
 }

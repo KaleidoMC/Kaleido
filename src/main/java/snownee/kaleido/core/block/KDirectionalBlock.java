@@ -1,5 +1,7 @@
 package snownee.kaleido.core.block;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
@@ -8,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ActionResultType;
@@ -76,5 +79,10 @@ public class KDirectionalBlock extends DirectionalBlock implements KaleidoBlock 
 	@Override
 	public KaleidoTemplate getTemplate() {
 		return KaleidoTemplate.DIRECTIONAL;
+	}
+
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		return KaleidoBlock.getDrops(pState, pBuilder);
 	}
 }
