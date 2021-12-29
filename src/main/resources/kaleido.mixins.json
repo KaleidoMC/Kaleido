@@ -12,6 +12,7 @@
     "MixinFoodStats"
   ],
   "client": [
+    "ChunkRenderCacheAccessor",
     "MixinModelBakery",
     "MixinBlockModelRenderer",
     "MixinBlock",
