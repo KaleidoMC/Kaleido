@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
@@ -244,8 +243,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		if (!allPacks.isEmpty()) {
 			try {
 				List<ItemGroup> tabs = Lists.newArrayList(ItemGroup.TABS);
-				List<ItemGroup> tabs1 = allPacks.values().stream().map($ -> $.tab).filter(Objects::nonNull).collect(Collectors.toList());
-				if (tabs.removeAll(tabs1)) {
+				if (tabs.removeIf($ -> $ instanceof KaleidoCreativeTab)) {
 					ItemGroup.TABS = tabs.toArray(new ItemGroup[tabs.size()]);
 				}
 			} catch (Throwable e) {
