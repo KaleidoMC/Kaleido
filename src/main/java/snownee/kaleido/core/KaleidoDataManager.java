@@ -304,7 +304,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	public void skipOnce() {
-		skip = true;
+		if (KaleidoCommonConfig.skipFirstTimeDataLoading)
+			skip = true;
 	}
 
 }

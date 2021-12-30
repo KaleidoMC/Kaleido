@@ -34,4 +34,7 @@ public final class KaleidoCommonConfig {
 	@Range(min = 1)
 	public static int scopeStackLimit = 8;
 
+	@Comment("Forge will load data pack twice, which the first time is unnecessary for Kaleido.")
+	public static boolean skipFirstTimeDataLoading = true;
+
 }
