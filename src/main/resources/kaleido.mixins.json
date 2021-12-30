@@ -21,7 +21,6 @@
     "MixinItemColors",
     "MixinBlockColors",
     "ctm.MixinCTMLogic",
-    "jei.MixinItemStackListFactory",
     "buildinggadgets.MixinBaseRenderer",
     "buildinggadgets.MixinCopyPasteRender",
     "buildinggadgets.MixinBuildRender",

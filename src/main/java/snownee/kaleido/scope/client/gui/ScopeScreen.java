@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.widget.Widget;
@@ -38,7 +39,6 @@ import snownee.kaleido.core.client.gui.KCheckbox;
 import snownee.kaleido.core.client.gui.KLabel;
 import snownee.kaleido.core.client.gui.ResizeableScreen;
 import snownee.kaleido.scope.ScopeStack;
-import snownee.kaleido.scope.block.ScopeBlock;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CConfigureScopePacket.Data;
@@ -128,7 +128,7 @@ public class ScopeScreen extends ResizeableScreen {
 		rotY.target(camera.getYRot() + 180).withSpeed(0.2F);
 		rotX.value = rotX.getTarget() - 20;
 		rotY.value = rotY.getTarget() + 20;
-		Direction facing = blockEntity.getBlockState().getValue(ScopeBlock.FACING);
+		Direction facing = blockEntity.getBlockState().getValue(HorizontalBlock.FACING);
 		globalYRot = facing.toYRot();
 	}
 

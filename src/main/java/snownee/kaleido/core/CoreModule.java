@@ -85,7 +85,6 @@ import snownee.kiwi.item.ModBlockItem;
 import snownee.kiwi.network.NetworkChannel;
 
 @KiwiModule
-@KiwiModule.Group("decorations")
 @KiwiModule.Subscriber(Bus.MOD)
 public class CoreModule extends AbstractModule {
 

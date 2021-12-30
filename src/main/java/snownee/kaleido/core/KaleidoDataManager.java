@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.NotImplementedException;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -30,6 +30,7 @@ import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
@@ -124,7 +125,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 				continue;
 			}
 			if ("_pack".equals(entry.getKey().getPath())) {
-				throw new NotImplementedException("Reserved word");
+				getPack(entry.getKey().getNamespace());
+				continue;
 			}
 			try {
 				JsonObject json = GSON.fromJson(entry.getValue(), JsonObject.class);
@@ -239,7 +241,18 @@ public class KaleidoDataManager extends JsonReloadListener {
 		allInfos.values().forEach($ -> $.expired = true);
 		allInfos.clear();
 		allGroups.clear();
-		allPacks.clear();
+		if (!allPacks.isEmpty()) {
+			try {
+				List<ItemGroup> tabs = Lists.newArrayList(ItemGroup.TABS);
+				List<ItemGroup> tabs1 = allPacks.values().stream().map($ -> $.tab).filter(Objects::nonNull).collect(Collectors.toList());
+				if (tabs.removeAll(tabs1)) {
+					ItemGroup.TABS = tabs.toArray(new ItemGroup[tabs.size()]);
+				}
+			} catch (Throwable e) {
+				Kaleido.logger.catching(e);
+			}
+			allPacks.clear();
+		}
 	}
 
 	public void syncAllLockInfo(ServerPlayerEntity player) {

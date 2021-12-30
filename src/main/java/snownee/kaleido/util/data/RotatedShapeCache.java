@@ -30,7 +30,7 @@ public class RotatedShapeCache {
 	public Instance put(HashCode hashCode, VoxelShape shape) {
 		return map.computeIfAbsent(hashCode, $ -> new Instance($, shape));
 	}
-	
+
 	public void init() {
 		empty = put(newHasher().hash(), VoxelShapes.empty());
 		Hasher hasher = newHasher();
@@ -39,8 +39,8 @@ public class RotatedShapeCache {
 			hasher.putDouble(d);
 		block = put(hasher.hash(), VoxelShapes.block());
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		map.clear();
 		init();
 	}

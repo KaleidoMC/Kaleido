@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.Streams;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -15,14 +13,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Food;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.ITextComponent;
@@ -32,9 +28,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.core.CoreModule;
-import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
-import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.core.behavior.Behavior;
 import snownee.kaleido.core.behavior.FoodBehavior;
 import snownee.kaleido.core.block.KaleidoBlock;
@@ -162,22 +156,4 @@ public class StuffItem extends ModBlockItem {
 		return !actionresulttype.consumesAction() && isEdible(pContext.getItemInHand()) ? use(pContext.getLevel(), pContext.getPlayer(), pContext.getHand()).getResult() : actionresulttype;
 	}
 
-	@Override
-	public void fillItemCategory(ItemGroup pGroup, NonNullList<ItemStack> items) {
-		if (!allowdedIn(pGroup))
-			return;
-		for (ModelPack pack : KaleidoDataManager.INSTANCE.allPacks.values()) {
-			fillEmpty(items);
-			Streams.concat(pack.normalInfos.stream(), pack.rewardInfos.stream()).filter($ -> !$.hide).map(ModelInfo::makeItem).forEach(items::add);
-		}
-		if (!KaleidoDataManager.INSTANCE.allPacks.isEmpty()) {
-			fillEmpty(items);
-		}
-	}
-
-	private static void fillEmpty(NonNullList<ItemStack> items) {
-		while (items.size() % 9 != 0) {
-			items.add(ItemStack.EMPTY);
-		}
-	}
 }

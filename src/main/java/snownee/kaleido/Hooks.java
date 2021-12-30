@@ -18,6 +18,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.AbstractBlock.AbstractBlockState;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
@@ -55,7 +56,6 @@ import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.resources.JarPackFinder;
 import snownee.kaleido.resources.RequiredFolderPackFinder;
 import snownee.kaleido.scope.ScopeStack;
-import snownee.kaleido.scope.block.ScopeBlock;
 import snownee.kaleido.scope.client.model.ScopeModel;
 import snownee.kaleido.util.SimulationBlockReader;
 
@@ -118,7 +118,7 @@ public final class Hooks {
 		BlockModelRenderer.clearCache();
 		RenderType layer = MinecraftForgeClient.getRenderLayer();
 		blockReader.setLevel(worldIn);
-		Direction facing = stateIn.getValue(ScopeBlock.FACING);
+		Direction facing = stateIn.getValue(HorizontalBlock.FACING);
 		for (ScopeStack stack : stacks) {
 			if (layer == null || stack.blockDefinition.canRenderInLayer(layer))
 				stack.render(matrixIn, buffer, blockReader, posIn, combinedOverlayIn, randomIn, rand, checkSides, facing.toYRot());
