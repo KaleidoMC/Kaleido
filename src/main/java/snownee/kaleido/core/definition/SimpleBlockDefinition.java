@@ -25,7 +25,9 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
@@ -204,6 +206,17 @@ public class SimpleBlockDefinition implements BlockDefinition {
 		for (SimpleBlockDefinition supplier : MAP.values()) {
 			Arrays.fill(supplier.materials, null);
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public BlockDefinition rotate(Rotation rotation) {
+		return of(getBlockState().rotate(rotation));
+	}
+
+	@Override
+	public BlockDefinition mirror(Mirror mirror) {
+		return of(getBlockState().mirror(mirror));
 	}
 
 }

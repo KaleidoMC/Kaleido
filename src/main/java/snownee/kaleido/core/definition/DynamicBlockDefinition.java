@@ -8,6 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
@@ -130,6 +132,17 @@ public class DynamicBlockDefinition extends SimpleBlockDefinition {
 			return ((ScopeBlockEntity) blockEntity).getBlockDefinition();
 		}
 		return null;
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public BlockDefinition rotate(Rotation rotation) {
+		return new DynamicBlockDefinition(getBlockState().rotate(rotation), blockEntity);
+	}
+
+	@Override
+	public BlockDefinition mirror(Mirror mirror) {
+		return new DynamicBlockDefinition(getBlockState().mirror(mirror), blockEntity);
 	}
 
 }

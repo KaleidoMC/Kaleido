@@ -20,7 +20,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
@@ -257,6 +259,23 @@ public class KaleidoBlockDefinition implements BlockDefinition {
 
 	public static void reload() {
 		simpleDefs.clear();
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public BlockDefinition rotate(Rotation rotation) {
+		BlockState state = getBlockState();
+		state = state.rotate(rotation);
+		int meta = getModelInfo().template.toMeta(state);
+		return of(modelInfo, meta, tint);
+	}
+
+	@Override
+	public BlockDefinition mirror(Mirror mirror) {
+		BlockState state = getBlockState();
+		state = state.mirror(mirror);
+		int meta = getModelInfo().template.toMeta(state);
+		return of(modelInfo, meta, tint);
 	}
 
 }

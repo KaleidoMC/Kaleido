@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -37,6 +38,7 @@ import snownee.kaleido.core.client.gui.KCheckbox;
 import snownee.kaleido.core.client.gui.KLabel;
 import snownee.kaleido.core.client.gui.ResizeableScreen;
 import snownee.kaleido.scope.ScopeStack;
+import snownee.kaleido.scope.block.ScopeBlock;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.scope.network.CConfigureScopePacket;
 import snownee.kaleido.scope.network.CConfigureScopePacket.Data;
@@ -111,6 +113,7 @@ public class ScopeScreen extends ResizeableScreen {
 	private KLabel sizeLabel;
 	private KLabel rotationLabel;
 	private int existedStacks;
+	private float globalYRot;
 
 	public ScopeScreen(ScopeBlockEntity blockEntity) {
 		super(new TranslationTextComponent("gui.kaleido.scope"));
@@ -125,6 +128,8 @@ public class ScopeScreen extends ResizeableScreen {
 		rotY.target(camera.getYRot() + 180).withSpeed(0.2F);
 		rotX.value = rotX.getTarget() - 20;
 		rotY.value = rotY.getTarget() + 20;
+		Direction facing = blockEntity.getBlockState().getValue(ScopeBlock.FACING);
+		globalYRot = facing.toYRot();
 	}
 
 	@Override
@@ -383,7 +388,7 @@ public class ScopeScreen extends ResizeableScreen {
 			}
 			info.tick(pPartialTicks);
 			buffer.setAlpha(info.alpha.value);
-			info.stack.render(pMatrixStack, buffer, blockReader, tilePos, OverlayTexture.NO_OVERLAY, false);
+			info.stack.render(pMatrixStack, buffer, blockReader, tilePos, OverlayTexture.NO_OVERLAY, false, globalYRot);
 		}
 		BlockModelRenderer.enableCaching();
 		//		buffer.endBatch(GhostRenderType.remap(RenderType.solid(), 1));

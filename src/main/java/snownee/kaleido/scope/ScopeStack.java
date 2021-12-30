@@ -48,26 +48,26 @@ public class ScopeStack {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, SimulationBlockReader world, BlockPos pos, int pCombinedOverlay, boolean checkSides) {
+	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, SimulationBlockReader world, BlockPos pos, int pCombinedOverlay, boolean checkSides, float yRot) {
 		for (RenderType renderType : KaleidoClient.blockRenderTypes) {
 			if (!blockDefinition.canRenderInLayer(renderType)) {
 				continue;
 			}
 			ForgeHooksClient.setRenderLayer(renderType);
 			IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
-			render(matrixStack, vertexBuilder, world, pos, pCombinedOverlay, new Random(), blockDefinition.getBlockState().getSeed(pos), checkSides);
+			render(matrixStack, vertexBuilder, world, pos, pCombinedOverlay, new Random(), blockDefinition.getBlockState().getSeed(pos), checkSides, yRot);
 		}
 		ForgeHooksClient.setRenderLayer(null);
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void render(MatrixStack matrixIn, IVertexBuilder buffer, SimulationBlockReader world, BlockPos posIn, int combinedOverlayIn, Random randomIn, long rand, boolean checkSides) {
+	public void render(MatrixStack matrixIn, IVertexBuilder buffer, SimulationBlockReader world, BlockPos posIn, int combinedOverlayIn, Random randomIn, long rand, boolean checkSides, float yRot) {
 		if (modelRenderer == null) {
 			modelRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
 		}
 
 		boolean bTranslate = notZero(translation);
-		boolean bRotate = notZero(rotation);
+		boolean bRotate = notZero(rotation) || yRot != 180;
 		boolean bScale = notZero(scale);
 		boolean transformed = bTranslate || bRotate || bScale;
 
@@ -113,6 +113,7 @@ public class ScopeStack {
 
 		matrixIn.translate(ox, oy, oz);
 		if (bRotate) {
+			matrixIn.mulPose(Vector3f.YN.rotationDegrees(yRot + 180));
 			matrixIn.mulPose(quaternion);
 		}
 		if (bScale) {

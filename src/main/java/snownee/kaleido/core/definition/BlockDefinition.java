@@ -19,6 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
@@ -138,5 +140,9 @@ public interface BlockDefinition {
 		@Nullable
 		T fromItem(ItemStack stack, BlockItemUseContext context);
 	}
+
+	BlockDefinition rotate(Rotation rotation);
+
+	BlockDefinition mirror(Mirror mirror);
 
 }

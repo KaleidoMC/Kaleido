@@ -28,7 +28,7 @@ public class KDirectionalBlock extends DirectionalBlock implements KaleidoBlock 
 
 	public KDirectionalBlock(Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
 	@Override

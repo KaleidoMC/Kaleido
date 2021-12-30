@@ -7,9 +7,11 @@ import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.kaleido.scope.ScopeStack;
+import snownee.kaleido.scope.block.ScopeBlock;
 import snownee.kaleido.scope.block.ScopeBlockEntity;
 import snownee.kaleido.util.SimulationBlockReader;
 
@@ -26,8 +28,9 @@ public class ScopeRenderer extends TileEntityRenderer<ScopeBlockEntity> {
 	public void render(ScopeBlockEntity scope, float pPartialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int pCombinedLight, int pCombinedOverlay) {
 		blockReader.setLevel(Minecraft.getInstance().level);
 		BlockModelRenderer.clearCache();
+		Direction facing = scope.getBlockState().getValue(ScopeBlock.FACING);
 		for (ScopeStack stack : scope.stacks) {
-			stack.render(matrixStack, buffer, blockReader, scope.getBlockPos(), pCombinedOverlay, scope.hasLevel());
+			stack.render(matrixStack, buffer, blockReader, scope.getBlockPos(), pCombinedOverlay, scope.hasLevel(), facing.toYRot());
 		}
 		BlockModelRenderer.enableCaching();
 	}

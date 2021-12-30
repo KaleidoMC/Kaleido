@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -22,8 +23,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
@@ -36,11 +40,11 @@ import snownee.kaleido.scope.ScopeModule;
 import snownee.kaleido.scope.client.gui.ScopeScreen;
 import snownee.kiwi.block.ModBlock;
 
-public class ScopeBlock extends ModBlock implements IWaterLoggable {
+public class ScopeBlock extends HorizontalBlock implements IWaterLoggable {
 
 	public ScopeBlock() {
 		super(AbstractBlock.Properties.of(Material.BUILDABLE_GLASS).noCollission().strength(0.3F));
-		registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.WATERLOGGED, false));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(BlockStateProperties.WATERLOGGED, false));
 	}
 
 	@Override
@@ -79,10 +83,28 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 		if (definition == null) {
 			return ActionResultType.PASS;
 		}
+		Direction facing = state.getValue(FACING);
+		Rotation rotation = rotFromNorth(facing);
+		if (rotation != Rotation.NONE) {
+			definition = definition.rotate(rotation);
+		}
 		if (!level.isClientSide) {
 			((ScopeBlockEntity) blockEntity).addStack(definition, player);
 		}
 		return ActionResultType.sidedSuccess(level.isClientSide);
+	}
+
+	public static Rotation rotFromNorth(Direction facing) {
+		switch (facing) {
+		case SOUTH:
+			return Rotation.CLOCKWISE_180;
+		case WEST:
+			return Rotation.CLOCKWISE_90;
+		case EAST:
+			return Rotation.COUNTERCLOCKWISE_90;
+		default:
+			return Rotation.NONE;
+		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -117,7 +139,7 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 
 	@Override
 	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		pBuilder.add(BlockStateProperties.WATERLOGGED);
+		pBuilder.add(FACING, BlockStateProperties.WATERLOGGED);
 	}
 
 	@Override
@@ -125,7 +147,7 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 	public BlockState getStateForPlacement(BlockItemUseContext pContext) {
 		FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
 		boolean flag = fluidstate.getType() == Fluids.WATER;
-		return defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, flag);
+		return defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, flag).setValue(FACING, pContext.getHorizontalDirection());
 	}
 
 	@Override
@@ -146,4 +168,20 @@ public class ScopeBlock extends ModBlock implements IWaterLoggable {
 	public boolean isPathfindable(BlockState pState, IBlockReader pLevel, BlockPos pPos, PathType pType) {
 		return false;
 	}
+
+	@Override
+	public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
+		return p_185499_1_.setValue(FACING, p_185499_2_.rotate(p_185499_1_.getValue(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
+		return p_185471_1_.setValue(FACING, p_185471_2_.mirror(p_185471_1_.getValue(FACING)));
+	}
+
+	@Override
+	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return ModBlock.pickBlock(state, target, world, pos, player);
+	}
+
 }
