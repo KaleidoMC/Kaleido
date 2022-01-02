@@ -11,6 +11,7 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.kaleido.core.KaleidoDataManager;
 import snownee.kaleido.core.ModelInfo;
+import snownee.kaleido.core.ModelPack;
 import snownee.kaleido.util.BitBufferHelper;
 import snownee.kiwi.network.Packet;
 
@@ -26,7 +27,14 @@ public class SSyncModelsPacket extends Packet {
 			for (int i = 0; i < size; i++) {
 				builder.add(ModelInfo.fromNetwork(buf, bitHelper));
 			}
-			return new SSyncModelsPacket(builder.build());
+			size = buf.readVarInt();
+			ImmutableList.Builder<ModelPack> builder1 = ImmutableList.builder();
+			for (int i = 0; i < size; i++) {
+				ModelPack pack = new ModelPack(buf.readUtf());
+				pack.fromNetwork(buf);
+				builder1.add(pack);
+			}
+			return new SSyncModelsPacket(builder.build(), builder1.build());
 		}
 
 		@Override
@@ -36,12 +44,16 @@ public class SSyncModelsPacket extends Packet {
 			for (ModelInfo info : pkt.infos) {
 				info.toNetwork(buf, pkt.player, bitHelper);
 			}
+			buf.writeVarInt(pkt.packs.size());
+			for (ModelPack pack : pkt.packs) {
+				pack.toNetwork(buf);
+			}
 		}
 
 		@Override
 		public void handle(SSyncModelsPacket pkt, Supplier<Context> ctx) {
 			ctx.get().enqueueWork(() -> {
-				KaleidoDataManager.INSTANCE.read(pkt.infos);
+				KaleidoDataManager.INSTANCE.read(pkt.infos, pkt.packs);
 			});
 			ctx.get().setPacketHandled(true);
 		}
@@ -54,11 +66,13 @@ public class SSyncModelsPacket extends Packet {
 	}
 
 	public final Collection<ModelInfo> infos;
+	public final Collection<ModelPack> packs;
 
 	private ServerPlayerEntity player;
 
-	public SSyncModelsPacket(Collection<ModelInfo> infos) {
+	public SSyncModelsPacket(Collection<ModelInfo> infos, Collection<ModelPack> packs) {
 		this.infos = infos;
+		this.packs = packs;
 	}
 
 	@Override

@@ -159,7 +159,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 		//        }
 
 		if (FMLEnvironment.dist.isClient() && !FMLEnvironment.production) {
-			SSyncModelsPacket packet = new SSyncModelsPacket(allInfos.values());
+			SSyncModelsPacket packet = new SSyncModelsPacket(allInfos.values(), allPacks.values());
 			SSyncModelsPacket.Handler handler = new SSyncModelsPacket.Handler();
 			PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 			handler.encode(packet, buf);
@@ -223,8 +223,9 @@ public class KaleidoDataManager extends JsonReloadListener {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void read(Collection<ModelInfo> infos) {
+	public void read(Collection<ModelInfo> infos, Collection<ModelPack> packs) {
 		invalidate();
+		packs.forEach($ -> allPacks.put($.id, $));
 		infos.forEach(this::add);
 		sort();
 	}
@@ -297,7 +298,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 				INSTANCE.syncAllLockInfo(player);
 			} else {
 				new SSyncShapesPacket().send(player);
-				new SSyncModelsPacket(INSTANCE.allInfos.values()).setPlayer(player).send();
+				new SSyncModelsPacket(INSTANCE.allInfos.values(), INSTANCE.allPacks.values()).setPlayer(player).send();
 				new SSyncBehaviorsPacket(INSTANCE.clientBehaviorModelsCount, INSTANCE.allInfos.values()).setPlayer(player).send();
 			}
 		}
