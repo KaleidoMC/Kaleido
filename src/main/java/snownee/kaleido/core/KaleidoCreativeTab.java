@@ -26,6 +26,9 @@ public class KaleidoCreativeTab extends ItemGroup {
 
 	@Override
 	public ItemStack makeIcon() {
+		if (pack.icon != null && KaleidoDataManager.get(pack.icon) != null) {
+			return KaleidoDataManager.get(pack.icon).makeItem();
+		}
 		if (!pack.normalInfos.isEmpty()) {
 			return pack.normalInfos.get(0).makeItem();
 		}

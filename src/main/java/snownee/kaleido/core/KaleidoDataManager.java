@@ -124,7 +124,8 @@ public class KaleidoDataManager extends JsonReloadListener {
 				continue;
 			}
 			if ("_pack".equals(entry.getKey().getPath())) {
-				getPack(entry.getKey().getNamespace());
+				ModelPack pack = getPack(entry.getKey().getNamespace());
+				pack.fromJson(entry.getValue().getAsJsonObject());
 				continue;
 			}
 			try {
@@ -249,6 +250,7 @@ public class KaleidoDataManager extends JsonReloadListener {
 			} catch (Throwable e) {
 				Kaleido.logger.catching(e);
 			}
+			allPacks.values().forEach($ -> $.tab = null);
 			allPacks.clear();
 		}
 	}
