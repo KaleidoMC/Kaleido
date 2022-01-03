@@ -110,11 +110,12 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	private final Lazy<ItemOverrideList> overrides = Lazy.of(OverrideList::new);
 
-	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state) {
+	@Nullable
+	public static IBakedModel getModel(ModelInfo info, @Nullable BlockState state, boolean checkLayer) {
 		IBakedModel model = null;
 		if (info != null) {
 			RenderType layer = MinecraftForgeClient.getRenderLayer();
-			if (layer == null || info.canRenderInLayer(layer)) {
+			if (!checkLayer || layer == null || info.canRenderInLayer(layer)) {
 				model = KaleidoClient.getModel(info, state);
 			} else
 				return null;
@@ -135,7 +136,7 @@ public class KaleidoModel implements IDynamicBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture(IModelData extraData) {
-		return getModel(extraData.getData(MODEL), null).getParticleTexture(extraData);
+		return getModel(extraData.getData(MODEL), null, false).getParticleTexture(extraData);
 	}
 
 	@Override
@@ -143,7 +144,8 @@ public class KaleidoModel implements IDynamicBakedModel {
 		if (state == null) {
 			return missingno.get().getQuads(null, side, rand, extraData);
 		}
-		return getModel(extraData.getData(MODEL), state).getQuads(state, side, rand, extraData);
+		IBakedModel model = getModel(extraData.getData(MODEL), state, true);
+		return model == null ? Collections.EMPTY_LIST : model.getQuads(state, side, rand, extraData);
 	}
 
 	@Override

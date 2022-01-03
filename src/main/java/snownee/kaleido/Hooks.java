@@ -107,7 +107,7 @@ public final class Hooks {
 			Vector3d offset = info.getOffset(posIn);
 			matrixIn.translate(offset.x, offset.y, offset.z);
 		}
-		return KaleidoModel.getModel(info, stateIn);
+		return KaleidoModel.getModel(info, stateIn, true);
 	}
 
 	@OnlyIn(Dist.CLIENT)

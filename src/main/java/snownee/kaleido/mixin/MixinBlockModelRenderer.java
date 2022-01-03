@@ -29,7 +29,7 @@ public abstract class MixinBlockModelRenderer {
 		if (modelIn == KaleidoModel.INSTANCE) {
 			modelIn = Hooks.replaceKaleidoModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData);
 			if (modelIn == null)
-				ci.setReturnValue(true);
+				ci.setReturnValue(false);
 			else
 				ci.setReturnValue(renderModel(worldIn, modelIn, stateIn, posIn, matrixIn, buffer, checkSides, randomIn, rand, combinedOverlayIn, modelData));
 		} else if (Hooks.scopeEnabled && modelIn == ScopeModel.INSTANCE) {
