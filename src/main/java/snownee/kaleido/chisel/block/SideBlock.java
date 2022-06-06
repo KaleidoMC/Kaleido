@@ -23,20 +23,20 @@ import snownee.kaleido.util.VoxelUtil;
 public class SideBlock extends HorizontalBlock implements IWaterLoggable {
 
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-	public static final VoxelShape[] SHAPES = new VoxelShape[4];
+	public final VoxelShape[] shapes = new VoxelShape[4];
 
 	public SideBlock(VoxelShape shape, Properties properties) {
 		super(properties);
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
-		SHAPES[0] = shape;
-		SHAPES[1] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.EAST);
-		SHAPES[2] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.SOUTH);
-		SHAPES[3] = VoxelUtil.rotateHorizontal(SHAPES[0], Direction.WEST);
+		shapes[0] = shape;
+		shapes[1] = VoxelUtil.rotateHorizontal(shapes[0], Direction.EAST);
+		shapes[2] = VoxelUtil.rotateHorizontal(shapes[0], Direction.SOUTH);
+		shapes[3] = VoxelUtil.rotateHorizontal(shapes[0], Direction.WEST);
 	}
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
-		return SHAPES[state.getValue(FACING).get2DDataValue()];
+		return shapes[state.getValue(FACING).get2DDataValue()];
 	}
 
 	@Override
