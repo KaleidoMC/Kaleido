@@ -2,6 +2,7 @@ package snownee.kaleido.chisel.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
@@ -15,7 +16,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -27,6 +27,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.chisel.ChiselModule;
 import snownee.kaleido.chisel.ChiselPalette;
 import snownee.kaleido.chisel.block.entity.ChiseledBlockEntity;
+import snownee.kaleido.chisel.network.CChiselClickPacket;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.definition.BlockDefinition;
 import snownee.kaleido.util.KaleidoUtil;
@@ -45,21 +46,37 @@ public class ChiselItem extends ModItem {
 
 	@Override
 	public boolean canAttackBlock(BlockState state, World level, BlockPos pos, PlayerEntity player) {
-		if (!KaleidoUtil.canPlayerBreak(player, state, pos)) {
-			return false;
+		return false;
+	}
+
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+		ItemStack stack = event.getItemStack();
+		if (!(stack.getItem() instanceof ChiselItem))
+			return;
+		event.setCanceled(true);
+		CooldownTracker cooldowns = event.getPlayer().getCooldowns();
+		if (cooldowns.isOnCooldown(stack.getItem())) {
+			return;
 		}
+		new CChiselClickPacket(event.getHand()).send();
+	}
+
+	public static void click(PlayerEntity player, Hand hand, ItemStack stack, BlockRayTraceResult hitResult) {
+		BlockPos pos = hitResult.getBlockPos();
+		BlockState state = player.level.getBlockState(pos);
+		if (!KaleidoUtil.canPlayerBreak(player, state, pos)) {
+			return;
+		}
+		World level = player.level;
 		boolean isChiseled = ChiselModule.CHISELED_BLOCKS.contains(state.getBlock());
 		if (!isChiseled) {
 			if (Kaleido.isKaleidoBlock(state) && !Block.isShapeFullBlock(state.getCollisionShape(level, pos))) {
-				return false;
+				return;
 			} else if (!Block.isShapeFullBlock(state.getShape(level, pos))) {
-				return false;
+				return;
 			}
-		}
-		ItemStack stack = player.getMainHandItem();
-		BlockRayTraceResult hitResult = getPlayerPOVHitResult(level, player, FluidMode.NONE);
-		if (hitResult.getType() == Type.MISS) {
-			return false;
 		}
 		ChiselPalette palette = palette(stack);
 		if (palette == ChiselPalette.NONE) {
@@ -73,35 +90,22 @@ public class ChiselItem extends ModItem {
 		TileEntity blockEntity = level.getBlockEntity(pos);
 		if (isChiseled) {
 			if (!(blockEntity instanceof ChiseledBlockEntity))
-				return false;
+				return;
 			supplier = ((ChiseledBlockEntity) blockEntity).getTexture();
 		} else {
 			supplier = BlockDefinition.fromBlock(state, blockEntity, level, pos);
 		}
-		if (supplier != null) {
-			palette.place(supplier, level, pos, context);
-		}
-		return false;
-	}
-
-	@SubscribeEvent
-	public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-		if (event.getPlayer().isCreative()) {
+		if (supplier == null) {
 			return;
 		}
-		ItemStack stack = event.getItemStack();
-		if (!(stack.getItem() instanceof ChiselItem))
-			return;
-		event.setCanceled(true);
-		CooldownTracker cooldowns = event.getPlayer().getCooldowns();
+		CooldownTracker cooldowns = player.getCooldowns();
 		if (cooldowns.isOnCooldown(stack.getItem())) {
 			return;
 		}
-		World worldIn = event.getWorld();
-		BlockPos pos = event.getPos();
-		BlockState state = worldIn.getBlockState(pos);
-		stack.getItem().canAttackBlock(state, worldIn, pos, event.getPlayer());
-		cooldowns.addCooldown(stack.getItem(), 10);
+		palette.place(supplier, level, pos, context);
+		SoundType sound = level.getBlockState(pos).getSoundType(level, pos, player);
+		level.playSound(null, pos, sound.getPlaceSound(), SoundCategory.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
+		cooldowns.addCooldown(stack.getItem(), 3);
 	}
 
 	@SubscribeEvent

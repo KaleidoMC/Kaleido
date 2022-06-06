@@ -40,6 +40,7 @@ import snownee.kaleido.Kaleido;
 import snownee.kaleido.brush.network.CConfigureBrushPacket;
 import snownee.kaleido.carpentry.network.CRedeemPacket;
 import snownee.kaleido.carpentry.network.SUnlockModelsPacket;
+import snownee.kaleido.chisel.network.CChiselClickPacket;
 import snownee.kaleido.chisel.network.CChiselPickPacket;
 import snownee.kaleido.core.action.Action;
 import snownee.kaleido.core.action.CommandAction;
@@ -179,6 +180,7 @@ public class CoreModule extends AbstractModule {
 
 		NetworkChannel.register(CRedeemPacket.class, new CRedeemPacket.Handler());
 		NetworkChannel.register(CChiselPickPacket.class, new CChiselPickPacket.Handler());
+		NetworkChannel.register(CChiselClickPacket.class, new CChiselClickPacket.Handler());
 		NetworkChannel.register(CCreateScopePacket.class, new CCreateScopePacket.Handler());
 		NetworkChannel.register(CConfigureScopePacket.class, new CConfigureScopePacket.Handler());
 		NetworkChannel.register(CConfigureBrushPacket.class, new CConfigureBrushPacket.Handler());
